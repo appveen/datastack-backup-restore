@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>data.stack Backup and Restore Utility</title>
+	<script type="text/javascript">
+		var d = document;
+		d.i = d.getElementById;
+		d.c = d.getElementsByClassName
+
+		var api_req_token = null;
+		var api_req_baseUrl = null;
+
+		function callAPI(method, api, headers, urlParams, payload, cb) {
+			let constructedURL = `${api_req_baseUrl}${api}`;
+			let xhttp = new XMLHttpRequest();
+
+			if (urlParams) {
+				constructedURL += "?";
+				for (var key in urlParams) {
+					if (key == "filter") constructedURL += `${key}=${JSON.stringify(urlParams[key])}&`;
+					else constructedURL += `${key}=${urlParams[key]}&`;
+				}
+			}
+			constructedURL = encodeURI(constructedURL)
+
+			xhttp.open(method, constructedURL, false);
+			xhttp.setRequestHeader("Content-type", "application/json");
+			if (api_req_token) xhttp.setRequestHeader("Authorization", `JWT ${api_req_token}`);
+
+			xhttp.onreadystatechange = function () {
+				if (this.readyState == 4) {
+					if (this.status == 200) cb(JSON.parse(this.responseText))
+					else if (this.status == 401) {
+						logoutAction();
+					} else {
+						alert(this.responseText)
+					}
+				}
+			};
+			if (payload) xhttp.send(JSON.stringify(payload));
+			else xhttp.send();
+		}
+	</script>
+
+	<style type="text/css">
+		body {
+			margin: 10px;
+			font-family: monospace;
+			font-size: 14px;
+		}
+
+		/* GLOBAL STYLES */
+
+		.shadow {
+			box-shadow: 2px 2px 4px lightgray;
+		}
+
+
+		/* CONFIG */
+		.configManager {
+			margin: 50px auto;
+			display: block;
+			border: 1px solid gray;
+			width: 900px;
+			padding: 10px;
+			border-radius: 2px;
+		}
+
+		.noConfig {
+			margin: 2px auto;
+			padding: 10px;
+			background-color: lightsalmon;
+			text-align: center;
+			width: 250px;
+		}
+
+		.configForm {
+			margin: 50px auto;
+			display: block;
+			width: 350px;
+			border: 1px solid gray;
+			border-radius: 2px;
+			padding: 10px;
+		}
+
+		.configForm button {
+			width: 100px;
+			height: 30px;
+		}
+
+		.configForm h1 {
+			text-align: center;
+		}
+
+		.configForm p {
+			text-align: center;
+		}
+
+		.configForm p:last-child {
+			text-align: center;
+			margin-top: 30px;
+		}
+
+		.configForm p>label {
+			width: 100px;
+			display:  inline-block;
+			text-align: left;
+		}
+
+		.configList{
+			margin: 50px auto;
+			display: block;
+			width: 350px;
+			border: 1px solid gray;
+			border-radius: 2px;
+			padding: 10px;
+		}
+
+		.configList h1 {
+			text-align: center;
+		}
+
+		.configList p>label {
+			width: 120px;
+			display:  inline-block;
+			text-align: left;
+		}
+
+		.configList .configAdd{
+			margin-top: 20px;
+		}
+
+		.configList .configLogin{
+			margin-bottom: 50px;
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="configManager shadow" id="configManager">
+		<p class="noConfig shadow" id="noConfig">No configurations defined</p>
+		<div class="configForm shadow" id="configForm">
+			<h1>New Config</h1>
+			<p>
+				<label for="name">Name</label>
+				<input type="text" name="name">
+			</p>
+			<p>
+				<label for="url">URL</label>
+				<input type="text" name="url">
+			</p>
+			<p>
+				<label for="username">Username</label>
+				<input type="text" name="username">
+			</p>
+			<p>
+				<label for="password">Password</label>
+				<input type="password" name="password" autosave="false">
+			</p>
+			<p>
+				<button class="configSave">Save</button>
+				<button class="configClear">Clear</button>
+				<button class="configDiscard">Discard</button>
+			</p>
+		</div>
+
+		<div class="configList shadow" id="configList">
+			<h1>Configs</h1>
+			<button class="configAdd">Add new</button>
+			<p>
+				<label for="config">Select config</label>
+				<select name="config">
+					<option>100</option>
+					<option>200</option>
+					<option>300</option>
+					<option>400</option>
+				</select>
+				<button class="configDelete">Delete</button>
+			</p>
+			<p>
+				<label for="password">Password</label>
+				<input type="password" name="password" autosave="false">
+			</p>
+			<button class="configLogin">Login</button>
+		</div>
+
+	</div>
+
+</body>
+
+</html>
