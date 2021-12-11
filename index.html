@@ -142,53 +142,92 @@
 <body>
 
 	<div class="configManager shadow" id="configManager">
-		<p class="noConfig shadow" id="noConfig">No configurations defined</p>
+		<p class="noConfig shadow" id="noConfig">No saved configs found. Let's create a new config.</p>
+		
 		<div class="configForm shadow" id="configForm">
 			<h1>New Config</h1>
 			<p>
 				<label for="name">Name</label>
-				<input type="text" name="name">
+				<input type="text" name="name" id="configInputName" autocomplete="false">
 			</p>
 			<p>
 				<label for="url">URL</label>
-				<input type="text" name="url">
+				<input type="text" name="url" id="configInputURL" autocomplete="false">
 			</p>
 			<p>
 				<label for="username">Username</label>
-				<input type="text" name="username">
+				<input type="text" name="username" id="configInputUsername" autocomplete="false">
 			</p>
 			<p>
-				<label for="password">Password</label>
-				<input type="password" name="password" autosave="false">
-			</p>
-			<p>
-				<button class="configSave">Save</button>
-				<button class="configClear">Clear</button>
-				<button class="configDiscard">Discard</button>
+				<button class="configSave" id="configButtonSave" onclick="saveConfig()">Save</button>
+				<button class="configClear" id="configButtonClear">Clear</button>
+				<button class="configDiscard" id="configButtonDiscard">Discard</button>
 			</p>
 		</div>
 
 		<div class="configList shadow" id="configList">
 			<h1>Configs</h1>
-			<button class="configAdd">Add new</button>
+			<button class="configAdd" id="configButtonAdd">Add new</button>
 			<p>
 				<label for="config">Select config</label>
-				<select name="config">
+				<select name="config" id="configSelect">
 					<option>100</option>
 					<option>200</option>
 					<option>300</option>
 					<option>400</option>
 				</select>
-				<button class="configDelete">Delete</button>
+				<button class="configDelete" id="configButtonDelete">Delete</button>
 			</p>
 			<p>
 				<label for="password">Password</label>
-				<input type="password" name="password" autosave="false">
+				<input type="password" name="password" autosave="false" id="configInputPassword" autocomplete="false">
 			</p>
-			<button class="configLogin">Login</button>
+			<button class="configLogin" id="configButtonLogin">Login</button>
 		</div>
 
 	</div>
+
+	<script type="text/javascript">
+		// config handler
+		var configs = localStorage.getItem("configs");
+
+		const configManager = d.i("configManager");
+		const noConfig = d.i("noConfig");
+		const configForm = d.i("configForm");
+		const configList = d.i("configList");
+		const configInputName = d.i("configInputName");
+		const configInputURL = d.i("configInputURL");
+		const configInputUsername = d.i("configInputUsername");
+		const configInputPassword = d.i("configInputPassword");
+		const configSelect = d.i("configSelect");
+		const configButtonSave = d.i("configButtonSave");
+		const configButtonClear = d.i("configButtonClear");
+		const configButtonDiscard = d.i("configButtonDiscard");
+		const configButtonAdd = d.i("configButtonAdd");
+		const configButtonDelete = d.i("configButtonDelete");
+		const configButtonLogin = d.i("configButtonLogin");
+		
+		// hide all config
+		configManager.style.display = "none";
+		noConfig.style.display = "none";
+		configForm.style.display = "none";
+		configList.style.display = "none";
+
+		if(!configs){
+			noConfig.style.display = "block";
+			configForm.style.display = "block";
+			configManager.style.display = "block";
+		}
+
+		function loadConfigs(){}
+
+		function saveConfig(){
+			let nameValue = configInputName.value;
+			let urlValue = configInputURL.value;
+			let usernameValue = configInputUsername.value;
+			console.log(nameValue, urlValue, nameValue)
+		}
+	</script>
 
 </body>
 
