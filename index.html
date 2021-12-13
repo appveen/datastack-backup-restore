@@ -52,10 +52,38 @@
 			font-size: 14px;
 		}
 
+		.title {
+			text-align: center;
+			padding: 10px;
+			display: block;
+			margin: 0px auto;
+		}
+
 		/* GLOBAL STYLES */
+
+		button {
+			width: 100px;
+			height: 25px;
+		}
+
+		select {
+			width: 200px;
+			height: 25px;
+		}
+
+		input {
+			width: 200px;
+			height: 25px;
+		}
 
 		.shadow {
 			box-shadow: 2px 2px 4px lightgray;
+		}
+
+		p.error{
+			text-align: center;
+			color: darkred;
+			display: none;
 		}
 
 
@@ -86,11 +114,6 @@
 			padding: 10px;
 		}
 
-		.configForm button {
-			width: 100px;
-			height: 30px;
-		}
-
 		.configForm h1 {
 			text-align: center;
 		}
@@ -113,7 +136,7 @@
 		.configList{
 			margin: 50px auto;
 			display: block;
-			width: 350px;
+			width: 450px;
 			border: 1px solid gray;
 			border-radius: 2px;
 			padding: 10px;
@@ -129,6 +152,10 @@
 			text-align: left;
 		}
 
+		.configList p>button {
+			display:  inline-block;
+		}
+
 		.configList .configAdd{
 			margin-top: 20px;
 		}
@@ -141,43 +168,45 @@
 
 <body>
 
+	<div class="title">
+		<h2>data.stack Configuration Backup and Restore Utility v1.0</h2>
+	</div>
+
+	<p class="error" id="errorManager"></p>
+
 	<div class="configManager shadow" id="configManager">
 		<p class="noConfig shadow" id="noConfig">No saved configs found. Let's create a new config.</p>
 		
 		<div class="configForm shadow" id="configForm">
 			<h1>New Config</h1>
 			<p>
-				<label for="name">Name</label>
-				<input type="text" name="name" id="configInputName" autocomplete="false">
+				<label for="environmentName">Name*</label>
+				<input type="text" name="environmentName" id="configInputName" autocomplete="false">
 			</p>
 			<p>
-				<label for="url">URL</label>
-				<input type="text" name="url" id="configInputURL" autocomplete="false">
+				<label for="environmentUrl">URL*</label>
+				<input type="text" name="environmentUrl" id="configInputURL" autocomplete="false">
 			</p>
 			<p>
-				<label for="username">Username</label>
-				<input type="text" name="username" id="configInputUsername" autocomplete="false">
+				<label for="environmentNameUsername">Username*</label>
+				<input type="text" name="environmentNameUsername" id="configInputUsername" autocomplete="false">
 			</p>
 			<p>
 				<button class="configSave" id="configButtonSave" onclick="saveConfig()">Save</button>
-				<button class="configClear" id="configButtonClear">Clear</button>
-				<button class="configDiscard" id="configButtonDiscard">Discard</button>
+				<button class="configClear" id="configButtonClear" onclick="clearConfig()">Clear</button>
+				<button class="configDiscard" id="configButtonDiscard" onclick="loadConfigs()">Discard</button>
 			</p>
 		</div>
 
 		<div class="configList shadow" id="configList">
-			<h1>Configs</h1>
-			<button class="configAdd" id="configButtonAdd">Add new</button>
+			<h1>Environments</h1>
+			<button class="configAdd" id="configButtonAdd" onclick="addNewConfig()">Add new</button>
 			<p>
-				<label for="config">Select config</label>
-				<select name="config" id="configSelect">
-					<option>100</option>
-					<option>200</option>
-					<option>300</option>
-					<option>400</option>
-				</select>
-				<button class="configDelete" id="configButtonDelete">Delete</button>
+				<label for="config">Select env.</label>
+				<select name="config" id="configSelect" onchange="configSelectChanged()"></select>
+				<button class="configDelete" id="configButtonDelete" onclick="deleteConfig()">Delete</button>
 			</p>
+			<p id="configProperties"></p>
 			<p>
 				<label for="password">Password</label>
 				<input type="password" name="password" autosave="false" id="configInputPassword" autocomplete="false">
@@ -186,6 +215,20 @@
 		</div>
 
 	</div>
+
+	<script type="text/javascript">
+		// COMMON FUNCTIONS
+
+		const errorManager = d.i("errorManager");
+
+		function nullCheckAndShowError(value, message){
+			if(!value || value == "") {
+				alert(message);
+				return true;
+			}
+			return false;
+		}
+	</script>
 
 	<script type="text/javascript">
 		// config handler
@@ -200,6 +243,7 @@
 		const configInputUsername = d.i("configInputUsername");
 		const configInputPassword = d.i("configInputPassword");
 		const configSelect = d.i("configSelect");
+		const configProperties = d.i("configProperties");
 		const configButtonSave = d.i("configButtonSave");
 		const configButtonClear = d.i("configButtonClear");
 		const configButtonDiscard = d.i("configButtonDiscard");
@@ -208,24 +252,76 @@
 		const configButtonLogin = d.i("configButtonLogin");
 		
 		// hide all config
-		configManager.style.display = "none";
-		noConfig.style.display = "none";
-		configForm.style.display = "none";
-		configList.style.display = "none";
+		function hideAllConfig(){
+			configManager.style.display = "none";
+			noConfig.style.display = "none";
+			configForm.style.display = "none";
+			configList.style.display = "none";
+		}
 
-		if(!configs){
-			noConfig.style.display = "block";
+		function loadConfigs(){
+			hideAllConfig();
+			if(!configs){
+				noConfig.style.display = "block";
+				configForm.style.display = "block";
+				configManager.style.display = "block";
+				configs = [];
+				return;
+			}
+			configManager.style.display = "block";
+			configList.style.display = "block";
+			configs = JSON.parse(localStorage.getItem("configs"));
+			let option = document.createElement('option');
+			let selectedIndex = 0;
+			configSelect.innerHTML = "";
+			configs.forEach((config,index) => {
+				let clone = option.cloneNode();
+				clone.value = index;
+				clone.innerHTML = `${config.name} (${config.username})`;
+				configSelect.appendChild(clone);
+			})
+			configSelect.selectedIndex = 0;
+			configSelectChanged();
+		}
+		loadConfigs();
+
+		function configSelectChanged(){
+			configProperties.innerHTML = `
+			<label>URL</label><span>${configs[configSelect.value].url}</span>
+			<p></p>
+			<label>Username</label><span>${configs[configSelect.value].username}</span>
+			`
+		}
+
+		function addNewConfig(){
+			hideAllConfig();
 			configForm.style.display = "block";
 			configManager.style.display = "block";
 		}
 
-		function loadConfigs(){}
-
 		function saveConfig(){
-			let nameValue = configInputName.value;
-			let urlValue = configInputURL.value;
-			let usernameValue = configInputUsername.value;
-			console.log(nameValue, urlValue, nameValue)
+			let name = configInputName.value;
+			let url = configInputURL.value;
+			let username = configInputUsername.value;
+			if(nullCheckAndShowError(name, "Name is required.")) return;
+			if(nullCheckAndShowError(url, "URL is required.")) return;
+			if(nullCheckAndShowError(username, "Username is required.")) return;
+			configs.push({name, url, username});
+			localStorage.setItem("configs", JSON.stringify(configs));
+			clearConfig();
+			loadConfigs();
+		}
+
+		function clearConfig(){
+			configInputName.value = "";
+			configInputURL.value = "";
+			configInputUsername.value = "";
+		}
+
+		function deleteConfig(){
+			configs.splice(configSelect.value, 1)
+			localStorage.setItem("configs", JSON.stringify(configs));
+			loadConfigs();
 		}
 	</script>
 
