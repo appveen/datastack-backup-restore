@@ -1,0 +1,39 @@
+body {
+	margin: 10px;
+	font-family: monospace;
+	font-size: 14px;
+}
+
+.title {
+	text-align: center;
+	padding: 10px;
+	display: block;
+	margin: 0px auto;
+}
+
+/* GLOBAL STYLES */
+
+button {
+	width: 100px;
+	height: 25px;
+}
+
+select {
+	width: 200px;
+	height: 25px;
+}
+
+input {
+	width: 200px;
+	height: 25px;
+}
+
+.shadow {
+	box-shadow: 2px 2px 4px lightgray;
+}
+
+p.error {
+	text-align: center;
+	color: darkred;
+	display: none;
+}

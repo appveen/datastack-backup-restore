@@ -5,165 +5,10 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>data.stack Backup and Restore Utility</title>
-	<script type="text/javascript">
-		var d = document;
-		d.i = d.getElementById;
-		d.c = d.getElementsByClassName
 
-		var api_req_token = null;
-		var api_req_baseUrl = null;
-
-		function callAPI(method, api, headers, urlParams, payload, cb) {
-			let constructedURL = `${api_req_baseUrl}${api}`;
-			let xhttp = new XMLHttpRequest();
-
-			if (urlParams) {
-				constructedURL += "?";
-				for (var key in urlParams) {
-					if (key == "filter") constructedURL += `${key}=${JSON.stringify(urlParams[key])}&`;
-					else constructedURL += `${key}=${urlParams[key]}&`;
-				}
-			}
-			constructedURL = encodeURI(constructedURL)
-
-			xhttp.open(method, constructedURL, false);
-			xhttp.setRequestHeader("Content-type", "application/json");
-			if (api_req_token) xhttp.setRequestHeader("Authorization", `JWT ${api_req_token}`);
-
-			xhttp.onreadystatechange = function () {
-				if (this.readyState == 4) {
-					if (this.status == 200) cb(JSON.parse(this.responseText))
-					else if (this.status == 401) {
-						logoutAction();
-					} else {
-						alert(this.responseText)
-					}
-				}
-			};
-			if (payload) xhttp.send(JSON.stringify(payload));
-			else xhttp.send();
-		}
-	</script>
-
-	<style type="text/css">
-		body {
-			margin: 10px;
-			font-family: monospace;
-			font-size: 14px;
-		}
-
-		.title {
-			text-align: center;
-			padding: 10px;
-			display: block;
-			margin: 0px auto;
-		}
-
-		/* GLOBAL STYLES */
-
-		button {
-			width: 100px;
-			height: 25px;
-		}
-
-		select {
-			width: 200px;
-			height: 25px;
-		}
-
-		input {
-			width: 200px;
-			height: 25px;
-		}
-
-		.shadow {
-			box-shadow: 2px 2px 4px lightgray;
-		}
-
-		p.error{
-			text-align: center;
-			color: darkred;
-			display: none;
-		}
-
-
-		/* CONFIG */
-		.configManager {
-			margin: 50px auto;
-			display: block;
-			border: 1px solid gray;
-			width: 900px;
-			padding: 10px;
-			border-radius: 2px;
-		}
-
-		.noConfig {
-			margin: 2px auto;
-			padding: 10px;
-			background-color: lightsalmon;
-			text-align: center;
-			width: 250px;
-		}
-
-		.configForm {
-			margin: 50px auto;
-			display: block;
-			width: 350px;
-			border: 1px solid gray;
-			border-radius: 2px;
-			padding: 10px;
-		}
-
-		.configForm h1 {
-			text-align: center;
-		}
-
-		.configForm p {
-			text-align: center;
-		}
-
-		.configForm p:last-child {
-			text-align: center;
-			margin-top: 30px;
-		}
-
-		.configForm p>label {
-			width: 100px;
-			display:  inline-block;
-			text-align: left;
-		}
-
-		.configList{
-			margin: 50px auto;
-			display: block;
-			width: 450px;
-			border: 1px solid gray;
-			border-radius: 2px;
-			padding: 10px;
-		}
-
-		.configList h1 {
-			text-align: center;
-		}
-
-		.configList p>label {
-			width: 120px;
-			display:  inline-block;
-			text-align: left;
-		}
-
-		.configList p>button {
-			display:  inline-block;
-		}
-
-		.configList .configAdd{
-			margin-top: 20px;
-		}
-
-		.configList .configLogin{
-			margin-bottom: 50px;
-		}
-	</style>
+	<link rel="stylesheet" href="style.global.css">
+	<link rel="stylesheet" href="style.configManager.css">
+	<link rel="stylesheet" href="style.appManager.css">
 </head>
 
 <body>
@@ -174,9 +19,9 @@
 
 	<p class="error" id="errorManager"></p>
 
-	<div class="configManager shadow" id="configManager">
+	<div class="configManager" id="configManager">
 		<p class="noConfig shadow" id="noConfig">No saved configs found. Let's create a new config.</p>
-		
+
 		<div class="configForm shadow" id="configForm">
 			<h1>New Config</h1>
 			<p>
@@ -211,119 +56,30 @@
 				<label for="password">Password</label>
 				<input type="password" name="password" autosave="false" id="configInputPassword" autocomplete="false">
 			</p>
-			<button class="configLogin" id="configButtonLogin">Login</button>
+			<button class="configLogin" id="configButtonLogin" onclick="login()">Login</button>
 		</div>
 
 	</div>
 
-	<script type="text/javascript">
-		// COMMON FUNCTIONS
+	<div class="appManager shadow" id="appManager">
+		<h1>Select app</h1>
+		<p>
+			<input type="text" name="searchApp" autosave="false" id="appSearch" autocomplete="false" placeholder="Search app">
+		</p>
+		<ul class="appList">
+			<li>Hostels7n8Renovation</li>
+			<li>Test123-432</li>
+			<li>zyx</li>
+			<li>abc</li>
+			<li>ratitestrules</li>
+		</ul>
+	</div>
 
-		const errorManager = d.i("errorManager");
-
-		function nullCheckAndShowError(value, message){
-			if(!value || value == "") {
-				alert(message);
-				return true;
-			}
-			return false;
-		}
-	</script>
-
-	<script type="text/javascript">
-		// config handler
-		var configs = localStorage.getItem("configs");
-
-		const configManager = d.i("configManager");
-		const noConfig = d.i("noConfig");
-		const configForm = d.i("configForm");
-		const configList = d.i("configList");
-		const configInputName = d.i("configInputName");
-		const configInputURL = d.i("configInputURL");
-		const configInputUsername = d.i("configInputUsername");
-		const configInputPassword = d.i("configInputPassword");
-		const configSelect = d.i("configSelect");
-		const configProperties = d.i("configProperties");
-		const configButtonSave = d.i("configButtonSave");
-		const configButtonClear = d.i("configButtonClear");
-		const configButtonDiscard = d.i("configButtonDiscard");
-		const configButtonAdd = d.i("configButtonAdd");
-		const configButtonDelete = d.i("configButtonDelete");
-		const configButtonLogin = d.i("configButtonLogin");
-		
-		// hide all config
-		function hideAllConfig(){
-			configManager.style.display = "none";
-			noConfig.style.display = "none";
-			configForm.style.display = "none";
-			configList.style.display = "none";
-		}
-
-		function loadConfigs(){
-			hideAllConfig();
-			if(!configs){
-				noConfig.style.display = "block";
-				configForm.style.display = "block";
-				configManager.style.display = "block";
-				configs = [];
-				return;
-			}
-			configManager.style.display = "block";
-			configList.style.display = "block";
-			configs = JSON.parse(localStorage.getItem("configs"));
-			let option = document.createElement('option');
-			let selectedIndex = 0;
-			configSelect.innerHTML = "";
-			configs.forEach((config,index) => {
-				let clone = option.cloneNode();
-				clone.value = index;
-				clone.innerHTML = `${config.name} (${config.username})`;
-				configSelect.appendChild(clone);
-			})
-			configSelect.selectedIndex = 0;
-			configSelectChanged();
-		}
-		loadConfigs();
-
-		function configSelectChanged(){
-			configProperties.innerHTML = `
-			<label>URL</label><span>${configs[configSelect.value].url}</span>
-			<p></p>
-			<label>Username</label><span>${configs[configSelect.value].username}</span>
-			`
-		}
-
-		function addNewConfig(){
-			hideAllConfig();
-			configForm.style.display = "block";
-			configManager.style.display = "block";
-		}
-
-		function saveConfig(){
-			let name = configInputName.value;
-			let url = configInputURL.value;
-			let username = configInputUsername.value;
-			if(nullCheckAndShowError(name, "Name is required.")) return;
-			if(nullCheckAndShowError(url, "URL is required.")) return;
-			if(nullCheckAndShowError(username, "Username is required.")) return;
-			configs.push({name, url, username});
-			localStorage.setItem("configs", JSON.stringify(configs));
-			clearConfig();
-			loadConfigs();
-		}
-
-		function clearConfig(){
-			configInputName.value = "";
-			configInputURL.value = "";
-			configInputUsername.value = "";
-		}
-
-		function deleteConfig(){
-			configs.splice(configSelect.value, 1)
-			localStorage.setItem("configs", JSON.stringify(configs));
-			loadConfigs();
-		}
-	</script>
+	<script src="lib.global.js"></script>
+	<script src="lib.apis.js"></script>
+	<script src="lib.elements.js"></script>
+	<script src="lib.configManager.js"></script>
+	<script src="lib.appManager.js"></script>
 
 </body>
 

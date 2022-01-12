@@ -1,0 +1,46 @@
+.appManager {
+	margin: 50px auto;
+	display: block;
+	width: 350px;
+	height: 475px;
+	padding: 10px;
+	border-radius: 2px;
+	border: 1px solid gray;
+	text-align: center;
+}
+
+.appManager>h1 {
+	text-align: center;
+}
+
+.appManager>p>input {
+	width: 295px;
+}
+
+ul.appList {
+	list-style: none;
+	width: 300px;
+	max-height: 325px;
+	padding: 0px;
+	overflow-y: auto;
+	border: 1px solid gray;
+	border-radius: 2px;
+	margin-left: 23px;
+}
+
+ul.appList > li {
+	padding: 2px 4px;
+	height: 20px;
+	overflow: hidden;
+	text-align: left;
+	border-bottom: 1px solid lightgray;
+}
+
+ul.appList > li:last-child {
+	border: none;
+}
+
+ul.appList > li:hover {
+	background-color: lightblue;
+	cursor: pointer;
+} 
