@@ -1,13 +1,5 @@
 var configs = localStorage.getItem("configs");
 
-// hide all config
-function hideAllConfig() {
-	configManager.style.display = "none";
-	noConfig.style.display = "none";
-	configForm.style.display = "none";
-	configList.style.display = "none";
-}
-
 function loadConfigs() {
 	hideAllConfig();
 	if (!configs) {
@@ -21,7 +13,6 @@ function loadConfigs() {
 	configList.style.display = "block";
 	configs = JSON.parse(localStorage.getItem("configs"));
 	let option = document.createElement('option');
-	let selectedIndex = 0;
 	configSelect.innerHTML = "";
 	configs.forEach((config, index) => {
 		let clone = option.cloneNode();
@@ -32,8 +23,8 @@ function loadConfigs() {
 	configSelect.selectedIndex = 0;
 	configSelectChanged();
 }
-// loadConfigs();
-hideAllConfig()
+loadConfigs();
+// hideAllConfig()
 
 function configSelectChanged() {
 	configProperties.innerHTML = `
@@ -80,6 +71,7 @@ function login() {
 	let data = configs[configSelect.value];
 	data.password = configInputPassword.value;
 	api_req_baseUrl = data.url;
+	console.log(`Logging into ${api_req_baseUrl} as user ${data.username}`);
 	callAPI("POST", APIS.LOGIN, null, null, data, (responseData) => {
 		api_req_token = responseData.token;
 		api_req_refresh_token = responseData.rToken;
@@ -87,6 +79,7 @@ function login() {
 		if (responseData.bot) {
 			api_req_token_duration = (responseData.rbacBotTokenDuration - (5 * 60)) * 1000;
 		}
+		console.log("Login successful");
 		createTokenRefreshRoutine();
 		hideAllConfig();
 		loadApps();

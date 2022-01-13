@@ -18,3 +18,22 @@ const configButtonDelete = d.i("configButtonDelete");
 const configButtonLogin = d.i("configButtonLogin");
 
 const appManager = d.i("appManager");
+const appSearch = d.i("appSearch");
+const appList = d.i("appList");
+
+
+function hideAllConfig() {
+	configManager.style.display = "none";
+	noConfig.style.display = "none";
+	configForm.style.display = "none";
+	configList.style.display = "none";
+}
+
+function hideAppManager() {
+	appManager.style.display = "none";
+	appSearch.value = "";
+	appList.innerHTML = ""
+}
+
+hideAllConfig();
+hideAppManager();
