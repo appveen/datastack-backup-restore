@@ -37,3 +37,7 @@ p.error {
 	color: darkred;
 	display: none;
 }
+
+.red {
+	color: darkred;
+}

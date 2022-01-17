@@ -69,7 +69,7 @@ function deleteConfig() {
 
 function login() {
 	let data = configs[configSelect.value];
-	data.password = configInputPassword.value;
+	data.password = configInputPassword.value || data.password;
 	api_req_baseUrl = data.url;
 	console.log(`Logging into ${api_req_baseUrl} as user ${data.username}`);
 	callAPI("POST", APIS.LOGIN, null, null, data, (responseData) => {

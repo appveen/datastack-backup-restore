@@ -14,16 +14,36 @@ function loadApps() {
 				if (nameA > nameB) return 1;
 				return 0;
 			})
-			.forEach(app => apps.push(app._id))
+			.forEach(app => apps_list.push(app._id))
 		populateAppList();
 	})
 }
 
 function populateAppList() {
 	appManager.style.display = "block";
+	apps_list_clone = apps_list
+	if (apps_list.length < 1) {
+		appList.innerHTML = `<span class="red">No apps found</span>`;
+		appSearch.style.display = "none";
+		return;
+	}
+	populateAppLi()
+}
+
+function searchApps() {
+	let searchString = appSearch.value;
+	apps_list_clone = apps_list.filter(app => app.toLowerCase().indexOf(searchString) != -1)
+	populateAppLi()
+}
+
+function populateAppLi() {
+	if (apps_list_clone.length < 1) {
+		appList.innerHTML = `<li>No matching apps found!</li>`;
+		return;
+	}
 	let li = document.createElement("li");
 	appList.innerHTML = "";
-	apps.forEach(app => {
+	apps_list_clone.forEach(app => {
 		let clone = li.cloneNode();
 		clone.innerHTML = app;
 		clone.addEventListener("click", () => { appSelected(app) });

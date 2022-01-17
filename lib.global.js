@@ -7,7 +7,9 @@ var api_req_refresh_token = null;
 var api_req_token_duration = null
 var api_req_baseUrl = null;
 
-var apps = [];
+var apps_list = [];
+var apps_list_clone = [];
+var app_selected = null;
 
 function callAPI(method, api, headers, urlParams, payload, cb) {
 	let constructedURL = `${api_req_baseUrl}${api}`;
