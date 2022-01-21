@@ -9,6 +9,7 @@
 	<link rel="stylesheet" href="style.global.css">
 	<link rel="stylesheet" href="style.configManager.css">
 	<link rel="stylesheet" href="style.appManager.css">
+	<link rel="stylesheet" href="style.main.css">
 </head>
 
 <body>
@@ -58,7 +59,6 @@
 			</p>
 			<button class="configLogin" id="configButtonLogin" onclick="login()">Login</button>
 		</div>
-
 	</div>
 
 	<div class="appManager shadow" id="appManager">
@@ -72,11 +72,65 @@
 		</ul>
 	</div>
 
+	<div class="main" id="main">
+		<p class="appName">Selected app :: <span id="main_appname">Jerry</span></p>
+		<div class="container">
+			<fieldset class="container-child-nav">
+				<legend>Menu</legend>
+				<span class="info">Select configurations to backup</span>
+				<ul class="navigation">
+					<li id="main_dataservice_menu_list" class="deselected" onclick="menuSelect('dataservice')">
+						<span class="nav-list-title">Dataservice</span>
+						<span class="summary-value" id="main_dataservice_summary">[<span id="main_dataservice_selected_count">999/999</span>]</span>
+					</li>
+					<li id="main_library_menu_list" class="deselected" onclick="menuSelect('library')">
+						<span class="nav-list-title">Library</span>
+						<span class="summary-value" id="main_library_summary">[<span id="main_library_selected_count">999/999</span>]</span>
+					</li>
+					<li id="main_functions_menu_list" class="deselected" onclick="menuSelect('functions')">
+						<span class="nav-list-title">Functions</span>
+						<span class="summary-value" id="main_functions_summary">[<span id="main_functions_selected_count">999/999</span>]</span>
+					</li>
+					<li id="main_bookmarks_menu_list" class="deselected" onclick="menuSelect('bookmarks')">
+						<span class="nav-list-title">Bookmarks</span>
+						<span class="summary-value" id="main_bookmarks_summary">[<span id="main_bookmarks_selected_count">999/999</span>]</span>
+					</li>
+					<li id="main_groups_menu_list" class="deselected" onclick="menuSelect('groups')">
+						<span class="nav-list-title">Groups</span>
+						<span class="summary-value" id="main_groups_summary">[<span id="main_groups_selected_count">999/999</span>]</span>
+					</li>
+				</ul>
+				<div class="col-layout">
+					<button id="main_menu_selectAll_button">Select All</button>
+					<button id="main_menu_deselectAll_button">De-select All</button>
+				</div>
+			</fieldset>
+			<!-- Display -->
+			<fieldset class="container-child">
+				<legend id="main_selected_title">Dataservice</legend>
+				
+				<span id="main_selected_error" class="error red"> No dataservices found </span>
+
+				<div id="main_selected_data">
+					<input type="text" name="main_selected_search" autosave="false" id="main_selected_search" autocomplete="false" placeholder="Search" onkeyup="searchSelected()">
+
+					<div class="col-layout">
+						<button id="main_selected_clearAll_button">Clear All</button>
+						<button id="main_selected_showSelected_button">Show selected</button>
+					</div>
+
+					<ul class="list" id="main_selected_list"></ul>
+				</div>
+			</fieldset>
+
+	</div>
+
 	<script src="lib.global.js"></script>
 	<script src="lib.apis.js"></script>
 	<script src="lib.elements.js"></script>
 	<script src="lib.configManager.js"></script>
 	<script src="lib.appManager.js"></script>
+	<script src="lib.mainManager.js"></script>
 
 </body>
 

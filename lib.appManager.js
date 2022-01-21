@@ -54,4 +54,6 @@ function populateAppLi() {
 function appSelected(_selectedApp) {
 	app_selected = _selectedApp;
 	console.log(`Selected app :: ${app_selected}`)
+	hideAppManager();
+	main_appname.innerHTML = app_selected
 }

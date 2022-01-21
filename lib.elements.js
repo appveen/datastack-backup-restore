@@ -21,6 +21,35 @@ const appManager = d.i("appManager");
 const appSearch = d.i("appSearch");
 const appList = d.i("appList");
 
+const main = d.i("main");
+const main_appname = d.i("main_appname");
+const main_dataservice_summary = d.i("main_dataservice_summary");
+const main_library_summary = d.i("main_library_summary");
+const main_functions_summary = d.i("main_functions_summary");
+const main_bookmarks_summary = d.i("main_bookmarks_summary");
+const main_groups_summary = d.i("main_groups_summary");
+const main_dataservice_selected_count = d.i("main_dataservice_selected_count");
+const main_library_selected_count = d.i("main_library_selected_count");
+const main_functions_selected_count = d.i("main_functions_selected_count");
+const main_bookmarks_selected_count = d.i("main_bookmarks_selected_count");
+const main_groups_selected_count = d.i("main_groups_selected_count");
+const menu_item = {
+	"dataservice": d.i("main_dataservice_menu_list"),
+	"library": d.i("main_library_menu_list"),
+	"functions": d.i("main_functions_menu_list"),
+	"bookmarks": d.i("main_bookmarks_menu_list"),
+	"groups": d.i("main_groups_menu_list")
+};
+const main_menu_selectAll_button = d.i("main_menu_selectAll_button");
+const main_menu_deselectAll_button = d.i("main_menu_deselectAll_button");
+const main_selected_title = d.i("main_selected_title");
+const main_selected_error = d.i("main_selected_error");
+const main_selected_data = d.i("main_selected_data");
+const main_selected_search = d.i("main_selected_search");
+const main_selected_clearAll_button = d.i("main_selected_clearAll_button");
+const main_selected_showSelected_button = d.i("main_selected_showSelected_button");
+const main_selected_list = d.i("main_selected_list");
+
 
 function hideAllConfig() {
 	configManager.style.display = "none";
@@ -33,6 +62,10 @@ function hideAppManager() {
 	appManager.style.display = "none";
 	appSearch.value = "";
 	appList.innerHTML = ""
+}
+
+function hideMain() {
+	main.style.display = "none";
 }
 
 hideAllConfig();

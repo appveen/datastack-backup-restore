@@ -41,3 +41,16 @@ p.error {
 .red {
 	color: darkred;
 }
+
+.info {
+	font-size: 12px;
+	padding: 2px;
+	text-align: center;
+	font-style: italic;
+}
+
+.col-layout{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
