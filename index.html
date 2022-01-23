@@ -113,13 +113,15 @@
 
 				<div id="main_selected_data">
 					<input type="text" name="main_selected_search" autosave="false" id="main_selected_search" autocomplete="false" placeholder="Search" onkeyup="searchSelected()">
-
-					<div class="col-layout">
-						<button id="main_selected_clearAll_button">Clear All</button>
-						<button id="main_selected_showSelected_button">Show selected</button>
-					</div>
+					
+					<span id="main_selected_summary" class="main_selected_summary">Select configurations to backup</span>
 
 					<ul class="list" id="main_selected_list"></ul>
+
+					<div class="col-layout">
+						<button id="main_selected_selectAll_button" onclick="mainSelected_SelectAll()">Select All</button>
+						<button id="main_selected_clearAll_button" onclick="mainSelected_ClearAll()">Clear All</button>
+					</div>
 				</div>
 			</fieldset>
 

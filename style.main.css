@@ -64,6 +64,8 @@ ul.navigation > li {
 ul.navigation > li:hover {
 	background-color: dimgray;
 	cursor: pointer;
+	border: 1px solid gray;
+	box-shadow: 1px 1px 5px gray;
 }
 
 ul.navigation > li.selected {
@@ -93,10 +95,10 @@ ul.navigation > li > span.summary-value {
 	display: flex;
 	margin: 10px 10px 2px 2px;
 	flex-direction: column;
-	width: 250px;
+	width: 275px;
 	padding: 10px;
 	border-color: black;
-	height: 454px;
+	height: 480px;
 }
 
 .main>.container>.container-child>.navigation{
@@ -111,11 +113,23 @@ ul.navigation > li > span.summary-value {
 	text-align: center;
 }
 
+.main>.container>.container-child .main_selected_summary {
+	font-style: italic;
+	font-size: 12px;
+}
+
 .main>.container>.container-child .buttons {
 	margin: 5px 0;
 }
-.main>.container>.container-child button {
-	width: 110px;
+
+.main>.container>.container-child .col-layout {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+.main>.container>.container-child .col-layout button {
+	margin-bottom: 10px;
+	width: 85px;
 }
 
 ul.list {

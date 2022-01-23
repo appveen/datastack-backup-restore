@@ -46,9 +46,10 @@ const main_selected_title = d.i("main_selected_title");
 const main_selected_error = d.i("main_selected_error");
 const main_selected_data = d.i("main_selected_data");
 const main_selected_search = d.i("main_selected_search");
+const main_selected_selectAll_button = d.i("main_selected_selectAll_button");
 const main_selected_clearAll_button = d.i("main_selected_clearAll_button");
-const main_selected_showSelected_button = d.i("main_selected_showSelected_button");
 const main_selected_list = d.i("main_selected_list");
+const main_selected_summary = d.i("main_selected_summary");
 
 
 function hideAllConfig() {
