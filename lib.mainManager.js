@@ -1,7 +1,12 @@
-
-var listOfRandomNames = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]
-
 var mainMap = {
+	"apis": (app) => [
+		["dataservice", APIS.DATASERVICE],
+		["library", APIS.LIBRARY],
+		["functions", APIS.FUNCTIONS],
+		["bookmarks", APIS.BOOKMARKS(app)],
+		["groups", APIS.GROUPS(app)],
+		["roles", APIS.ROLES]
+	],
 	"title": {
 		"dataservice": "Dataservice",
 		"library": "Library",
@@ -11,29 +16,40 @@ var mainMap = {
 	},
 	"count": {
 		"dataservice": { 
-			total: listOfRandomNames.length,
-			selected: JSON.parse(JSON.stringify(listOfRandomNames)),
-			raw: JSON.parse(JSON.stringify(listOfRandomNames))
+			"total": 0,
+			"selected": [],
+			"raw": [],
+			"rawData": []
 		},
 		"library": { 
-			total: listOfRandomNames.length,
-			selected: JSON.parse(JSON.stringify(listOfRandomNames)),
-			raw: JSON.parse(JSON.stringify(listOfRandomNames))
+			"total": 0,
+			"selected": [],
+			"raw": [],
+			"rawData": []
 		},
 		"functions": { 
-			total: listOfRandomNames.length,
-			selected: JSON.parse(JSON.stringify(listOfRandomNames)),
-			raw: JSON.parse(JSON.stringify(listOfRandomNames))
+			"total": 0,
+			"selected": [],
+			"raw": [],
+			"rawData": []
 		},
 		"bookmarks": { 
-			total: listOfRandomNames.length,
-			selected: JSON.parse(JSON.stringify(listOfRandomNames)),
-			raw: JSON.parse(JSON.stringify(listOfRandomNames))
+			"total": 0,
+			"selected": [],
+			"raw": [],
+			"rawData": []
 		},
 		"groups": { 
-			total: listOfRandomNames.length,
-			selected: JSON.parse(JSON.stringify(listOfRandomNames)),
-			raw: JSON.parse(JSON.stringify(listOfRandomNames))
+			"total": 0,
+			"selected": [],
+			"raw": [],
+			"rawData": []
+		},
+		"roles": { 
+			"total": 0,
+			"selected": [],
+			"raw": [],
+			"rawData": []
 		}
 	},
 	"error": {
@@ -64,6 +80,34 @@ function menuHideContainerElements(){
 }
 menuHideContainerElements();
 
+function fetchData(){
+	main.style.display = "flex";
+	let apis = mainMap.apis(app_selected);
+	console.log(apis);
+	let urlParams = {
+		"sort": "name",
+		"filter": {app: app_selected},
+		"count": -1,
+	}
+	apis.reduce((_p,_c) => {
+		_p.then();
+		console.log(`Calling ${_c[0]} api to fetch all the configuration data`);
+		return new Promise((resolve) => {
+			callAPI("GET", _c[1], null, urlParams, null, (responseData) => {
+				let menuNames = [];
+				responseData.forEach(item => menuNames.push(item.name));
+				mainMap.count[_c[0]].total = responseData.length;
+				mainMap.count[_c[0]].rawData = responseData;
+				mainMap.count[_c[0]].selected = JSON.parse(JSON.stringify(menuNames));
+				mainMap.count[_c[0]].raw = JSON.parse(JSON.stringify(menuNames));
+			})
+		});
+	}, Promise.resolve());
+	
+	renderMenuData()
+	menuSelect("dataservice");
+}
+
 function renderMenuData(){
 	main_dataservice_selected_count.innerHTML = `${mainMap.count.dataservice.selected.length}/${mainMap.count.dataservice.total}`;
 	main_library_selected_count.innerHTML = `${mainMap.count.library.selected.length}/${mainMap.count.library.total}`;
@@ -71,7 +115,6 @@ function renderMenuData(){
 	main_bookmarks_selected_count.innerHTML = `${mainMap.count.bookmarks.selected.length}/${mainMap.count.bookmarks.total}`;
 	main_groups_selected_count.innerHTML = `${mainMap.count.groups.selected.length}/${mainMap.count.groups.total}`;
 }
-renderMenuData()
 
 function menuSelect(selectedItem) {
 	removeSelectedClass();
@@ -80,10 +123,14 @@ function menuSelect(selectedItem) {
 	item.setAttribute("class", "selected");
 	main_selected = selectedItem;
 	main_selected_title.innerHTML = mainMap.title[selectedItem];
-	main_selected_data.style.display = "grid";
-	populateSelectedList(selectedItem, mainMap.count[selectedItem].raw);
+	if(mainMap.count[selectedItem].total == 0){
+		main_selected_error.innerHTML = `No ${selectedItem} found.`
+		main_selected_error.style.display = "block"
+	} else {
+		main_selected_data.style.display = "grid";
+		populateSelectedList(selectedItem, mainMap.count[selectedItem].raw);
+	}
 }
-menuSelect("dataservice");
 
 function populateSelectedList(_type, _listOfItems) {
 	let li = document.createElement("li");

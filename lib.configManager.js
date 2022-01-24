@@ -23,8 +23,8 @@ function loadConfigs() {
 	configSelect.selectedIndex = 0;
 	configSelectChanged();
 }
-// loadConfigs();
-hideAllConfig()
+loadConfigs();
+// hideAllConfig()
 
 function configSelectChanged() {
 	configProperties.innerHTML = `

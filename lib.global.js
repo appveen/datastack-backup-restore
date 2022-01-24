@@ -40,6 +40,11 @@ function callAPI(method, api, headers, urlParams, payload, cb) {
 			else if (this.status == 401) {
 				logoutAction();
 			} else {
+				console.error(`Error invoking API : ${method} ${constructedURL}`)
+				console.error(`Headers : ${JSON.stringify(headers)}`)
+				console.error(`URLParams : ${JSON.stringify(urlParams)}`)
+				console.error(`payload : ${JSON.stringify(payload)}`)
+				console.error(`Response : ${JSON.stringify(this.responseText)}`)
 				alert(this.responseText)
 			}
 		}
@@ -61,4 +66,12 @@ function nullCheckAndShowError(value, message) {
 		return true;
 	}
 	return false;
+}
+
+function stringComparator(a, b) {
+	let nameA = a._id.toUpperCase();
+	let nameB = b._id.toUpperCase();
+	if (nameA < nameB) return -1;
+	if (nameA > nameB) return 1;
+	return 0;
 }

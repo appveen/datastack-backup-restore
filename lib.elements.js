@@ -67,7 +67,9 @@ function hideAppManager() {
 
 function hideMain() {
 	main.style.display = "none";
+	main_selected_search.value = "";
 }
 
 hideAllConfig();
 hideAppManager();
+hideMain();

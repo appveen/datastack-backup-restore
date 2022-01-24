@@ -7,13 +7,7 @@ function loadApps() {
 	}
 	callAPI("GET", APIS.APPS, null, urlParams, null, (responseData) => {
 		responseData
-			.sort(function (a, b) {
-				var nameA = a._id.toUpperCase();
-				var nameB = b._id.toUpperCase();
-				if (nameA < nameB) return -1;
-				if (nameA > nameB) return 1;
-				return 0;
-			})
+			.sort(stringComparator)
 			.forEach(app => apps_list.push(app._id))
 		populateAppList();
 	})
@@ -55,5 +49,6 @@ function appSelected(_selectedApp) {
 	app_selected = _selectedApp;
 	console.log(`Selected app :: ${app_selected}`)
 	hideAppManager();
-	main_appname.innerHTML = app_selected
+	main_appname.innerHTML = app_selected;
+	fetchData();
 }

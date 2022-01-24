@@ -134,7 +134,7 @@ ul.navigation > li > span.summary-value {
 
 ul.list {
 	list-style: none;
-	max-height: 350px;
+	height: 350px;
 	padding: 0px;
 	overflow-y: auto;
 	border: 1px solid lightgray;
