@@ -26,7 +26,40 @@ export function header(_s: string) {
 	var top = '┌' + liner + middle + liner + '┐';
 	var bottom = '└' + liner + middle + liner + '┘';
 	var center = '│' + spacer + _s + spacer + '│';
-	logger.info(top);
-	logger.info(center);
-	logger.info(bottom);
+	printInfo(top);
+	printInfo(center);
+	printInfo(bottom);
+}
+
+export function stringComparison(a: string, b: string) {
+	let nameA = a.toUpperCase();
+	let nameB = b.toUpperCase();
+	if (nameA < nameB) return -1;
+	if (nameA > nameB) return 1;
+	return 0;
+}
+
+export function isNotAnAcceptableValue(i: any) {
+	if (typeof i == 'object') return true;
+	if (i == null) return true;
+	return false;
+}
+
+export function printInfo(message: string) {
+	logger.info(message);
+	console.log(message);
+}
+
+export function printError(message: string) {
+	logger.error(message);
+	console.error(message);
+}
+
+export function printDone(_msg: string, _count: number) {
+	printInfo(`  ${padCount(_count)} ${_msg}`);
+}
+
+function padCount(_d: number) {
+	if (_d > 9) return ` ${_d} `;
+	return `  ${_d} `;
 }

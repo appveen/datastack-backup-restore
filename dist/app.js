@@ -12,9 +12,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const log4js_1 = require("log4js");
 'log4js';
 const version = require('../package.json').version;
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+global.version = version;
 let d = (new Date()).toISOString().replace(/:/gi, '-');
+// global.globalId = d;
+global.backupFileName = `backup-${d}.json`;
+global.backupMapFileName = `backupMap-${d}.json`;
+global.restoreFileName = `restore-${d}.json`;
+global.restoreMapFileName = `restoreMap-${d}.json`;
 let fileName = `dsBR_${version.split('.').join('_')}_${d}.log`;
+if (process.env.DS_BR_SINGLELOGFILE)
+    fileName = 'out.log';
 (0, log4js_1.configure)({
     appenders: {
         fileOut: {
@@ -24,17 +31,11 @@ let fileName = `dsBR_${version.split('.').join('_')}_${d}.log`;
             layout: {
                 type: 'basic'
             }
-        },
-        out: {
-            type: 'stdout',
-            layout: {
-                type: 'messagePassThrough'
-            }
         }
     },
     categories: {
         default: {
-            appenders: ['out', 'fileOut'],
+            appenders: ['fileOut'],
             level: 'error'
         }
     }
@@ -43,29 +44,24 @@ const logger = (0, log4js_1.getLogger)(`[${version}]`);
 logger.level = process.env.LOGLEVEL ? process.env.LOGLEVEL : 'info';
 global.logger = logger;
 const lib_misc_1 = require("./lib.misc");
+const lib_cli_1 = require("./lib.cli");
 const manager_api_1 = require("./manager.api");
-// const configManager = require('./lib.configManager');
-const apiManager = require('./manager.api');
-const backupManager = require('./manager.backup');
-const restoreManager = require('./manager.restore');
-const clearAllManager = require('./manager.clearAll');
-function start() {
-    return __awaiter(this, void 0, void 0, function* () {
-        // let selection = await cli.pickMode();
-        // if (selection.mode == 'Backup') await backupManager();
-        // if (selection.mode == 'Restore') await restoreManager();
-        // if (selection.mode == 'Clear All') await clearAllManager();
-        let creds = {
-            'host': "https://cloud.appveen.com",
-            "username": "jerry@appveen.com",
-            "password": "thisismysecret"
-        };
-        yield (0, manager_api_1.login)(creds);
-        var apps = yield (0, manager_api_1.getApps)();
-        console.log(apps);
-    });
-}
+const manager_backup_1 = require("./manager.backup");
+const manager_restore_1 = require("./manager.restore");
+const manager_clearAll_1 = require("./manager.clearAll");
 (() => __awaiter(void 0, void 0, void 0, function* () {
     (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
-    yield start();
+    let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
+    yield (0, manager_api_1.login)(dsConfig);
+    let apps = yield (0, manager_api_1.getApps)();
+    var selection = yield (0, lib_cli_1.startMenu)();
+    logger.info(`Selected mode :: ${selection.mode}`);
+    if (selection.mode == 'Backup')
+        yield (0, manager_backup_1.backupManager)(apps);
+    if (selection.mode == 'Restore')
+        yield (0, manager_restore_1.restoreManager)(apps);
+    if (selection.mode == 'Clear All')
+        yield (0, manager_clearAll_1.clearAllManager)(apps);
+    // Logout cleanly
+    global.dataStack.Logout();
 }))();

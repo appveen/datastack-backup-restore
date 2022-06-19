@@ -9,24 +9,51 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pickMode = exports.startMenu = void 0;
+exports.selectApp = exports.startMenu = exports.validateCLIParams = void 0;
+const lib_misc_1 = require("./lib.misc");
 const inquirer_1 = require("inquirer");
+const log4js_1 = require("log4js");
+const types_1 = require("@appveen/ds-sdk/dist/types");
 (0, inquirer_1.registerPrompt)('autocomplete', require('inquirer-autocomplete-prompt'));
-const options = [
+var logger = global.logger;
+const mainMenu = [
     new inquirer_1.Separator(),
     'Backup',
     'Restore',
     new inquirer_1.Separator('--- Utils ---'),
     'Clear All',
 ];
-const mainMenu = [
-    new inquirer_1.Separator('--- CONFIG ---'),
-    'Show',
-    'Add',
-    'Delete',
-    new inquirer_1.Separator(),
-    'Quit',
-];
+function validateCLIParams() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let credentials = new types_1.Credentials();
+        let terminate = false;
+        if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_HOST)) {
+            logger.error('DS_BR_HOST is invalid.');
+            terminate = true;
+        }
+        if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_USERNAME)) {
+            logger.error('DS_BR_USERNAME is invalid.');
+            terminate = true;
+        }
+        if (terminate)
+            yield (0, log4js_1.shutdown)(function () { process.exit(100); });
+        credentials.host = process.env.DS_BR_HOST;
+        global.host = process.env.DS_BR_HOST || '';
+        credentials.username = process.env.DS_BR_USERNAME;
+        logger.info(`Host      : ${credentials.host}`);
+        logger.info(`Username  : ${credentials.username}`);
+        credentials.password = process.env.DS_BR_PASSWORD;
+        if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_PASSWORD)) {
+            yield (0, inquirer_1.prompt)([{
+                    type: 'password',
+                    name: 'password',
+                    message: 'Password>'
+                }]).then(data => credentials.password = data.password);
+        }
+        return credentials;
+    });
+}
+exports.validateCLIParams = validateCLIParams;
 function startMenu() {
     return __awaiter(this, void 0, void 0, function* () {
         return yield (0, inquirer_1.prompt)([{
@@ -39,36 +66,24 @@ function startMenu() {
     });
 }
 exports.startMenu = startMenu;
-function pickMode() {
+function selectApp(apps) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield (0, inquirer_1.prompt)([{
-                type: 'list',
-                name: 'mode',
-                message: '>',
-                choices: options,
-                pageSize: options.length
-            }]);
+                type: 'autocomplete',
+                name: 'appName',
+                message: 'Select app: ',
+                pageSize: 5,
+                source: (_ans, _input) => {
+                    _input = _input || '';
+                    return new Promise(_res => _res(apps.filter((_n) => _n.indexOf(_input) > -1)));
+                }
+            }]).then(_d => {
+            logger.info(`Selected app : ${_d.appName}`);
+            return _d.appName;
+        });
     });
 }
-exports.pickMode = pickMode;
-// e.pickApp = _apps => {
-// 	var names = _apps.map(_d => _d._id);
-// 	names = names.sort();
-// 	return inquirer.prompt([{
-// 		type: 'autocomplete',
-// 		name: 'appName',
-// 		message: 'Select app: ',
-// 		pageSize: 5,
-// 		source: (_ans, _input) => {
-// 			_input = _input || '';
-// 			return new Promise(_res => _res(names.filter(_n => _n.indexOf(_input) > -1)));
-// 		}
-// 	}]).then(_d => {
-// 		misc.print('Selected app', _d.appName);
-// 		logger.info(`Selected app : ${_d.appName}`);
-// 		return _d.appName;
-// 	});
-// };
+exports.selectApp = selectApp;
 // e.customise = () => {
 // 	return inquirer.prompt([{
 // 		type: 'confirm',

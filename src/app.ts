@@ -1,11 +1,15 @@
-import { Credentials } from '@appveen/ds-sdk/dist/types';
 import { getLogger as GetLogger, configure as Log4JSConfig } from 'log4js'; 'log4js';
 const version = require('../package.json').version;
-
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+global.version = version;
 
 let d = (new Date()).toISOString().replace(/:/gi, '-');
+// global.globalId = d;
+global.backupFileName = `backup-${d}.json`;
+global.backupMapFileName = `backupMap-${d}.json`;
+global.restoreFileName = `restore-${d}.json`;
+global.restoreMapFileName = `restoreMap-${d}.json`;
 let fileName = `dsBR_${version.split('.').join('_')}_${d}.log`;
+if (process.env.DS_BR_SINGLELOGFILE) fileName = 'out.log';
 Log4JSConfig({
 	appenders: {
 		fileOut: {
@@ -15,17 +19,11 @@ Log4JSConfig({
 			layout: {
 				type: 'basic'
 			}
-		},
-		out: {
-			type: 'stdout',
-			layout: {
-				type: 'messagePassThrough'
-			}
 		}
 	},
 	categories: {
 		default: {
-			appenders: ['out', 'fileOut'],
+			appenders: ['fileOut'],
 			level: 'error'
 		}
 	}
@@ -35,25 +33,26 @@ logger.level = process.env.LOGLEVEL ? process.env.LOGLEVEL : 'info';
 global.logger = logger;
 
 import { header } from './lib.misc';
-import { login, getApps } from './manager.api'
-// const configManager = require('./lib.configManager');
-const apiManager = require('./manager.api');
-const backupManager = require('./manager.backup');
-const restoreManager = require('./manager.restore');
-const clearAllManager = require('./manager.clearAll');
-
-async function start() {
-	// let selection = await cli.pickMode();
-	// if (selection.mode == 'Backup') await backupManager();
-	// if (selection.mode == 'Restore') await restoreManager();
-	// if (selection.mode == 'Clear All') await clearAllManager();
-
-	await login(creds);
-	var apps = await getApps();
-	console.log(apps)
-}
+import { startMenu, validateCLIParams } from './lib.cli';
+import { getApps, login } from './manager.api';
+import { backupManager } from './manager.backup';
+import { restoreManager } from './manager.restore';
+import { clearAllManager } from './manager.clearAll';
 
 (async () => {
 	header(`data.stack Backup and Restore Utility ${version}`);
-	await start();
+	let dsConfig = await validateCLIParams();
+	await login(dsConfig);
+
+	let apps = await getApps();
+
+	var selection = await startMenu();
+	logger.info(`Selected mode :: ${selection.mode}`);
+
+	if (selection.mode == 'Backup') await backupManager(apps);
+	if (selection.mode == 'Restore') await restoreManager(apps);
+	if (selection.mode == 'Clear All') await clearAllManager(apps);
+
+	// Logout cleanly
+	global.dataStack.Logout();
 })();

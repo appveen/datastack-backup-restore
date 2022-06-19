@@ -1,127 +1,94 @@
-import { authenticateByCredentials, DSApp, DataStack } from '@appveen/ds-sdk'
+import got from 'got';
+import { authenticateByCredentials, DataStack } from '@appveen/ds-sdk';
 import { Credentials } from '@appveen/ds-sdk/dist/types';
+import { printError, printInfo } from './lib.misc';
 
 var logger = global.logger;
 var dataStack: DataStack;
 
+
 export async function login(config: Credentials) {
-	logger.info('Host      :', `${config.host}`);
-	logger.info(`Username  : ${config.username}`);
-	dataStack = await authenticateByCredentials(config);
-	global.dataStack = dataStack;
+	logger.trace(config);
+	try {
+		dataStack = await authenticateByCredentials(config);
+		printInfo('Logged into data.stack.');
+		global.dataStack = dataStack;
+	} catch (e) {
+		printError('Unable to login to data.stack server');
+		logger.error(e);
+	}
 }
 
 export async function getApps() {
 	let apps = await dataStack.ListApps();
-	return apps.map(a => a.app._id);
+	return apps.map(a => a.app._id).sort();
 }
 
-// function __login() {
-// 	return req({
-// 		uri: `${config.url}/api/a/rbac/login`,
-// 		method: 'POST',
-// 		json: true,
-// 		body: config,
-// 	}).then(
-// 		_d => {
-// 			logger.info(`User ${config.username} logged into ${config.name} successfully`);
-// 			logger.info(`User session duration ${_d.rbacUserTokenDuration}`);
-// 			if (!refreshActive) {
-// 				refreshActive = true;
-// 				__refreshToken(_d.rbacUserTokenDuration);
-// 			}
-// 			token = _d.token;
-// 			return _d;
-// 		},
-// 		_e => {
-// 			logger.error(`Unable to login to ${config.name}`);
-// 			logger.error(_e.message);
-// 			console.log(`Unable to login to ${config.name}`);
-// 			misc.error('Error', _e.message);
-// 			process.exit();
-// 		}
-// 	);
-// }
+export async function get(endpoint: string, searchParams: URLSearchParams): Promise<any[]> {
+	logger.info(`GET ${global.host}${endpoint} :: ${JSON.stringify(searchParams)}`);
+	try {
+		return await got.get(`${global.host}${endpoint}`, {
+			'headers': {
+				'Authorization': `JWT ${dataStack.authData.token}`
+			},
+			'searchParams': searchParams
+		}).json();
+	} catch (e) {
+		printError(`Error on GET ${global.host}${endpoint}`);
+		logger.error(e);
+		printInfo('Terminating...');
+		process.exit(200);
+	}
+}
 
-// function __refreshToken(_duration) {
-// 	logger.info('Refreshing user session');
-// 	global.refreshIntervalID = setInterval(__login, (_duration - 10) * 1000);
-// }
+export async function post(endpoint: string, payload: any): Promise<any[]> {
+	logger.info(`POST ${global.host}${endpoint}`);
+	logger.info(`Payload - ${JSON.stringify(payload)}`);
+	try {
+		return await got.post(`${global.host}${endpoint}`, {
+			'headers': {
+				'Authorization': `JWT ${dataStack.authData.token}`
+			},
+			json: payload
+		}).json();
+	} catch (e) {
+		printError(`Error on POST ${global.host}${endpoint}`);
+		logger.error(e);
+		printInfo('Terminating...');
+		process.exit(201);
+	}
+}
 
-// e.get = (_url, _qs) => {
-// 	logger.info(`GET :: ${config.url}${_url}`);
-// 	logger.debug(JSON.stringify(_qs));
-// 	return req({
-// 		method: 'GET',
-// 		uri: `${config.url}${_url}`,
-// 		headers: {
-// 			'Authorization': `JWT ${token}`
-// 		},
-// 		qs: _qs,
-// 		json: true
-// 	}).then(_d => {
-// 		return _d;
-// 	}, _e => {
-// 		logger.error(_e.message);
-// 		return _e.message;
-// 	});
-// };
+export async function put(endpoint: string, payload: any): Promise<any[]> {
+	logger.info(`PUT ${global.host}${endpoint}`);
+	logger.info(`Payload - ${JSON.stringify(payload)}`);
+	try {
+		return await got.put(`${global.host}${endpoint}`, {
+			'headers': {
+				'Authorization': `JWT ${dataStack.authData.token}`
+			},
+			json: payload
+		}).json();
+	} catch (e) {
+		printError(`Error on PUT ${global.host}${endpoint}`);
+		logger.error(e);
+		printInfo('Terminating...');
+		process.exit(201);
+	}
+}
 
-// e.post = (_url, _body) => {
-// 	logger.info(`POST :: ${config.url}${_url}`);
-// 	// dataLogger.debug(JSON.stringify(_body))
-// 	return req({
-// 		method: 'POST',
-// 		uri: `${config.url}${_url}`,
-// 		headers: {
-// 			'Authorization': `JWT ${token}`
-// 		},
-// 		body: _body,
-// 		json: true
-// 	}).then(_d => {
-// 		return _d;
-// 	}, _e => {
-// 		logger.error(_e.message);
-// 		logger.error(JSON.stringify(_body));
-// 		return _e.message;
-// 	});
-// };
-
-// e.put = (_url, _body) => {
-// 	logger.info(`PUT :: ${config.url}${_url}`);
-// 	// dataLogger.debug(JSON.stringify(_body))
-// 	return req({
-// 		method: 'PUT',
-// 		uri: `${config.url}${_url}`,
-// 		headers: {
-// 			'Authorization': `JWT ${token}`
-// 		},
-// 		body: _body,
-// 		json: true
-// 	}).then(_d => {
-// 		return _d;
-// 	}, _e => {
-// 		logger.error(_e.message);
-// 		logger.error(JSON.stringify(_body));
-// 		return _e.message;
-// 	});
-// };
-
-// e.delete = (_url) => {
-// 	logger.info(`DELETE :: ${config.url}${_url}`);
-// 	return req({
-// 		method: 'DELETE',
-// 		uri: `${config.url}${_url}`,
-// 		headers: {
-// 			'Authorization': `JWT ${token}`
-// 		},
-// 		json: true
-// 	}).then(_d => {
-// 		return _d;
-// 	}, _e => {
-// 		logger.error(_e.message);
-// 		return _e.message;
-// 	});
-// };
-
-// module.exports = e;
+export async function del(endpoint: string): Promise<any[]> {
+	logger.info(`DELETE ${global.host}${endpoint}`);
+	try {
+		return await got.delete(`${global.host}${endpoint}`, {
+			'headers': {
+				'Authorization': `JWT ${dataStack.authData.token}`
+			}
+		}).json();
+	} catch (e) {
+		printError(`Error on DELETE ${global.host}${endpoint}`);
+		logger.error(e);
+		printInfo('Terminating...');
+		process.exit(203);
+	}
+}

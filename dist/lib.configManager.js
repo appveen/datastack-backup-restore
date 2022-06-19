@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.display = exports.deleteConfig = exports.addConfig = void 0;
+exports.displayConfig = exports.deleteConfig = exports.addConfig = void 0;
 const fs_1 = require("fs");
 const path_1 = require("path");
 const inquirer_1 = require("inquirer");
@@ -84,7 +84,7 @@ function deleteConfig() {
     });
 }
 exports.deleteConfig = deleteConfig;
-function display() {
+function displayConfig() {
     return __awaiter(this, void 0, void 0, function* () {
         var configData = new types_1.ConfigData(JSON.parse((0, fs_1.readFileSync)(configDBFile).toString()));
         if (configData.data.length < 1) {
@@ -116,5 +116,4 @@ function display() {
         return config;
     });
 }
-exports.display = display;
-module.exports = e;
+exports.displayConfig = displayConfig;

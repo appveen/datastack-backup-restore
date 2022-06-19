@@ -1,4 +1,4 @@
-import { ConfigData } from './types';
+import { Config, ConfigData } from './types';
 export declare function addConfig(): Promise<ConfigData>;
 export declare function deleteConfig(): Promise<void>;
-export declare function display(): Promise<import("./types").Config>;
+export declare function displayConfig(): Promise<Config>;
