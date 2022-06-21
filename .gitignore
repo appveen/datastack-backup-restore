@@ -2,3 +2,9 @@ node_modules
 *.log
 clean.sh
 run.sh
+
+backup.json
+backupMap.json
+restore.json
+restoreMap.json
+del

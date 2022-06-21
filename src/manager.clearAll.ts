@@ -1,62 +1,61 @@
-import { selectApp } from './lib.cli';
-import { printInfo } from './lib.misc';
-import { del, get } from './manager.api';
+import { selectApp } from "./lib.cli";
+import { header, printInfo } from "./lib.misc";
+import { del, get } from "./manager.api";
+
+let searchParams = new URLSearchParams();
 
 export async function clearAllManager(apps: any) {
+	header("Clear all configurations");
 	let selectedApp = await selectApp(apps);
 
-	printInfo('Scanning the configurations within the app...');
+	searchParams.append("filter", JSON.stringify({ app: selectedApp }));
+	searchParams.append("count", "-1");
+	searchParams.append("select", "name");
+
+	printInfo("Scanning the configurations within the app...");
 
 	await clearGroups(selectedApp);
 	await clearDataServices(selectedApp);
 	await clearLibrary(selectedApp);
-	printInfo('Backup complete!');
+	printInfo("Cleanup complete!");
 }
 
 async function clearGroups(selectedApp: string) {
-	let URL = `/api/a/rbac/${selectedApp}/group`;
-	let searchParams = new URLSearchParams();
-	searchParams.append('count', '-1');
-	searchParams.append('select', 'name');
-	let groups = await get(URL, searchParams);
-	groups = groups.filter(group => group.name != '#');
-	printInfo(`${groups.length} Group(s) found.`);
-	await groups.reduce(async (p, group) => {
+	header("Group");
+	let BASE_URL = `/api/a/rbac/${selectedApp}/group`;
+	let groups = await get(BASE_URL, searchParams);
+	printInfo(`${groups.length - 1} Group(s) found.`);
+	await groups.reduce(async (p: any, group: any) => {
 		await p;
-		printInfo(`  Removing group ${group._id} ${group.name}`);
-		let GROUP_URL = `/api/a/rbac/${selectedApp}/group/${group._id}`;
+		if (group.name == "#") return Promise.resolve();
+		printInfo(`  * Removing group ${group._id} ${group.name}`);
+		let GROUP_URL = `${BASE_URL}/${group._id}`;
 		await del(GROUP_URL);
 	}, Promise.resolve());
 }
 
 async function clearDataServices(selectedApp: string) {
-	var URL = `/api/a/sm/${selectedApp}/service`;
-	let searchParams = new URLSearchParams();
-	searchParams.append('filter', JSON.stringify({ app: selectedApp }));
-	searchParams.append('count', '-1');
-	searchParams.append('select', 'name');
-	let dataServices = await get(URL, searchParams);
-	printInfo(`${dataServices.length} Data service(s) found.`);
-	await dataServices.reduce(async (p, dataService) => {
+	header("Dataservice");
+	var BASE_URL = `/api/a/sm/${selectedApp}/service`;
+	let dataservices = await get(BASE_URL, searchParams);
+	printInfo(`${dataservices.length} Dataservice(s) found.`);
+	await dataservices.reduce(async (p: any, dataservice: any) => {
 		await p;
-		printInfo(`  Removing data service ${dataService._id} ${dataService.name}`);
-		let DS_URL = `/api/a/sm/${selectedApp}/service/${dataService._id}`;
+		printInfo(`  * Removing dataservice ${dataservice._id} ${dataservice.name}`);
+		let DS_URL = `${BASE_URL}/${dataservice._id}`;
 		await del(DS_URL);
 	}, Promise.resolve());
 }
 
 async function clearLibrary(selectedApp: string) {
-	let URL = `/api/a/sm/${selectedApp}/globalSchema`;
-	let searchParams = new URLSearchParams();
-	searchParams.append('filter', JSON.stringify({ app: selectedApp }));
-	searchParams.append('count', '-1');
-	searchParams.append('select', 'name');
-	let libraries = await get(URL, searchParams);
+	header("Library");
+	let BASE_URL = `/api/a/sm/${selectedApp}/globalSchema`;
+	let libraries = await get(BASE_URL, searchParams);
 	printInfo(`${libraries.length} Library(-ies) found.`);
-	await libraries.reduce(async (p, library) => {
+	await libraries.reduce(async (p: any, library: any) => {
 		await p;
-		printInfo(`  Removing data service ${library._id} ${library.name}`);
-		let LIB_URL = `/api/a/sm/${selectedApp}/globalSchema/${library._id}`;
+		printInfo(`  * Removing library ${library._id} ${library.name}`);
+		let LIB_URL = `${BASE_URL}/${library._id}`;
 		await del(LIB_URL);
 	}, Promise.resolve());
 }

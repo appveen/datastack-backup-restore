@@ -1,47 +1,54 @@
-import { join } from 'path';
-import { readFileSync, writeFileSync } from 'fs';
-import { printInfo } from './lib.misc';
+import { join } from "path";
+import { readFileSync, writeFileSync } from "fs";
+import { printInfo } from "./lib.misc";
 
 let logger = global.logger;
 
 export function backupInit() {
 	printInfo(`Backup file - ${global.backupFileName}`);
-	printInfo(`Map file    - ${global.backupMapFileName}`);
-	writeJSON(global.backupFileName, `{"version":"${global.version}"}`);
-	writeJSON(global.backupMapFileName, `{"version":"${global.version}"}`);
+	writeJSON(global.backupFileName, `{"version":"${global.version}", "map": {}, "data": {}}`);
 }
 
 export function restoreInit() {
-	logger.debug(`Creating restore files - ${global.restoreFileName} and ${global.restoreMapFileName}`);
+	logger.debug(`Restore file - ${global.restoreFileName}`);
 	writeJSON(global.restoreFileName, `{"version":"${global.version}"}`);
-	writeJSON(global.restoreMapFileName, `{"version":"${global.version}"}`);
 }
 
 export function save(key: string, data: any[]) {
 	let backupData = readJSON(global.backupFileName);
-	backupData[key] = data;
+	backupData.data[key] = data;
 	writeJSON(global.backupFileName, backupData);
 }
 
-export function backupMapper(token: string, key: string, data: string) {
-	let backupData = readJSON(global.backupMapFileName);
-	if (!backupData[token]) backupData[token] = {};
-	backupData[token][key] = data;
-	writeJSON(global.backupMapFileName, backupData);
-	logger.trace(`Updated ${global.backupMapFileName} : ${token} : ${key} : ${data}`);
+export function backupMapper(token: string, key: string, value: string) {
+	let backupData = readJSON(global.backupFileName);
+	if (!backupData.map[token]) backupData.map[token] = {};
+	backupData.map[token][key] = value;
+	writeJSON(global.backupFileName, backupData);
+	logger.trace(`Updated ${global.backupFileName} : ${token} : ${key} : ${value}`);
 }
 
-export function restoreMapper(token: string, key: string, data: string) {
-	let restoreMapData = readJSON(global.restoreMapFileName);
+export function restoreMapper(token: string, key: string, value: string) {
+	let restoreMapData = readJSON(global.restoreFileName);
 	if (!restoreMapData[token]) restoreMapData[token] = {};
-	restoreMapData[token][key] = data;
-	writeJSON(global.restoreMapFileName, restoreMapData);
-	logger.trace(`Updated ${global.restoreMapFileName} : ${token} : ${key} : ${data}`);
+	restoreMapData[token][key] = value;
+	writeJSON(global.restoreFileName, restoreMapData);
+	logger.trace(`Updated ${global.restoreFileName} : ${token} : ${key} : ${value}`);
 }
 
 export function read(key: string) {
-	let data = readJSON(global.backupFileName);
-	return data[key];
+	let backupData = readJSON(global.backupFileName);
+	return backupData.data[key];
+}
+
+export function readBackupMap(token: string, key: string) {
+	let backupData = readJSON(global.backupFileName);
+	return backupData.map[token][key];
+}
+
+export function readRestoreMap(token: string) {
+	let restoreMapData = readJSON(global.restoreFileName);
+	return restoreMapData[token];
 }
 
 function readJSON(filename: string) {
@@ -50,7 +57,7 @@ function readJSON(filename: string) {
 }
 
 function writeJSON(filename: string, data: any) {
-	if (typeof data == 'object') {
+	if (typeof data == "object") {
 		data = JSON.stringify(data);
 	}
 	const filePath = join(process.cwd(), filename);

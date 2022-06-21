@@ -1,32 +1,50 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.printDone = exports.printError = exports.printInfo = exports.isNotAnAcceptableValue = exports.stringComparison = exports.header = void 0;
+exports.printUpsert = exports.printDone = exports.printError = exports.printInfo = exports.isNotAnAcceptableValue = exports.stringComparison = exports.header = exports.killThySelf = void 0;
+const log4js_1 = require("log4js");
 var logger = global.logger;
+function killThySelf(killCode) {
+    return __awaiter(this, void 0, void 0, function* () {
+        printError(`Terminating with exit code(${killCode})`);
+        yield (0, log4js_1.shutdown)(function () { process.exit(killCode); });
+    });
+}
+exports.killThySelf = killThySelf;
 function header(_s) {
     let totalWidth = 32;
     let fitLength = _s.length;
     if (_s.length % 2 != 0) {
         fitLength += 1;
-        _s += ' ';
+        _s += " ";
     }
     let sideWidth = (totalWidth - fitLength) / 2;
-    let middle = '';
+    let middle = "";
     let i = 0;
     while (i < fitLength) {
-        middle += '─';
+        middle += "─";
         i++;
     }
-    let liner = '';
-    let spacer = '';
+    let liner = "";
+    let spacer = "";
     i = 0;
     while (i < sideWidth) {
-        liner += '─';
-        spacer += ' ';
+        liner += "─";
+        spacer += " ";
         i++;
     }
-    var top = '┌' + liner + middle + liner + '┐';
-    var bottom = '└' + liner + middle + liner + '┘';
-    var center = '│' + spacer + _s + spacer + '│';
+    var top = "┌" + liner + middle + liner + "┐";
+    var bottom = "└" + liner + middle + liner + "┘";
+    var center = "│" + spacer + _s + spacer + "│";
+    console.log("");
     printInfo(top);
     printInfo(center);
     printInfo(bottom);
@@ -43,7 +61,7 @@ function stringComparison(a, b) {
 }
 exports.stringComparison = stringComparison;
 function isNotAnAcceptableValue(i) {
-    if (typeof i == 'object')
+    if (typeof i == "object")
         return true;
     if (i == null)
         return true;
@@ -61,7 +79,8 @@ function printError(message) {
 }
 exports.printError = printError;
 function printDone(_msg, _count) {
-    printInfo(`  ${padCount(_count)} ${_msg}`);
+    console.log(`  ${padCount(_count)} ${_msg}`);
+    logger.info(`${_msg} -> ${_count}`);
 }
 exports.printDone = printDone;
 function padCount(_d) {
@@ -69,3 +88,9 @@ function padCount(_d) {
         return ` ${_d} `;
     return `  ${_d} `;
 }
+function printUpsert(upsertResult) {
+    if (upsertResult.update)
+        return printInfo(`${upsertResult.type} updated : ${upsertResult.data.name}`);
+    printInfo(`${upsertResult.type} created : ${upsertResult.data.name}`);
+}
+exports.printUpsert = printUpsert;

@@ -1,31 +1,38 @@
+import { shutdown } from "log4js";
 
 var logger = global.logger;
+
+export async function killThySelf(killCode: number) {
+	printError(`Terminating with exit code(${killCode})`);
+	await shutdown(function () { process.exit(killCode); });
+}
 
 export function header(_s: string) {
 	let totalWidth = 32;
 	let fitLength = _s.length;
 	if (_s.length % 2 != 0) {
 		fitLength += 1;
-		_s += ' ';
+		_s += " ";
 	}
 	let sideWidth = (totalWidth - fitLength) / 2;
-	let middle = '';
+	let middle = "";
 	let i = 0;
 	while (i < fitLength) {
-		middle += '─';
+		middle += "─";
 		i++;
 	}
-	let liner = '';
-	let spacer = '';
+	let liner = "";
+	let spacer = "";
 	i = 0;
 	while (i < sideWidth) {
-		liner += '─';
-		spacer += ' ';
+		liner += "─";
+		spacer += " ";
 		i++;
 	}
-	var top = '┌' + liner + middle + liner + '┐';
-	var bottom = '└' + liner + middle + liner + '┘';
-	var center = '│' + spacer + _s + spacer + '│';
+	var top = "┌" + liner + middle + liner + "┐";
+	var bottom = "└" + liner + middle + liner + "┘";
+	var center = "│" + spacer + _s + spacer + "│";
+	console.log("");
 	printInfo(top);
 	printInfo(center);
 	printInfo(bottom);
@@ -40,7 +47,7 @@ export function stringComparison(a: string, b: string) {
 }
 
 export function isNotAnAcceptableValue(i: any) {
-	if (typeof i == 'object') return true;
+	if (typeof i == "object") return true;
 	if (i == null) return true;
 	return false;
 }
@@ -56,10 +63,16 @@ export function printError(message: string) {
 }
 
 export function printDone(_msg: string, _count: number) {
-	printInfo(`  ${padCount(_count)} ${_msg}`);
+	console.log(`  ${padCount(_count)} ${_msg}`);
+	logger.info(`${_msg} -> ${_count}`);
 }
 
 function padCount(_d: number) {
 	if (_d > 9) return ` ${_d} `;
 	return `  ${_d} `;
+}
+
+export function printUpsert(upsertResult: any) {
+	if (upsertResult.update) return printInfo(`${upsertResult.type} updated : ${upsertResult.data.name}`);
+	printInfo(`${upsertResult.type} created : ${upsertResult.data.name}`);
 }

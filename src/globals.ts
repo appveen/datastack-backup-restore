@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { DataStack } from '@appveen/ds-sdk';
-import { Logger } from 'log4js';
+import { DataStack } from "@appveen/ds-sdk";
+import { Logger } from "log4js";
 
 declare global {
 	// var globalId = (new Date()).toISOString().replace(/:/gi, '-');
@@ -9,7 +9,5 @@ declare global {
 	var dataStack: DataStack;
 	var host: string;
 	var backupFileName: string;
-	var backupMapFileName: string;
 	var restoreFileName: string;
-	var restoreMapFileName: string;
 }

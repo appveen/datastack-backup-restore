@@ -1,45 +1,44 @@
-import { isNotAnAcceptableValue } from './lib.misc';
-import { registerPrompt, Separator, prompt } from 'inquirer';
-import { shutdown } from 'log4js';
-import { Credentials } from '@appveen/ds-sdk/dist/types';
-registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
+import { isNotAnAcceptableValue, killThySelf } from "./lib.misc";
+import { registerPrompt, Separator, prompt } from "inquirer";
+import { Credentials } from "@appveen/ds-sdk/dist/types";
+registerPrompt("autocomplete", require("inquirer-autocomplete-prompt"));
 
 var logger = global.logger;
 
 const mainMenu = [
 	new Separator(),
-	'Backup',
-	'Restore',
-	new Separator('--- Utils ---'),
-	'Clear All',
+	"Backup",
+	"Restore",
+	new Separator("--- Utils ---"),
+	"Clear All",
 ];
 
 export async function validateCLIParams(): Promise<Credentials> {
 	let credentials = new Credentials();
 	let terminate = false;
 	if (isNotAnAcceptableValue(process.env.DS_BR_HOST)) {
-		logger.error('DS_BR_HOST is invalid.');
+		logger.error("DS_BR_HOST is invalid.");
 		terminate = true;
 	}
 
 	if (isNotAnAcceptableValue(process.env.DS_BR_USERNAME)) {
-		logger.error('DS_BR_USERNAME is invalid.');
+		logger.error("DS_BR_USERNAME is invalid.");
 		terminate = true;
 	}
 
-	if (terminate) await shutdown(function () { process.exit(100); });
+	if (terminate) await killThySelf(100);
 
 	credentials.host = process.env.DS_BR_HOST;
-	global.host = process.env.DS_BR_HOST || '';
+	global.host = process.env.DS_BR_HOST || "";
 	credentials.username = process.env.DS_BR_USERNAME;
 	logger.info(`Host      : ${credentials.host}`);
 	logger.info(`Username  : ${credentials.username}`);
 	credentials.password = process.env.DS_BR_PASSWORD;
 	if (isNotAnAcceptableValue(process.env.DS_BR_PASSWORD)) {
 		await prompt([{
-			type: 'password',
-			name: 'password',
-			message: 'Password>'
+			type: "password",
+			name: "password",
+			message: "Password>"
 		}]).then(data => credentials.password = data.password);
 	}
 
@@ -48,9 +47,9 @@ export async function validateCLIParams(): Promise<Credentials> {
 
 export async function startMenu() {
 	return await prompt([{
-		type: 'list',
-		name: 'mode',
-		message: '>',
+		type: "list",
+		name: "mode",
+		message: ">",
 		choices: mainMenu,
 		pageSize: mainMenu.length
 	}]);
@@ -58,13 +57,13 @@ export async function startMenu() {
 
 export async function selectApp(apps: any) {
 	return await prompt([{
-		type: 'autocomplete',
-		name: 'appName',
-		message: 'Select app: ',
+		type: "autocomplete",
+		name: "appName",
+		message: "Select app: ",
 		pageSize: 5,
 		source: (_ans: any, _input: string) => {
-			_input = _input || '';
-			return new Promise(_res => _res(apps.filter((_n: string) => _n.indexOf(_input) > -1)));
+			_input = _input || "";
+			return new Promise(_res => _res(apps.filter((_n: string) => _n.toLowerCase().indexOf(_input) > -1)));
 		}
 	}]).then(_d => {
 		logger.info(`Selected app : ${_d.appName}`);

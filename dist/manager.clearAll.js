@@ -13,57 +13,64 @@ exports.clearAllManager = void 0;
 const lib_cli_1 = require("./lib.cli");
 const lib_misc_1 = require("./lib.misc");
 const manager_api_1 = require("./manager.api");
-const lib_db_1 = require("./lib.db");
+let searchParams = new URLSearchParams();
 function clearAllManager(apps) {
     return __awaiter(this, void 0, void 0, function* () {
+        (0, lib_misc_1.header)("Clear all configurations");
         let selectedApp = yield (0, lib_cli_1.selectApp)(apps);
-        (0, lib_misc_1.printInfo)('Scanning the configurations within the app...');
+        searchParams.append("filter", JSON.stringify({ app: selectedApp }));
+        searchParams.append("count", "-1");
+        searchParams.append("select", "name");
+        (0, lib_misc_1.printInfo)("Scanning the configurations within the app...");
         yield clearGroups(selectedApp);
-        // await fetchDataServices(selectedApp);
-        // await fetchLibrary(selectedApp);
-        (0, lib_misc_1.printInfo)('Backup complete!');
+        yield clearDataServices(selectedApp);
+        yield clearLibrary(selectedApp);
+        (0, lib_misc_1.printInfo)("Cleanup complete!");
     });
 }
 exports.clearAllManager = clearAllManager;
 function clearGroups(selectedApp) {
     return __awaiter(this, void 0, void 0, function* () {
-        let URL = `/api/a/rbac/${selectedApp}/group`;
-        let searchParams = new URLSearchParams();
-        searchParams.append('count', '-1');
-        searchParams.append('select', 'name');
-        let groups = yield (0, manager_api_1.get)(URL, searchParams);
-        groups = groups.filter(group => group.name != '#');
+        (0, lib_misc_1.header)("Group");
+        let BASE_URL = `/api/a/rbac/${selectedApp}/group`;
+        let groups = yield (0, manager_api_1.get)(BASE_URL, searchParams);
         (0, lib_misc_1.printInfo)(`${groups.length - 1} Group(s) found.`);
         yield groups.reduce((p, group) => __awaiter(this, void 0, void 0, function* () {
-            (0, lib_misc_1.printInfo)(`  Removing group ${group._id} ${group.name}`);
+            yield p;
+            if (group.name == "#")
+                return Promise.resolve();
+            (0, lib_misc_1.printInfo)(`  * Removing group ${group._id} ${group.name}`);
+            let GROUP_URL = `${BASE_URL}/${group._id}`;
+            yield (0, manager_api_1.del)(GROUP_URL);
         }), Promise.resolve());
     });
 }
-function fetchDataServices(selectedApp) {
+function clearDataServices(selectedApp) {
     return __awaiter(this, void 0, void 0, function* () {
-        var URL = `/api/a/sm/${selectedApp}/service`;
-        let searchParams = new URLSearchParams();
-        searchParams.append('filter', JSON.stringify({ app: selectedApp }));
-        searchParams.append('count', '-1');
-        let dataServices = yield (0, manager_api_1.get)(URL, searchParams);
-        (0, lib_db_1.save)('dataservices', dataServices);
-        dataServices.forEach((ds) => (0, lib_db_1.backupMapper)('dataservice', ds._id, ds.name));
-        dataServices.forEach((ds) => (0, lib_db_1.backupMapper)('dataservice_lookup', ds.name, ds._id));
-        (0, lib_misc_1.printDone)('Data services', dataServices.length);
+        (0, lib_misc_1.header)("Dataservice");
+        var BASE_URL = `/api/a/sm/${selectedApp}/service`;
+        let dataservices = yield (0, manager_api_1.get)(BASE_URL, searchParams);
+        (0, lib_misc_1.printInfo)(`${dataservices.length} Dataservice(s) found.`);
+        yield dataservices.reduce((p, dataservice) => __awaiter(this, void 0, void 0, function* () {
+            yield p;
+            (0, lib_misc_1.printInfo)(`  * Removing dataservice ${dataservice._id} ${dataservice.name}`);
+            let DS_URL = `${BASE_URL}/${dataservice._id}`;
+            yield (0, manager_api_1.del)(DS_URL);
+        }), Promise.resolve());
     });
 }
-function fetchLibrary(selectedApp) {
+function clearLibrary(selectedApp) {
     return __awaiter(this, void 0, void 0, function* () {
-        let URL = `/api/a/sm/${selectedApp}/globalSchema`;
-        let searchParams = new URLSearchParams();
-        searchParams.append('filter', JSON.stringify({ app: selectedApp }));
-        searchParams.append('count', '-1');
-        let libraries = yield (0, manager_api_1.get)(URL, searchParams);
-        (0, lib_db_1.save)('library', libraries);
-        libraries.forEach(library => library.services = []);
-        libraries.forEach(library => (0, lib_db_1.backupMapper)('library', library._id, library.name));
-        libraries.forEach(library => (0, lib_db_1.backupMapper)('library_lookup', library.name, library._id));
-        (0, lib_misc_1.printDone)('Libraries', libraries.length);
+        (0, lib_misc_1.header)("Library");
+        let BASE_URL = `/api/a/sm/${selectedApp}/globalSchema`;
+        let libraries = yield (0, manager_api_1.get)(BASE_URL, searchParams);
+        (0, lib_misc_1.printInfo)(`${libraries.length} Library(-ies) found.`);
+        yield libraries.reduce((p, library) => __awaiter(this, void 0, void 0, function* () {
+            yield p;
+            (0, lib_misc_1.printInfo)(`  * Removing library ${library._id} ${library.name}`);
+            let LIB_URL = `${BASE_URL}/${library._id}`;
+            yield (0, manager_api_1.del)(LIB_URL);
+        }), Promise.resolve());
     });
 }
 // function fetchBookmarks() {
