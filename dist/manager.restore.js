@@ -26,7 +26,7 @@ function restoreManager(apps) {
         yield restoreLibrary(selectedApp);
         yield restoreDataServices(selectedApp);
         yield restoreGroups(selectedApp);
-        (0, lib_misc_1.printInfo)("Restore complete!");
+        (0, lib_misc_1.header)("Restore complete!");
     });
 }
 exports.restoreManager = restoreManager;
@@ -87,6 +87,7 @@ function restoreLibrary(selectedApp) {
         (0, lib_misc_1.printInfo)(`Libraries to restore - ${libraries.length}`);
         yield libraries.reduce((prev, library) => __awaiter(this, void 0, void 0, function* () {
             yield prev;
+            delete library.services;
             let upsertResponse = yield upsert("Library", `/api/a/sm/${selectedApp}/globalSchema`, selectedApp, library);
             (0, lib_db_1.restoreMapper)("library", library._id, upsertResponse.data._id);
         }), Promise.resolve());
@@ -98,9 +99,9 @@ function restoreDataServices(selectedApp) {
         var BASE_URL = `/api/a/sm/${selectedApp}/service`;
         let dataservices = (0, lib_db_1.read)("dataservice");
         (0, lib_misc_1.printInfo)(`Dataservices to restore - ${dataservices.length}`);
+        dataservices = (0, lib_dsParser_1.parseAndFixDataServices)(dataservices);
         yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
             yield prev;
-            dataservice = (0, lib_dsParser_1.parseAndFixDataService)(dataservice);
             let upsertResponse = yield upsert("Dataservice", BASE_URL, selectedApp, dataservice);
             (0, lib_db_1.restoreMapper)("dataservice", dataservice._id, upsertResponse.data._id);
         }), Promise.resolve());
@@ -122,7 +123,8 @@ function restoreGroups(selectedApp) {
                 if (role._id == "ADMIN_role.entity")
                     role._id = `ADMIN_${dataServiceIDMap[role.entity]}`;
             });
-            yield upsert("Group", BASE_URL, selectedApp, group);
+            let upsertResponse = yield upsert("Group", BASE_URL, selectedApp, group);
+            (0, lib_db_1.restoreMapper)("group", group._id, upsertResponse.data._id);
         }), Promise.resolve());
     });
 }

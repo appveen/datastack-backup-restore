@@ -1,6 +1,4 @@
 import { readRestoreMap } from "./lib.db";
-import { printInfo } from "./lib.misc";
-import { DependencyMatrix } from "./types";
 
 let logger = global.logger;
 
@@ -20,33 +18,53 @@ function getUniqueElements(inputArray: any[]) {
 }
 
 
-function findLibraries(parent: string, def: any) {
+function findLibraries(def: any) {
 	let librariesUsed: string[] = [];
 	def.forEach((attr: any) => {
 		if (attr.properties.schema) return librariesUsed.push(attr.properties.schema);
 		if (attr.type == "Object" || attr.type == "Array") {
-			let returnValues = findLibraries(`${parent}->${attr.key}`, attr.definition);
+			let returnValues = findLibraries(attr.definition);
 			librariesUsed = librariesUsed.concat(returnValues);
 		}
 	});
 	return librariesUsed;
 }
 
-function fixLibraries(stringifiedDefinition: string, librariesUsed: string[]): string {
+function repairRelationWithLibrary(definition: any) {
+	let stringifiedDefinition = JSON.stringify(definition);
+	let librariesUsed = findLibraries(definition);
+	librariesUsed = getUniqueElements(librariesUsed);
+	if (librariesUsed.length == 0) logger.info("No libraries foud");
+	logger.info(`Libraries used : ${librariesUsed.join(",")}`);
 	let libraryMap = readRestoreMap("library");
 	librariesUsed.forEach(lib => {
 		stringifiedDefinition = stringifiedDefinition.split(lib).join(libraryMap[lib]);
 	});
-	return stringifiedDefinition;
+	return JSON.parse(stringifiedDefinition);
 }
 
-export function parseAndFixDataService(ds: any) {
-	let stringifiedDefinition = JSON.stringify(ds.definition);
-	// 
-	let librariesUsed = findLibraries("", ds.definition);
-	librariesUsed = getUniqueElements(librariesUsed);
-	logger.info(`${ds.name} : Libraries used : ${librariesUsed.join(",")}`);
-	stringifiedDefinition = fixLibraries(stringifiedDefinition, librariesUsed);
-	ds.definition = JSON.parse(stringifiedDefinition);
-	return ds;
+function repairRelationWithUser(parent: string[], definition: any) {
+	definition.forEach((attr: any) => {
+		if (attr.type == "User") {
+			logger.info(`${parent.join(">")} : Default value of ${attr.properties.name} removed.`);
+			delete attr.properties.default;
+		}
+		if (attr.type == "Object" || attr.type == "Array") {
+			attr.definition = repairRelationWithUser(parent.concat(attr.properties.name), attr.definition);
+		}
+	});
+	return definition;
+}
+
+export function parseAndFixDataServices(dataservices: any[]) {
+	dataservices.forEach((dataservice: any) => {
+		delete dataservice.versionValidity;
+
+		logger.info(`${dataservice.name} : Find and repair libraries`);
+		dataservice.definition = repairRelationWithLibrary(dataservice.definition);
+
+		logger.info(`${dataservice.name} : Find and repair User relations`);
+		dataservice.definition = repairRelationWithUser([], dataservice.definition);
+	});
+	return dataservices;
 }

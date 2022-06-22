@@ -25,7 +25,7 @@ function clearAllManager(apps) {
         yield clearGroups(selectedApp);
         yield clearDataServices(selectedApp);
         yield clearLibrary(selectedApp);
-        (0, lib_misc_1.printInfo)("Cleanup complete!");
+        (0, lib_misc_1.header)("Cleanup complete!");
     });
 }
 exports.clearAllManager = clearAllManager;

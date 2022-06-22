@@ -21,7 +21,7 @@ export async function backupManager(apps: any) {
 	await fetchDataServices(selectedApp);
 	await fetchLibrary(selectedApp);
 	await fetchGroups(selectedApp);
-	printInfo("Backup complete!");
+	header("Backup complete!");
 }
 
 async function fetchDataServices(selectedApp: string) {

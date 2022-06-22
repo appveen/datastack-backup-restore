@@ -28,7 +28,7 @@ function backupManager(apps) {
         yield fetchDataServices(selectedApp);
         yield fetchLibrary(selectedApp);
         yield fetchGroups(selectedApp);
-        (0, lib_misc_1.printInfo)("Backup complete!");
+        (0, lib_misc_1.header)("Backup complete!");
     });
 }
 exports.backupManager = backupManager;

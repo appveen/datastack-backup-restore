@@ -17,7 +17,7 @@ export async function clearAllManager(apps: any) {
 	await clearGroups(selectedApp);
 	await clearDataServices(selectedApp);
 	await clearLibrary(selectedApp);
-	printInfo("Cleanup complete!");
+	header("Cleanup complete!");
 }
 
 async function clearGroups(selectedApp: string) {

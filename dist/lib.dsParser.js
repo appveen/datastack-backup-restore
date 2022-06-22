@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseAndFixDataService = exports.generateDependencyMatrix = exports.generateSampleDataSerivce = void 0;
+exports.parseAndFixDataServices = exports.generateDependencyMatrix = exports.generateSampleDataSerivce = void 0;
 const lib_db_1 = require("./lib.db");
 let logger = global.logger;
 function generateSampleDataSerivce(name, selectedApp) {
@@ -18,33 +18,51 @@ function getUniqueElements(inputArray) {
     });
     return outputArray;
 }
-function findLibraries(parent, def) {
+function findLibraries(def) {
     let librariesUsed = [];
     def.forEach((attr) => {
         if (attr.properties.schema)
             return librariesUsed.push(attr.properties.schema);
         if (attr.type == "Object" || attr.type == "Array") {
-            let returnValues = findLibraries(`${parent}->${attr.key}`, attr.definition);
+            let returnValues = findLibraries(attr.definition);
             librariesUsed = librariesUsed.concat(returnValues);
         }
     });
     return librariesUsed;
 }
-function fixLibraries(stringifiedDefinition, librariesUsed) {
+function repairRelationWithLibrary(definition) {
+    let stringifiedDefinition = JSON.stringify(definition);
+    let librariesUsed = findLibraries(definition);
+    librariesUsed = getUniqueElements(librariesUsed);
+    if (librariesUsed.length == 0)
+        logger.info("No libraries foud");
+    logger.info(`Libraries used : ${librariesUsed.join(",")}`);
     let libraryMap = (0, lib_db_1.readRestoreMap)("library");
     librariesUsed.forEach(lib => {
         stringifiedDefinition = stringifiedDefinition.split(lib).join(libraryMap[lib]);
     });
-    return stringifiedDefinition;
+    return JSON.parse(stringifiedDefinition);
 }
-function parseAndFixDataService(ds) {
-    let stringifiedDefinition = JSON.stringify(ds.definition);
-    // 
-    let librariesUsed = findLibraries("", ds.definition);
-    librariesUsed = getUniqueElements(librariesUsed);
-    logger.info(`${ds.name} : Libraries used : ${librariesUsed.join(",")}`);
-    stringifiedDefinition = fixLibraries(stringifiedDefinition, librariesUsed);
-    ds.definition = JSON.parse(stringifiedDefinition);
-    return ds;
+function repairRelationWithUser(parent, definition) {
+    definition.forEach((attr) => {
+        if (attr.type == "User") {
+            logger.info(`${parent.join(">")} : Default value of ${attr.properties.name} removed.`);
+            delete attr.properties.default;
+        }
+        if (attr.type == "Object" || attr.type == "Array") {
+            attr.definition = repairRelationWithUser(parent.concat(attr.properties.name), attr.definition);
+        }
+    });
+    return definition;
 }
-exports.parseAndFixDataService = parseAndFixDataService;
+function parseAndFixDataServices(dataservices) {
+    dataservices.forEach((dataservice) => {
+        delete dataservice.versionValidity;
+        logger.info(`${dataservice.name} : Find and repair libraries`);
+        dataservice.definition = repairRelationWithLibrary(dataservice.definition);
+        logger.info(`${dataservice.name} : Find and repair User relations`);
+        dataservice.definition = repairRelationWithUser([], dataservice.definition);
+    });
+    return dataservices;
+}
+exports.parseAndFixDataServices = parseAndFixDataServices;

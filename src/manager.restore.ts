@@ -2,7 +2,7 @@ import { selectApp } from "./lib.cli";
 import { header, printInfo, printUpsert } from "./lib.misc";
 import { get, post, put } from "./manager.api";
 import { read, readRestoreMap, restoreInit, restoreMapper } from "./lib.db";
-import { generateSampleDataSerivce, parseAndFixDataService } from "./lib.dsParser";
+import { generateSampleDataSerivce, parseAndFixDataServices } from "./lib.dsParser";
 
 let logger = global.logger;
 
@@ -19,7 +19,7 @@ export async function restoreManager(apps: any) {
 	await restoreLibrary(selectedApp);
 	await restoreDataServices(selectedApp);
 	await restoreGroups(selectedApp);
-	printInfo("Restore complete!");
+	header("Restore complete!");
 }
 
 async function configExists(api: string, name: string, selectedApp: string) {
@@ -74,6 +74,7 @@ async function restoreLibrary(selectedApp: string) {
 	printInfo(`Libraries to restore - ${libraries.length}`);
 	await libraries.reduce(async (prev: any, library: any) => {
 		await prev;
+		delete library.services;
 		let upsertResponse = await upsert("Library", `/api/a/sm/${selectedApp}/globalSchema`, selectedApp, library);
 		restoreMapper("library", library._id, upsertResponse.data._id);
 	}, Promise.resolve());
@@ -81,12 +82,16 @@ async function restoreLibrary(selectedApp: string) {
 
 async function restoreDataServices(selectedApp: string) {
 	header("Dataservice");
+
 	var BASE_URL = `/api/a/sm/${selectedApp}/service`;
+
 	let dataservices = read("dataservice");
 	printInfo(`Dataservices to restore - ${dataservices.length}`);
+
+	dataservices = parseAndFixDataServices(dataservices);
+
 	await dataservices.reduce(async (prev: any, dataservice: any) => {
 		await prev;
-		dataservice = parseAndFixDataService(dataservice);
 		let upsertResponse = await upsert("Dataservice", BASE_URL, selectedApp, dataservice);
 		restoreMapper("dataservice", dataservice._id, upsertResponse.data._id);
 	}, Promise.resolve());
@@ -105,6 +110,7 @@ async function restoreGroups(selectedApp: string) {
 			if (dataServiceIDMap[role.entity]) role.entity = dataServiceIDMap[role.entity];
 			if (role._id == "ADMIN_role.entity") role._id = `ADMIN_${dataServiceIDMap[role.entity]}`;
 		});
-		await upsert("Group", BASE_URL, selectedApp, group);
+		let upsertResponse = await upsert("Group", BASE_URL, selectedApp, group);
+		restoreMapper("group", group._id, upsertResponse.data._id);
 	}, Promise.resolve());
 }
