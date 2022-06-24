@@ -5,12 +5,12 @@ class DependencyMatrix {
     constructor() {
         this.matrix = {};
         this.rank = {};
-        this.largestRank = 0;
-        this.list = {};
+        this.largest = 0;
+        this.ordered = {};
         this.matrix = {};
         this.rank = {};
-        this.largestRank = 0;
-        this.list = {};
+        this.largest = 0;
+        this.ordered = {};
     }
 }
 exports.DependencyMatrix = DependencyMatrix;

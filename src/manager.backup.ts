@@ -1,7 +1,8 @@
 import { selectApp } from "./lib.cli";
 import { header, printDone, printInfo } from "./lib.misc";
 import { get } from "./manager.api";
-import { backupInit, backupMapper, save } from "./lib.db";
+import { backupDependencyMatrix, backupInit, backupMapper, save } from "./lib.db";
+import { buildDependencyMatrix } from "./lib.dsParser";
 
 // let logger = global.logger;
 
@@ -14,6 +15,7 @@ export async function backupManager(apps: any) {
 	searchParams.append("filter", JSON.stringify({ app: selectedApp }));
 	searchParams.append("count", "-1");
 	searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
+	searchParams.append("sort", "_id");
 
 	backupInit();
 	printInfo("Scanning the configurations within the app...");
@@ -32,6 +34,7 @@ async function fetchDataServices(selectedApp: string) {
 		backupMapper("dataservice", ds._id, ds.name);
 		backupMapper("dataservice_lookup", ds.name, ds._id);
 	});
+	backupDependencyMatrix(buildDependencyMatrix(dataServices));
 	printDone("Data services", dataServices.length);
 }
 

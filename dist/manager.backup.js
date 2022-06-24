@@ -14,6 +14,7 @@ const lib_cli_1 = require("./lib.cli");
 const lib_misc_1 = require("./lib.misc");
 const manager_api_1 = require("./manager.api");
 const lib_db_1 = require("./lib.db");
+const lib_dsParser_1 = require("./lib.dsParser");
 // let logger = global.logger;
 let searchParams = new URLSearchParams();
 function backupManager(apps) {
@@ -23,6 +24,7 @@ function backupManager(apps) {
         searchParams.append("filter", JSON.stringify({ app: selectedApp }));
         searchParams.append("count", "-1");
         searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
+        searchParams.append("sort", "_id");
         (0, lib_db_1.backupInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations within the app...");
         yield fetchDataServices(selectedApp);
@@ -41,6 +43,7 @@ function fetchDataServices(selectedApp) {
             (0, lib_db_1.backupMapper)("dataservice", ds._id, ds.name);
             (0, lib_db_1.backupMapper)("dataservice_lookup", ds.name, ds._id);
         });
+        (0, lib_db_1.backupDependencyMatrix)((0, lib_dsParser_1.buildDependencyMatrix)(dataServices));
         (0, lib_misc_1.printDone)("Data services", dataServices.length);
     });
 }

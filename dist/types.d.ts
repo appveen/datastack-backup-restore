@@ -1,7 +1,7 @@
 export declare class DependencyMatrix {
     matrix: any;
     rank: any;
-    largestRank: number;
-    list: any;
+    largest: number;
+    ordered: any;
     constructor();
 }

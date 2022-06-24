@@ -1,15 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseAndFixDataServices = exports.generateDependencyMatrix = exports.generateSampleDataSerivce = void 0;
+exports.buildDependencyMatrix = exports.parseAndFixDataServices = exports.generateSampleDataSerivce = void 0;
 const lib_db_1 = require("./lib.db");
+const types_1 = require("./types");
 let logger = global.logger;
 function generateSampleDataSerivce(name, selectedApp) {
     return { "name": name, "description": null, "app": selectedApp };
 }
 exports.generateSampleDataSerivce = generateSampleDataSerivce;
-function generateDependencyMatrix(dataservice) {
-}
-exports.generateDependencyMatrix = generateDependencyMatrix;
 function getUniqueElements(inputArray) {
     let outputArray = [];
     inputArray.forEach(elem => {
@@ -66,3 +64,34 @@ function parseAndFixDataServices(dataservices) {
     return dataservices;
 }
 exports.parseAndFixDataServices = parseAndFixDataServices;
+function buildDependencyMatrix(dataservices) {
+    let dependencyMatrix = new types_1.DependencyMatrix();
+    // INIT
+    dataservices.forEach((dataservice) => {
+        dependencyMatrix.matrix[dataservice._id] = [];
+        dependencyMatrix.rank[dataservice._id] = 0;
+    });
+    // BUILD MATRIX
+    dataservices.forEach((dataservice) => {
+        if (!dataservice.relatedSchemas.outgoing)
+            return;
+        dataservice.relatedSchemas.outgoing.forEach((outgoing) => {
+            if (dependencyMatrix.matrix[dataservice._id].indexOf(outgoing.service) == -1)
+                dependencyMatrix.matrix[dataservice._id].push(outgoing.service);
+            dependencyMatrix.rank[outgoing.service] += 1;
+            if (dependencyMatrix.rank[outgoing.service] > dependencyMatrix.largest)
+                dependencyMatrix.largest = dependencyMatrix.rank[outgoing.service];
+        });
+    });
+    let largest = dependencyMatrix.largest;
+    while (largest > -1) {
+        dependencyMatrix.ordered[largest] = [];
+        Object.keys(dependencyMatrix.rank).forEach((key) => {
+            if (dependencyMatrix.rank[key] == largest)
+                dependencyMatrix.ordered[largest].push(key);
+        });
+        largest -= 1;
+    }
+    return dependencyMatrix;
+}
+exports.buildDependencyMatrix = buildDependencyMatrix;

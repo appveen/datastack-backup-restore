@@ -1,12 +1,10 @@
 import { readRestoreMap } from "./lib.db";
+import { DependencyMatrix } from "./types";
 
 let logger = global.logger;
 
 export function generateSampleDataSerivce(name: string, selectedApp: String) {
 	return { "name": name, "description": null, "app": selectedApp };
-}
-
-export function generateDependencyMatrix(dataservice: any[]) {
 }
 
 function getUniqueElements(inputArray: any[]) {
@@ -56,6 +54,19 @@ function repairRelationWithUser(parent: string[], definition: any) {
 	return definition;
 }
 
+function repairRelationships(parent: any[], definition: any): any {
+	definition.forEach((attr: any) => {
+		if (attr.properties.relatedTo) {
+			logger.info(`${parent.join(">")} : Default value of ${attr.properties.name} removed`);
+			delete attr.properties.default;
+		}
+		if (attr.type == "Object" || attr.type == "Array") {
+			attr.definition = repairRelationships(parent.concat(attr.properties.name), attr.definition);
+		}
+	});
+	return definition;
+}
+
 export function parseAndFixDataServices(dataservices: any[]) {
 	dataservices.forEach((dataservice: any) => {
 		delete dataservice.versionValidity;
@@ -65,6 +76,36 @@ export function parseAndFixDataServices(dataservices: any[]) {
 
 		logger.info(`${dataservice.name} : Find and repair User relations`);
 		dataservice.definition = repairRelationWithUser([], dataservice.definition);
+
+		logger.info(`${dataservice.name} : Find and repair dataservice relationships`);
+		dataservice.definition = repairRelationships([], dataservice.definition);
 	});
 	return dataservices;
+}
+
+export function buildDependencyMatrix(dataservices: any[]) {
+	let dependencyMatrix = new DependencyMatrix();
+	// INIT
+	dataservices.forEach((dataservice: any) => {
+		dependencyMatrix.matrix[dataservice._id] = [];
+		dependencyMatrix.rank[dataservice._id] = 0;
+	});
+	// BUILD MATRIX
+	dataservices.forEach((dataservice: any) => {
+		if (!dataservice.relatedSchemas.outgoing) return;
+		dataservice.relatedSchemas.outgoing.forEach((outgoing: any) => {
+			if (dependencyMatrix.matrix[dataservice._id].indexOf(outgoing.service) == -1) dependencyMatrix.matrix[dataservice._id].push(outgoing.service);
+			dependencyMatrix.rank[outgoing.service] += 1;
+			if (dependencyMatrix.rank[outgoing.service] > dependencyMatrix.largest) dependencyMatrix.largest = dependencyMatrix.rank[outgoing.service];
+		});
+	});
+	let largest = dependencyMatrix.largest;
+	while (largest > -1) {
+		dependencyMatrix.ordered[largest] = [];
+		Object.keys(dependencyMatrix.rank).forEach((key: string) => {
+			if (dependencyMatrix.rank[key] == largest) dependencyMatrix.ordered[largest].push(key);
+		});
+		largest -= 1;
+	}
+	return dependencyMatrix;
 }

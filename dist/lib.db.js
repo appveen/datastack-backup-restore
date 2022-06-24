@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.readRestoreMap = exports.readBackupMap = exports.read = exports.restoreMapper = exports.backupMapper = exports.save = exports.restoreInit = exports.backupInit = void 0;
+exports.readRestoreMap = exports.readDependencyMatrix = exports.readBackupMap = exports.read = exports.restoreMapper = exports.backupDependencyMatrix = exports.backupMapper = exports.save = exports.restoreInit = exports.backupInit = void 0;
 const path_1 = require("path");
 const fs_1 = require("fs");
 const lib_misc_1 = require("./lib.misc");
@@ -30,6 +30,15 @@ function backupMapper(token, key, value) {
     logger.trace(`Updated ${global.backupFileName} : ${token} : ${key} : ${value}`);
 }
 exports.backupMapper = backupMapper;
+function backupDependencyMatrix(data) {
+    let backupData = readJSON(global.backupFileName);
+    if (!backupData.dependencyMatrix)
+        backupData["dependencyMatrix"] = {};
+    backupData.dependencyMatrix = data;
+    writeJSON(global.backupFileName, backupData);
+    logger.trace(`Updated ${global.backupFileName} : dependencyMatrix`);
+}
+exports.backupDependencyMatrix = backupDependencyMatrix;
 function restoreMapper(token, key, value) {
     let restoreMapData = readJSON(global.restoreFileName);
     if (!restoreMapData[token])
@@ -49,6 +58,11 @@ function readBackupMap(token, key) {
     return backupData.map[token][key];
 }
 exports.readBackupMap = readBackupMap;
+function readDependencyMatrix() {
+    let backupData = readJSON(global.backupFileName);
+    return backupData.dependencyMatrix;
+}
+exports.readDependencyMatrix = readDependencyMatrix;
 function readRestoreMap(token) {
     let restoreMapData = readJSON(global.restoreFileName);
     return restoreMapData[token];

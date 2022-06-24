@@ -28,6 +28,14 @@ export function backupMapper(token: string, key: string, value: string) {
 	logger.trace(`Updated ${global.backupFileName} : ${token} : ${key} : ${value}`);
 }
 
+export function backupDependencyMatrix(data: any) {
+	let backupData = readJSON(global.backupFileName);
+	if (!backupData.dependencyMatrix) backupData["dependencyMatrix"] = {};
+	backupData.dependencyMatrix = data;
+	writeJSON(global.backupFileName, backupData);
+	logger.trace(`Updated ${global.backupFileName} : dependencyMatrix`);
+}
+
 export function restoreMapper(token: string, key: string, value: string) {
 	let restoreMapData = readJSON(global.restoreFileName);
 	if (!restoreMapData[token]) restoreMapData[token] = {};
@@ -44,6 +52,11 @@ export function read(key: string) {
 export function readBackupMap(token: string, key: string) {
 	let backupData = readJSON(global.backupFileName);
 	return backupData.map[token][key];
+}
+
+export function readDependencyMatrix() {
+	let backupData = readJSON(global.backupFileName);
+	return backupData.dependencyMatrix;
 }
 
 export function readRestoreMap(token: string) {

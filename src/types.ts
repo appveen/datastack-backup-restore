@@ -2,13 +2,13 @@
 export class DependencyMatrix {
 	matrix: any = {};
 	rank: any = {};
-	largestRank: number = 0;
-	list: any = {};
+	largest: number = 0;
+	ordered: any = {};
 
 	constructor() {
 		this.matrix = {};
 		this.rank = {};
-		this.largestRank = 0;
-		this.list = {};
+		this.largest = 0;
+		this.ordered = {};
 	}
 }
