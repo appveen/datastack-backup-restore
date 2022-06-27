@@ -1,4 +1,4 @@
-import { readRestoreMap } from "./lib.db";
+import { readRestoreMap, readDependencyMatrix } from "./lib.db";
 import { DependencyMatrix } from "./types";
 
 let logger = global.logger;
@@ -28,13 +28,12 @@ function findLibraries(def: any) {
 	return librariesUsed;
 }
 
-function repairRelationWithLibrary(definition: any) {
+function repairRelationWithLibrary(definition: any, libraryMap: any) {
 	let stringifiedDefinition = JSON.stringify(definition);
 	let librariesUsed = findLibraries(definition);
 	librariesUsed = getUniqueElements(librariesUsed);
 	if (librariesUsed.length == 0) logger.info("No libraries foud");
 	logger.info(`Libraries used : ${librariesUsed.join(",")}`);
-	let libraryMap = readRestoreMap("library");
 	librariesUsed.forEach(lib => {
 		stringifiedDefinition = stringifiedDefinition.split(lib).join(libraryMap[lib]);
 	});
@@ -67,18 +66,38 @@ function repairRelationships(parent: any[], definition: any): any {
 	return definition;
 }
 
-export function parseAndFixDataServices(dataservices: any[]) {
+function repairRelationshipIDs(definition: any, dependencies: string[], dataserviceMap: any): any {
+	let stringifiedDefinition = JSON.stringify(definition);
+	dependencies.forEach(dataserviceID => {
+		stringifiedDefinition = stringifiedDefinition.split(dataserviceID).join(dataserviceMap[dataserviceID]);
+	});
+	return JSON.parse(stringifiedDefinition);
+}
+
+export function parseAndFixDataServices(dataservices: any[]): any[] {
+	let libraryMap = readRestoreMap("library");
+	let dataserviceMap = readRestoreMap("dataservice");
+	logger.info(`Dataservice ID Map : ${JSON.stringify(dataserviceMap)}`);
+	let dependencyMatrix = readDependencyMatrix().matrix;
+	logger.info(`Dataservice dependency matrix : ${JSON.stringify(dependencyMatrix)}`);
 	dataservices.forEach((dataservice: any) => {
 		delete dataservice.versionValidity;
 
 		logger.info(`${dataservice.name} : Find and repair libraries`);
-		dataservice.definition = repairRelationWithLibrary(dataservice.definition);
+		dataservice.definition = repairRelationWithLibrary(dataservice.definition, libraryMap);
 
 		logger.info(`${dataservice.name} : Find and repair User relations`);
 		dataservice.definition = repairRelationWithUser([], dataservice.definition);
 
-		logger.info(`${dataservice.name} : Find and repair dataservice relationships`);
+		logger.info(`${dataservice.name} : Find and repair dataservice relationships with default values`);
 		dataservice.definition = repairRelationships([], dataservice.definition);
+
+		logger.info(`${dataservice.name} : Find and repair dataservice relationship IDs`);
+		if (dependencyMatrix[dataservice._id].length > 0) dataservice.definition = repairRelationshipIDs(dataservice.definition, dependencyMatrix[dataservice._id], dataserviceMap);
+
+		if (dataservice.relatedSchemas.incoming) dataservice.relatedSchemas.incoming = [];
+		if (dataservice.relatedSchemas.outgoing) dataservice.relatedSchemas.outgoing = [];
+
 	});
 	return dataservices;
 }

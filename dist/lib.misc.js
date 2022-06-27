@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.printUpsert = exports.printDone = exports.printError = exports.printInfo = exports.isNotAnAcceptableValue = exports.stringComparison = exports.header = exports.killThySelf = void 0;
+exports.printDone = exports.printError = exports.printInfo = exports.isNotAnAcceptableValue = exports.stringComparison = exports.header = exports.killThySelf = void 0;
 const log4js_1 = require("log4js");
 var logger = global.logger;
 function killThySelf(killCode) {
@@ -88,9 +88,3 @@ function padCount(_d) {
         return ` ${_d} `;
     return `  ${_d} `;
 }
-function printUpsert(upsertResult) {
-    if (upsertResult.update)
-        return printInfo(`${upsertResult.type} updated : ${upsertResult.data.name}`);
-    printInfo(`${upsertResult.type} created : ${upsertResult.data.name}`);
-}
-exports.printUpsert = printUpsert;

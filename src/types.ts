@@ -1,4 +1,3 @@
-
 export class DependencyMatrix {
 	matrix: any = {};
 	rank: any = {};

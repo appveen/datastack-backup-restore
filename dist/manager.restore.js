@@ -36,48 +36,37 @@ function configExists(api, name, selectedApp) {
         searchParams.append("filter", JSON.stringify({ app: selectedApp, name: name }));
         searchParams.append("count", "-1");
         searchParams.append("select", "name");
-        logger.debug(`Config exists ${api} ${searchParams}`);
+        logger.debug(`Check for existing config - ${api} ${searchParams}`);
         let data = yield (0, manager_api_1.get)(api, searchParams);
-        logger.debug(`Config exists ${api} : ${JSON.stringify(data)}`);
+        logger.debug(`Check for existing config result - ${api} : ${JSON.stringify(data)}`);
         if (data.length > 0 && data[0]._id)
-            return { type: "", update: true, id: data[0]._id, data: {} };
-        return { type: "", update: false, id: null, data: {} };
+            return data[0]._id;
+        return null;
     });
 }
-function upsert(type, baseURL, selectedApp, backedUpData) {
+function insert(type, baseURL, selectedApp, backedUpData) {
     return __awaiter(this, void 0, void 0, function* () {
-        logger.info(`${selectedApp} : Upsert ${type} : ${backedUpData._id}`);
+        logger.info(`${selectedApp} : Insert ${type} : ${backedUpData.name}`);
         let data = JSON.parse(JSON.stringify(backedUpData));
         data.app = selectedApp;
-        let upsertResult = yield configExists(baseURL, data.name, selectedApp);
-        upsertResult.type = type;
-        logger.info(upsertResult);
-        if (upsertResult.update) {
-            data._id = upsertResult.id;
-            let resourceAPI = `${baseURL}/${data._id}`;
-            upsertResult.data = yield (0, manager_api_1.put)(resourceAPI, data);
-        }
-        else {
-            delete data._id;
-            if (type == "Dataservice") {
-                /*
-                For restoring a new data services we have to do the following
-                1. Create the ds first
-                2. Get the ID from the new DS
-                3. Fix the relationships
-                4. Update it using the data that we want to restore.
-                */
-                let createResponse = yield (0, manager_api_1.post)(baseURL, (0, lib_dsParser_1.generateSampleDataSerivce)(data.name, selectedApp));
-                data._id = createResponse._id;
-                let resourceAPI = `${baseURL}/${data._id}`;
-                upsertResult.data = yield (0, manager_api_1.put)(resourceAPI, data);
-            }
-            else {
-                upsertResult.data = yield (0, manager_api_1.post)(baseURL, data);
-            }
-        }
-        (0, lib_misc_1.printUpsert)(upsertResult);
-        return upsertResult;
+        delete data._id;
+        let newData = yield (0, manager_api_1.post)(baseURL, data);
+        (0, lib_misc_1.printInfo)(`${type} created : ${backedUpData.name}`);
+        logger.info(newData);
+        return newData;
+    });
+}
+function update(type, baseURL, selectedApp, backedUpData, existinID) {
+    return __awaiter(this, void 0, void 0, function* () {
+        logger.info(`${selectedApp} : Update ${type} : ${backedUpData.name}`);
+        let data = JSON.parse(JSON.stringify(backedUpData));
+        data.app = selectedApp;
+        data._id = existinID;
+        let updateURL = `${baseURL}/${existinID}`;
+        let newData = yield (0, manager_api_1.put)(updateURL, data);
+        (0, lib_misc_1.printInfo)(`${type} updated : ${backedUpData.name}`);
+        logger.info(newData);
+        return newData;
     });
 }
 function restoreLibrary(selectedApp) {
@@ -85,11 +74,17 @@ function restoreLibrary(selectedApp) {
         (0, lib_misc_1.header)("Library");
         let libraries = (0, lib_db_1.read)("library");
         (0, lib_misc_1.printInfo)(`Libraries to restore - ${libraries.length}`);
+        let BASE_URL = `/api/a/sm/${selectedApp}/globalSchema`;
         yield libraries.reduce((prev, library) => __awaiter(this, void 0, void 0, function* () {
             yield prev;
             delete library.services;
-            let upsertResponse = yield upsert("Library", `/api/a/sm/${selectedApp}/globalSchema`, selectedApp, library);
-            (0, lib_db_1.restoreMapper)("library", library._id, upsertResponse.data._id);
+            let existingID = yield configExists(BASE_URL, library.name, selectedApp);
+            let newData = null;
+            if (existingID)
+                newData = yield update("Library", BASE_URL, selectedApp, library, existingID);
+            else
+                newData = yield insert("Library", BASE_URL, selectedApp, library);
+            (0, lib_db_1.restoreMapper)("library", library._id, newData._id);
         }), Promise.resolve());
     });
 }
@@ -99,11 +94,31 @@ function restoreDataServices(selectedApp) {
         var BASE_URL = `/api/a/sm/${selectedApp}/service`;
         let dataservices = (0, lib_db_1.read)("dataservice");
         (0, lib_misc_1.printInfo)(`Dataservices to restore - ${dataservices.length}`);
-        dataservices = (0, lib_dsParser_1.parseAndFixDataServices)(dataservices);
+        // Find which data services exists and which doesn't
+        let newDataServices = [];
         yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
             yield prev;
-            let upsertResponse = yield upsert("Dataservice", BASE_URL, selectedApp, dataservice);
-            (0, lib_db_1.restoreMapper)("dataservice", dataservice._id, upsertResponse.data._id);
+            let existingID = yield configExists(BASE_URL, dataservice.name, selectedApp);
+            if (existingID)
+                return (0, lib_db_1.restoreMapper)("dataservice", dataservice._id, existingID);
+            newDataServices.push(dataservice._id);
+        }), Promise.resolve());
+        // Create new data services
+        logger.info(`New dataservices - ${newDataServices.join(", ")}`);
+        (0, lib_misc_1.printInfo)(`New dataservices to be created - ${newDataServices.length}`);
+        yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
+            yield prev;
+            if (newDataServices.indexOf(dataservice._id) == -1)
+                return;
+            let newDS = (0, lib_dsParser_1.generateSampleDataSerivce)(dataservice.name, selectedApp);
+            let newData = yield insert("Dataservice", BASE_URL, selectedApp, newDS);
+            return (0, lib_db_1.restoreMapper)("dataservice", dataservice._id, newData._id);
+        }), Promise.resolve());
+        dataservices = (0, lib_dsParser_1.parseAndFixDataServices)(dataservices);
+        let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservice");
+        yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
+            yield prev;
+            return yield update("Dataservice", BASE_URL, selectedApp, dataservice, dataserviceMap[dataservice._id]);
         }), Promise.resolve());
     });
 }
@@ -123,8 +138,13 @@ function restoreGroups(selectedApp) {
                 if (role._id == "ADMIN_role.entity")
                     role._id = `ADMIN_${dataServiceIDMap[role.entity]}`;
             });
-            let upsertResponse = yield upsert("Group", BASE_URL, selectedApp, group);
-            (0, lib_db_1.restoreMapper)("group", group._id, upsertResponse.data._id);
+            let existingID = yield configExists(BASE_URL, group.name, selectedApp);
+            let newData = null;
+            if (existingID)
+                newData = yield update("Group", BASE_URL, selectedApp, group, existingID);
+            else
+                newData = yield insert("Group", BASE_URL, selectedApp, group);
+            (0, lib_db_1.restoreMapper)("group", group._id, newData._id);
         }), Promise.resolve());
     });
 }

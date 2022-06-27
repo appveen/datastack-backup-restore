@@ -71,8 +71,3 @@ function padCount(_d: number) {
 	if (_d > 9) return ` ${_d} `;
 	return `  ${_d} `;
 }
-
-export function printUpsert(upsertResult: any) {
-	if (upsertResult.update) return printInfo(`${upsertResult.type} updated : ${upsertResult.data.name}`);
-	printInfo(`${upsertResult.type} created : ${upsertResult.data.name}`);
-}
