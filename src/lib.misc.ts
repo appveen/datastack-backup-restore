@@ -1,6 +1,6 @@
 import { shutdown } from "log4js";
 
-var logger = global.logger;
+let logger = global.logger;
 
 export async function killThySelf(killCode: number) {
 	printError(`Terminating with exit code(${killCode})`);
@@ -70,4 +70,17 @@ export function printDone(_msg: string, _count: number) {
 function padCount(_d: number) {
 	if (_d > 9) return ` ${_d} `;
 	return `  ${_d} `;
+}
+
+export function parseCliParams(options: any, timestamp: string) {
+	// ENV VAR > CLI PARAM > RUNTIME
+	global.backupFileName = `backup-${timestamp}.json`;
+	if (options.backupfile) global.backupFileName = options.backupfile;
+	global.backupFileName = process.env.DS_BR_BACKUPFILE ? process.env.DS_BR_BACKUPFILE : global.backupFileName;
+
+	global.restoreFileName = `restore-${timestamp}.json`;
+
+	if (options.host) process.env.DS_BR_HOST = options.host;
+	if (options.username) process.env.DS_BR_USERNAME = options.username;
+	if (options.password) process.env.DS_BR_PASSWORD = options.password;
 }

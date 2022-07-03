@@ -10,9 +10,9 @@ export async function restoreManager(apps: any) {
 	header("Restore configuration");
 	let selectedApp = await selectApp(apps);
 
-	restoreInit();
-
 	printInfo(`Backup file being used - ${global.backupFileName}`);
+
+	restoreInit();
 
 	printInfo("Scanning the configurations...");
 

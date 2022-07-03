@@ -16,6 +16,7 @@ export async function login(config: Credentials) {
 	} catch (e) {
 		printError("Unable to login to data.stack server");
 		logger.error(e);
+		killThySelf(400);
 	}
 }
 
@@ -36,12 +37,12 @@ export async function get(endpoint: string, searchParams: URLSearchParams): Prom
 			.catch(async (e) => {
 				printError(`Error on GET ${global.host}${endpoint}`);
 				printError(`${e.response.statusCode} ${e.response.body}`);
-				await killThySelf(200);
+				await killThySelf(500);
 			});
 	} catch (e) {
 		logger.error(e);
 		printError(`Error on GET ${global.host}${endpoint}`);
-		await killThySelf(200);
+		await killThySelf(500);
 	}
 }
 
@@ -58,12 +59,12 @@ export async function post(endpoint: string, payload: any): Promise<any> {
 			.catch(async (e: HTTPError) => {
 				printError(`Error on POST ${global.host}${endpoint}`);
 				printError(`${e.response.statusCode} ${e.response.body}`);
-				await killThySelf(201);
+				await killThySelf(500);
 			});
 	} catch (e) {
 		logger.error(e);
 		printError(`Error on POST ${global.host}${endpoint}`);
-		await killThySelf(201);
+		await killThySelf(500);
 	}
 }
 
@@ -80,12 +81,12 @@ export async function put(endpoint: string, payload: any): Promise<any> {
 			.catch(async (e) => {
 				printError(`Error on PUT ${global.host}${endpoint}`);
 				printError(`${e.response.statusCode} ${e.response.body}`);
-				await killThySelf(202);
+				await killThySelf(500);
 			});
 	} catch (e) {
 		printError(`Error on PUT ${global.host}${endpoint}`);
 		logger.error(e);
-		await killThySelf(202);
+		await killThySelf(500);
 	}
 }
 
@@ -100,11 +101,11 @@ export async function del(endpoint: string): Promise<any> {
 			.catch(async (e) => {
 				printError(`Error on DELETE ${global.host}${endpoint}`);
 				printError(`${e.response.statusCode} ${e.response.body}`);
-				await killThySelf(203);
+				await killThySelf(500);
 			});
 	} catch (e) {
 		logger.error(e);
 		printError(`Error on DELETE ${global.host}${endpoint}`);
-		await killThySelf(203);
+		await killThySelf(500);
 	}
 }

@@ -90,7 +90,7 @@ export function parseAndFixDataServices(dataservices: any[]): any[] {
 		dataservice.definition = repairRelationships([], dataservice.definition);
 
 		logger.info(`${dataservice.name} : Find and repair dataservice relationship IDs`);
-		if (dependencyMatrix[dataservice._id].length > 0) dataservice.definition = repairRelationshipIDs(dataservice.definition, dependencyMatrix[dataservice._id].dataservices, dataserviceMap);
+		dataservice.definition = repairRelationshipIDs(dataservice.definition, dependencyMatrix[dataservice._id].dataservices, dataserviceMap);
 
 		if (dataservice.relatedSchemas.incoming) dataservice.relatedSchemas.incoming = [];
 		if (dataservice.relatedSchemas.outgoing) dataservice.relatedSchemas.outgoing = [];

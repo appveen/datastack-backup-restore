@@ -41,8 +41,8 @@ function validateCLIParams() {
             credentials.password = yield promptUser("Password", null, true);
         }
         global.host = credentials.host || "";
-        logger.info(`Host      : ${credentials.host}`);
-        logger.info(`Username  : ${credentials.username}`);
+        (0, lib_misc_1.printInfo)(`Host      : ${credentials.host}`);
+        (0, lib_misc_1.printInfo)(`Username  : ${credentials.username}`);
         return credentials;
     });
 }

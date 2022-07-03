@@ -1,4 +1,4 @@
-import { isNotAnAcceptableValue } from "./lib.misc";
+import { isNotAnAcceptableValue, printInfo } from "./lib.misc";
 import { registerPrompt, Separator, prompt } from "inquirer";
 import { Credentials } from "@appveen/ds-sdk/dist/types";
 registerPrompt("autocomplete", require("inquirer-autocomplete-prompt"));
@@ -34,8 +34,8 @@ export async function validateCLIParams(): Promise<Credentials> {
 	}
 
 	global.host = credentials.host || "";
-	logger.info(`Host      : ${credentials.host}`);
-	logger.info(`Username  : ${credentials.username}`);
+	printInfo(`Host      : ${credentials.host}`);
+	printInfo(`Username  : ${credentials.username}`);
 
 	return credentials;
 }

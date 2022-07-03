@@ -21,6 +21,7 @@
   "homepage": "https://github.com/appveen/datastack-backup-restore#readme",
   "dependencies": {
     "@appveen/ds-sdk": "^2.3.0",
+    "commander": "^9.3.0",
     "got": "^11.8.3",
     "inquirer": "^8.2.1",
     "inquirer-autocomplete-prompt": "^2.0.0",

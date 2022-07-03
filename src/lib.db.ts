@@ -1,6 +1,6 @@
 import { join } from "path";
-import { readFileSync, writeFileSync } from "fs";
-import { printInfo } from "./lib.misc";
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { killThySelf, printInfo } from "./lib.misc";
 
 let logger = global.logger;
 
@@ -11,6 +11,10 @@ export function backupInit() {
 
 export function restoreInit() {
 	logger.debug(`Restore file - ${global.restoreFileName}`);
+	if (!existsSync(global.backupFileName)) {
+		printInfo(`Backup file ${global.backupFileName} doesn't exist!`);
+		killThySelf(400);
+	}
 	writeJSON(global.restoreFileName, `{"version":"${global.version}"}`);
 }
 

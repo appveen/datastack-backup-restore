@@ -1,22 +1,12 @@
 import { getLogger as GetLogger, configure as Log4JSConfig } from "log4js"; "log4js";
+import { Command } from "commander";
+
 const version = require("../package.json").version;
 global.version = version;
 
-// import { Command } from 'commander';
-// const program = new Command();
+let timestamp = (new Date()).toISOString().replace(/:/gi, "-");
 
-// program
-// 	.name('string-util')
-// 	.description('CLI to some JavaScript string utilities')
-// 	.version('0.8.0');
-
-// program.parse();
-
-let d = (new Date()).toISOString().replace(/:/gi, "-");
-// global.globalId = d;
-global.backupFileName = `backup-${d}.json`;
-global.restoreFileName = `restore-${d}.json`;
-let fileName = `dsBR_${version.split(".").join("_")}_${d}.log`;
+let fileName = `dsBR_${global.version.split(".").join("_")}_${timestamp}.log`;
 if (process.env.DS_BR_SINGLELOGFILE) {
 	fileName = "out.log";
 	global.backupFileName = "backup.json";
@@ -41,31 +31,81 @@ Log4JSConfig({
 		}
 	}
 });
-const logger = GetLogger(`[${version}]`);
+let logger = GetLogger(`[${global.version}]`);
 logger.level = process.env.LOGLEVEL ? process.env.LOGLEVEL : "info";
+
 global.logger = logger;
 
-import { header } from "./lib.misc";
+import { header, parseCliParams } from "./lib.misc";
 import { startMenu, validateCLIParams } from "./lib.cli";
 import { getApps, login } from "./manager.api";
 import { backupManager } from "./manager.backup";
 import { restoreManager } from "./manager.restore";
 import { clearAllManager } from "./manager.clearAll";
 
-(async () => {
-	header(`data.stack Backup and Restore Utility ${version}`);
-	let dsConfig = await validateCLIParams();
-	await login(dsConfig);
+const program = new Command();
 
-	let apps = await getApps();
+program
+	.name("data.stack Backup and Restore")
+	.description("CLI utility to backup and restore data.stack configurations.")
+	.version(version)
+	.addHelpCommand(false)
+	.option("-h, --host <URL>", "data.stack server to connect.")
+	.option("-u, --username <username>", "data.stack username.")
+	.option("-p, --password <password>", "data.stack password.")
+	.option("-b, --backupfile <path to backup JSON file>", "Backup file to use while restoring the configurtaion.")
+	.action(async () => {
+		parseCliParams(program.opts(), timestamp);
+		header(`data.stack Backup and Restore Utility ${version}`);
+		let dsConfig = await validateCLIParams();
+		await login(dsConfig);
+		let apps = await getApps();
+		var selection = await startMenu();
+		global.logger.info(`Selected mode :: ${selection.mode}`);
+		if (selection.mode == "Backup") await backupManager(apps);
+		if (selection.mode == "Restore") await restoreManager(apps);
+		if (selection.mode == "Clear All") await clearAllManager(apps);
+		// Logout cleanly
+		global.dataStack.Logout();
+	});
 
-	var selection = await startMenu();
-	logger.info(`Selected mode :: ${selection.mode}`);
+program.command("backup")
+	.description("backup configuration.")
+	.action(async () => {
+		parseCliParams(program.opts(), timestamp);
+		header(`data.stack Backup and Restore Utility ${version}`);
+		let dsConfig = await validateCLIParams();
+		await login(dsConfig);
+		let apps = await getApps();
+		await backupManager(apps);
+		// Logout cleanly
+		global.dataStack.Logout();
+	});
 
-	if (selection.mode == "Backup") await backupManager(apps);
-	if (selection.mode == "Restore") await restoreManager(apps);
-	if (selection.mode == "Clear All") await clearAllManager(apps);
+program.command("restore")
+	.description("Restore configuration.")
+	.action(async () => {
+		parseCliParams(program.opts(), timestamp);
+		header(`data.stack Backup and Restore Utility ${version}`);
+		let dsConfig = await validateCLIParams();
+		await login(dsConfig);
+		let apps = await getApps();
+		await restoreManager(apps);
+		// Logout cleanly
+		global.dataStack.Logout();
+	});
 
-	// Logout cleanly
-	global.dataStack.Logout();
-})();
+program.command("clear")
+	.description("Clear all configuration.")
+	.action(async () => {
+		parseCliParams(program.opts(), timestamp);
+		header(`data.stack Backup and Restore Utility ${version}`);
+		let dsConfig = await validateCLIParams();
+		await login(dsConfig);
+		let apps = await getApps();
+		await clearAllManager(apps);
+		// Logout cleanly
+		global.dataStack.Logout();
+	});
+
+program.parse();

@@ -11,20 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const log4js_1 = require("log4js");
 "log4js";
+const commander_1 = require("commander");
 const version = require("../package.json").version;
 global.version = version;
-// import { Command } from 'commander';
-// const program = new Command();
-// program
-// 	.name('string-util')
-// 	.description('CLI to some JavaScript string utilities')
-// 	.version('0.8.0');
-// program.parse();
-let d = (new Date()).toISOString().replace(/:/gi, "-");
-// global.globalId = d;
-global.backupFileName = `backup-${d}.json`;
-global.restoreFileName = `restore-${d}.json`;
-let fileName = `dsBR_${version.split(".").join("_")}_${d}.log`;
+let timestamp = (new Date()).toISOString().replace(/:/gi, "-");
+let fileName = `dsBR_${global.version.split(".").join("_")}_${timestamp}.log`;
 if (process.env.DS_BR_SINGLELOGFILE) {
     fileName = "out.log";
     global.backupFileName = "backup.json";
@@ -48,7 +39,7 @@ if (process.env.DS_BR_SINGLELOGFILE) {
         }
     }
 });
-const logger = (0, log4js_1.getLogger)(`[${version}]`);
+let logger = (0, log4js_1.getLogger)(`[${global.version}]`);
 logger.level = process.env.LOGLEVEL ? process.env.LOGLEVEL : "info";
 global.logger = logger;
 const lib_misc_1 = require("./lib.misc");
@@ -57,13 +48,24 @@ const manager_api_1 = require("./manager.api");
 const manager_backup_1 = require("./manager.backup");
 const manager_restore_1 = require("./manager.restore");
 const manager_clearAll_1 = require("./manager.clearAll");
-(() => __awaiter(void 0, void 0, void 0, function* () {
+const program = new commander_1.Command();
+program
+    .name("data.stack Backup and Restore")
+    .description("CLI utility to backup and restore data.stack configurations.")
+    .version(version)
+    .addHelpCommand(false)
+    .option("-h, --host <URL>", "data.stack server to connect.")
+    .option("-u, --username <username>", "data.stack username.")
+    .option("-p, --password <password>", "data.stack password.")
+    .option("-b, --backupfile <path to backup JSON file>", "Backup file to use while restoring the configurtaion.")
+    .action(() => __awaiter(void 0, void 0, void 0, function* () {
+    (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
     (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
     let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
     yield (0, manager_api_1.login)(dsConfig);
     let apps = yield (0, manager_api_1.getApps)();
     var selection = yield (0, lib_cli_1.startMenu)();
-    logger.info(`Selected mode :: ${selection.mode}`);
+    global.logger.info(`Selected mode :: ${selection.mode}`);
     if (selection.mode == "Backup")
         yield (0, manager_backup_1.backupManager)(apps);
     if (selection.mode == "Restore")
@@ -72,4 +74,41 @@ const manager_clearAll_1 = require("./manager.clearAll");
         yield (0, manager_clearAll_1.clearAllManager)(apps);
     // Logout cleanly
     global.dataStack.Logout();
-}))();
+}));
+program.command("backup")
+    .description("backup configuration.")
+    .action(() => __awaiter(void 0, void 0, void 0, function* () {
+    (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
+    (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
+    let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
+    yield (0, manager_api_1.login)(dsConfig);
+    let apps = yield (0, manager_api_1.getApps)();
+    yield (0, manager_backup_1.backupManager)(apps);
+    // Logout cleanly
+    global.dataStack.Logout();
+}));
+program.command("restore")
+    .description("Restore configuration.")
+    .action(() => __awaiter(void 0, void 0, void 0, function* () {
+    (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
+    (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
+    let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
+    yield (0, manager_api_1.login)(dsConfig);
+    let apps = yield (0, manager_api_1.getApps)();
+    yield (0, manager_restore_1.restoreManager)(apps);
+    // Logout cleanly
+    global.dataStack.Logout();
+}));
+program.command("clear")
+    .description("Clear all configuration.")
+    .action(() => __awaiter(void 0, void 0, void 0, function* () {
+    (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
+    (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
+    let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
+    yield (0, manager_api_1.login)(dsConfig);
+    let apps = yield (0, manager_api_1.getApps)();
+    yield (0, manager_clearAll_1.clearAllManager)(apps);
+    // Logout cleanly
+    global.dataStack.Logout();
+}));
+program.parse();

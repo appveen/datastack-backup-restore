@@ -20,8 +20,8 @@ function restoreManager(apps) {
     return __awaiter(this, void 0, void 0, function* () {
         (0, lib_misc_1.header)("Restore configuration");
         let selectedApp = yield (0, lib_cli_1.selectApp)(apps);
-        (0, lib_db_1.restoreInit)();
         (0, lib_misc_1.printInfo)(`Backup file being used - ${global.backupFileName}`);
+        (0, lib_db_1.restoreInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations...");
         yield restoreLibrary(selectedApp);
         yield restoreDataServices(selectedApp);

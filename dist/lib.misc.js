@@ -9,9 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.printDone = exports.printError = exports.printInfo = exports.isNotAnAcceptableValue = exports.stringComparison = exports.header = exports.killThySelf = void 0;
+exports.parseCliParams = exports.printDone = exports.printError = exports.printInfo = exports.isNotAnAcceptableValue = exports.stringComparison = exports.header = exports.killThySelf = void 0;
 const log4js_1 = require("log4js");
-var logger = global.logger;
+let logger = global.logger;
 function killThySelf(killCode) {
     return __awaiter(this, void 0, void 0, function* () {
         printError(`Terminating with exit code(${killCode})`);
@@ -88,3 +88,18 @@ function padCount(_d) {
         return ` ${_d} `;
     return `  ${_d} `;
 }
+function parseCliParams(options, timestamp) {
+    // ENV VAR > CLI PARAM > RUNTIME
+    global.backupFileName = `backup-${timestamp}.json`;
+    if (options.backupfile)
+        global.backupFileName = options.backupfile;
+    global.backupFileName = process.env.DS_BR_BACKUPFILE ? process.env.DS_BR_BACKUPFILE : global.backupFileName;
+    global.restoreFileName = `restore-${timestamp}.json`;
+    if (options.host)
+        process.env.DS_BR_HOST = options.host;
+    if (options.username)
+        process.env.DS_BR_USERNAME = options.username;
+    if (options.password)
+        process.env.DS_BR_PASSWORD = options.password;
+}
+exports.parseCliParams = parseCliParams;

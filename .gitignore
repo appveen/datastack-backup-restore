@@ -3,9 +3,9 @@ node_modules
 clean.sh
 run.sh
 
-backup.json
+backup*.json
 backup.bkp.json
 backupMap.json
-restore.json
+restore*.json
 restoreMap.json
 del

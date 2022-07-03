@@ -29,6 +29,7 @@ function login(config) {
         catch (e) {
             (0, lib_misc_1.printError)("Unable to login to data.stack server");
             logger.error(e);
+            (0, lib_misc_1.killThySelf)(400);
         }
     });
 }
@@ -53,13 +54,13 @@ function get(endpoint, searchParams) {
                 .catch((e) => __awaiter(this, void 0, void 0, function* () {
                 (0, lib_misc_1.printError)(`Error on GET ${global.host}${endpoint}`);
                 (0, lib_misc_1.printError)(`${e.response.statusCode} ${e.response.body}`);
-                yield (0, lib_misc_1.killThySelf)(200);
+                yield (0, lib_misc_1.killThySelf)(500);
             }));
         }
         catch (e) {
             logger.error(e);
             (0, lib_misc_1.printError)(`Error on GET ${global.host}${endpoint}`);
-            yield (0, lib_misc_1.killThySelf)(200);
+            yield (0, lib_misc_1.killThySelf)(500);
         }
     });
 }
@@ -78,13 +79,13 @@ function post(endpoint, payload) {
                 .catch((e) => __awaiter(this, void 0, void 0, function* () {
                 (0, lib_misc_1.printError)(`Error on POST ${global.host}${endpoint}`);
                 (0, lib_misc_1.printError)(`${e.response.statusCode} ${e.response.body}`);
-                yield (0, lib_misc_1.killThySelf)(201);
+                yield (0, lib_misc_1.killThySelf)(500);
             }));
         }
         catch (e) {
             logger.error(e);
             (0, lib_misc_1.printError)(`Error on POST ${global.host}${endpoint}`);
-            yield (0, lib_misc_1.killThySelf)(201);
+            yield (0, lib_misc_1.killThySelf)(500);
         }
     });
 }
@@ -103,13 +104,13 @@ function put(endpoint, payload) {
                 .catch((e) => __awaiter(this, void 0, void 0, function* () {
                 (0, lib_misc_1.printError)(`Error on PUT ${global.host}${endpoint}`);
                 (0, lib_misc_1.printError)(`${e.response.statusCode} ${e.response.body}`);
-                yield (0, lib_misc_1.killThySelf)(202);
+                yield (0, lib_misc_1.killThySelf)(500);
             }));
         }
         catch (e) {
             (0, lib_misc_1.printError)(`Error on PUT ${global.host}${endpoint}`);
             logger.error(e);
-            yield (0, lib_misc_1.killThySelf)(202);
+            yield (0, lib_misc_1.killThySelf)(500);
         }
     });
 }
@@ -126,13 +127,13 @@ function del(endpoint) {
                 .catch((e) => __awaiter(this, void 0, void 0, function* () {
                 (0, lib_misc_1.printError)(`Error on DELETE ${global.host}${endpoint}`);
                 (0, lib_misc_1.printError)(`${e.response.statusCode} ${e.response.body}`);
-                yield (0, lib_misc_1.killThySelf)(203);
+                yield (0, lib_misc_1.killThySelf)(500);
             }));
         }
         catch (e) {
             logger.error(e);
             (0, lib_misc_1.printError)(`Error on DELETE ${global.host}${endpoint}`);
-            yield (0, lib_misc_1.killThySelf)(203);
+            yield (0, lib_misc_1.killThySelf)(500);
         }
     });
 }
