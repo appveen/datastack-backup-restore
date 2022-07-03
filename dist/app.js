@@ -50,14 +50,14 @@ const manager_restore_1 = require("./manager.restore");
 const manager_clearAll_1 = require("./manager.clearAll");
 const program = new commander_1.Command();
 program
-    .name("data.stack Backup and Restore")
+    .name("ds-backup-restore")
     .description("CLI utility to backup and restore data.stack configurations.")
     .version(version)
     .addHelpCommand(false)
     .option("-h, --host <URL>", "data.stack server to connect.")
     .option("-u, --username <username>", "data.stack username.")
     .option("-p, --password <password>", "data.stack password.")
-    .option("-b, --backupfile <path to backup JSON file>", "Backup file to use while restoring the configurtaion.")
+    .option("-b, --backupfile <backup JSON file>", "Custom backup file to use during backup or restore")
     .action(() => __awaiter(void 0, void 0, void 0, function* () {
     (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
     (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);

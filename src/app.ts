@@ -46,14 +46,14 @@ import { clearAllManager } from "./manager.clearAll";
 const program = new Command();
 
 program
-	.name("data.stack Backup and Restore")
+	.name("ds-backup-restore")
 	.description("CLI utility to backup and restore data.stack configurations.")
 	.version(version)
 	.addHelpCommand(false)
 	.option("-h, --host <URL>", "data.stack server to connect.")
 	.option("-u, --username <username>", "data.stack username.")
 	.option("-p, --password <password>", "data.stack password.")
-	.option("-b, --backupfile <path to backup JSON file>", "Backup file to use while restoring the configurtaion.")
+	.option("-b, --backupfile <backup JSON file>", "Custom backup file to use during backup or restore")
 	.action(async () => {
 		parseCliParams(program.opts(), timestamp);
 		header(`data.stack Backup and Restore Utility ${version}`);

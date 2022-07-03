@@ -9,3 +9,4 @@ backupMap.json
 restore*.json
 restoreMap.json
 del
+builds
