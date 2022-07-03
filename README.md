@@ -29,7 +29,7 @@ Commands:
 
 # Info
 
-* Backup customization is only supported in the interactove mode.
+* Backup customization is only supported in the interactive mode. Run `ds-backup-restore` without any *commands* to enter into interactove mode.
 * Environment variables take priority over command line values.
 
 # Installation
