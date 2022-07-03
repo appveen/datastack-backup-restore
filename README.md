@@ -35,7 +35,7 @@ Commands:
 
 # Installation
 
-Download and run the executable from the Releases page.
+Download and run the executable from the [Releases](https://github.com/appveen/datastack-backup-restore/releases) page.
 
 # Environment variables
 
