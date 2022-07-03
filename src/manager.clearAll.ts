@@ -17,6 +17,7 @@ export async function clearAllManager(apps: any) {
 	await clearGroups(selectedApp);
 	await clearDataServices(selectedApp);
 	await clearLibrary(selectedApp);
+	await clearFunctions(selectedApp);
 	header("Cleanup complete!");
 }
 
@@ -60,17 +61,15 @@ async function clearLibrary(selectedApp: string) {
 	}, Promise.resolve());
 }
 
-// function fetchBookmarks() {
-// 	var numberOfBookmarks = 0;
-// 	var qs = {
-// 			count: -1
-// 	};
-// 	return api.get(`/api/a/rbac/app/${selectedApp}/bookmark/count`, null)
-// 			.then(_count => numberOfBookmarks = _count)
-// 			.then(_ => api.get(`/api/a/rbac/app/${selectedApp}/bookmark`, qs))
-// 			.then(_bookmarks => {
-// 					backup.save("bookmarks", _bookmarks);
-// 					_bookmarks.forEach(_d => backup.backupMapper("bookmarks", _d._id, _d.name));
-// 			})
-// 			.then(_ => misc.done("Bookmarks", numberOfBookmarks.toString()))
-// };
+async function clearFunctions(selectedApp: string) {
+	header("Function");
+	let BASE_URL = `/api/a/bm/${selectedApp}/faas`;
+	let functions = await get(BASE_URL, searchParams);
+	printInfo(`${functions.length} Function(s) found.`);
+	await functions.reduce(async (p: any, fn: any) => {
+		await p;
+		printInfo(`  * Removing function ${fn._id} ${fn.name}`);
+		let FN_URL = `${BASE_URL}/${fn._id}`;
+		await del(FN_URL);
+	}, Promise.resolve());
+}

@@ -1,10 +1,10 @@
-import { selectApp } from "./lib.cli";
+import { customise, selectApp, selections } from "./lib.cli";
 import { header, printDone, printInfo } from "./lib.misc";
 import { get } from "./manager.api";
-import { backupDependencyMatrix, backupInit, backupMapper, save } from "./lib.db";
+import { backupDependencyMatrix, backupInit, backupMapper, readBackupMap, readDependencyMatrix, save, read } from "./lib.db";
 import { buildDependencyMatrix } from "./lib.dsParser";
 
-// let logger = global.logger;
+let logger = global.logger;
 
 let searchParams = new URLSearchParams();
 
@@ -22,20 +22,22 @@ export async function backupManager(apps: any) {
 
 	await fetchDataServices(selectedApp);
 	await fetchLibrary(selectedApp);
+	await fetchFunctions(selectedApp);
 	await fetchGroups(selectedApp);
+	await customiseBackup();
 	header("Backup complete!");
 }
 
 async function fetchDataServices(selectedApp: string) {
 	var URL = `/api/a/sm/${selectedApp}/service`;
-	let dataServices = await get(URL, searchParams);
-	save("dataservice", dataServices);
-	dataServices.forEach((ds: any) => {
+	let dataservices = await get(URL, searchParams);
+	save("dataservice", dataservices);
+	dataservices.forEach((ds: any) => {
 		backupMapper("dataservice", ds._id, ds.name);
 		backupMapper("dataservice_lookup", ds.name, ds._id);
 	});
-	backupDependencyMatrix(buildDependencyMatrix(dataServices));
-	printDone("Data services", dataServices.length);
+	backupDependencyMatrix(buildDependencyMatrix(dataservices));
+	printDone("Data services", dataservices.length);
 }
 
 async function fetchLibrary(selectedApp: string) {
@@ -50,10 +52,95 @@ async function fetchLibrary(selectedApp: string) {
 	printDone("Libraries", libraries.length);
 }
 
+async function fetchFunctions(selectedApp: string) {
+	let URL = `/api/a/bm/${selectedApp}/faas`;
+	let functions = await get(URL, searchParams);
+	save("function", functions);
+	functions.forEach((fn: any) => {
+		fn.services = [];
+		backupMapper("function", fn._id, fn.name);
+		backupMapper("function_lookup", fn.name, fn._id);
+	});
+	printDone("Functions", functions.length);
+}
+
 async function fetchGroups(selectedApp: string) {
 	let URL = `/api/a/rbac/${selectedApp}/group`;
 	let groups = await get(URL, searchParams);
 	groups = groups.filter((group: any) => group.name != "#");
 	save("group", groups);
+	groups.forEach((group: any) => {
+		backupMapper("group", group._id, group.name);
+		backupMapper("group_lookup", group.name, group._id);
+	});
 	printDone("Groups", groups.length);
+}
+
+async function customiseBackup() {
+
+	let customisationRequired = await customise();
+	if (!customisationRequired) {
+		printInfo("No backup customizations done.");
+		return;
+	}
+	header("Customizing the backup");
+	let dataserviceLookup = readBackupMap("dataservice_lookup");
+	let selectedDataservices: string[] = [];
+	(await selections("dataservices", Object.keys(dataserviceLookup))).forEach((ds: string) => selectedDataservices.push(dataserviceLookup[ds]));
+
+	let libraryLookup = readBackupMap("library_lookup");
+	let selectedLibraries: string[] = [];
+	(await selections("libraries", Object.keys(libraryLookup))).forEach((lib: string) => selectedLibraries.push(libraryLookup[lib]));
+
+	let functionLookup = readBackupMap("function_lookup");
+	let selectedFunctions: string[] = [];
+	(await selections("functions", Object.keys(functionLookup))).forEach((fn: string) => selectedFunctions.push(functionLookup[fn]));
+
+	let groupLookup = readBackupMap("group_lookup");
+	let selectedGroups: string[] = [];
+	(await selections("groups", Object.keys(groupLookup))).forEach((group: string) => selectedGroups.push(groupLookup[group]));
+
+	logger.info(`Dataservices : ${selectedDataservices.join(", ") || "Nil"}`);
+	logger.info(`Libraries    : ${selectedLibraries.join(", ") || "Nil"}`);
+	logger.info(`Functions    : ${selectedFunctions.join(", ") || "Nil"}`);
+	logger.info(`Groups       : ${selectedGroups.join(", ") || "Nil"}`);
+
+	let dependencyMatrix = readDependencyMatrix();
+
+	let superSetOfDataservices = selectedDataservices;
+	selectedDataservices.forEach((dataserviceID: string) => {
+		selectAllRelated(dataserviceID, dependencyMatrix)
+			.filter(ds => superSetOfDataservices.indexOf(ds) == -1)
+			.forEach(ds => superSetOfDataservices.push(ds));
+		dependencyMatrix[dataserviceID].libraries.forEach((library: string) => {
+			if (selectedLibraries.indexOf(library) == -1) selectedLibraries.push(library);
+		});
+	});
+	logger.info(`Superset Dataservices : ${superSetOfDataservices.join(", ")}`);
+	logger.info(`Superset Libraries    : ${selectedLibraries.join(", ")}`);
+
+	let dataservices = read("dataservice").filter((dataservice: any) => superSetOfDataservices.indexOf(dataservice._id) != -1);
+	let libraries = read("library").filter((library: any) => selectedLibraries.indexOf(library._id) != -1);
+	let functions = read("function").filter((fn: any) => selectedFunctions.indexOf(fn._id) != -1);
+	let groups = read("group").filter((group: any) => selectedGroups.indexOf(group._id) != -1);
+
+	save("dataservice", dataservices);
+	save("library", libraries);
+	save("function", functions);
+	save("group", groups);
+}
+
+
+function selectAllRelated(dataserviceID: string, dependencyMatrix: any) {
+	let requiredDS: string[] = [];
+	dependencyMatrix[dataserviceID].dataservices.forEach((ds: string) => {
+		if (dataserviceID == ds) return;
+		if (requiredDS.indexOf(ds) == -1) {
+			requiredDS.push(ds);
+			selectAllRelated(ds, dependencyMatrix)
+				.filter(ds => requiredDS.indexOf(ds) == -1)
+				.forEach(ds => requiredDS.push(ds));
+		}
+	});
+	return requiredDS;
 }

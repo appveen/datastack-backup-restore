@@ -29,9 +29,9 @@ export function header(_s: string) {
 		spacer += " ";
 		i++;
 	}
-	var top = "┌" + liner + middle + liner + "┐";
-	var bottom = "└" + liner + middle + liner + "┘";
-	var center = "│" + spacer + _s + spacer + "│";
+	let top = "┌" + liner + middle + liner + "┐";
+	let bottom = "└" + liner + middle + liner + "┘";
+	let center = "│" + spacer + _s + spacer + "│";
 	console.log("");
 	printInfo(top);
 	printInfo(center);

@@ -1,5 +1,4 @@
 import { readRestoreMap, readDependencyMatrix } from "./lib.db";
-import { DependencyMatrix } from "./types";
 
 let logger = global.logger;
 
@@ -28,10 +27,8 @@ function findLibraries(def: any) {
 	return librariesUsed;
 }
 
-function repairRelationWithLibrary(definition: any, libraryMap: any) {
+function repairRelationWithLibrary(definition: any, librariesUsed: string[], libraryMap: any) {
 	let stringifiedDefinition = JSON.stringify(definition);
-	let librariesUsed = findLibraries(definition);
-	librariesUsed = getUniqueElements(librariesUsed);
 	if (librariesUsed.length == 0) logger.info("No libraries foud");
 	logger.info(`Libraries used : ${librariesUsed.join(",")}`);
 	librariesUsed.forEach(lib => {
@@ -43,7 +40,7 @@ function repairRelationWithLibrary(definition: any, libraryMap: any) {
 function repairRelationWithUser(parent: string[], definition: any) {
 	definition.forEach((attr: any) => {
 		if (attr.type == "User") {
-			logger.info(`${parent.join(">")} : Default value of ${attr.properties.name} removed.`);
+			logger.info(`${parent.join(">")} : Default value of '${attr.properties.name}' removed.`);
 			delete attr.properties.default;
 		}
 		if (attr.type == "Object" || attr.type == "Array") {
@@ -56,7 +53,7 @@ function repairRelationWithUser(parent: string[], definition: any) {
 function repairRelationships(parent: any[], definition: any): any {
 	definition.forEach((attr: any) => {
 		if (attr.properties.relatedTo) {
-			logger.info(`${parent.join(">")} : Default value of ${attr.properties.name} removed`);
+			logger.info(`${parent.join(">")} : Default value of '${attr.properties.name}' removed`);
 			delete attr.properties.default;
 		}
 		if (attr.type == "Object" || attr.type == "Array") {
@@ -78,13 +75,13 @@ export function parseAndFixDataServices(dataservices: any[]): any[] {
 	let libraryMap = readRestoreMap("library");
 	let dataserviceMap = readRestoreMap("dataservice");
 	logger.info(`Dataservice ID Map : ${JSON.stringify(dataserviceMap)}`);
-	let dependencyMatrix = readDependencyMatrix().matrix;
+	let dependencyMatrix = readDependencyMatrix();
 	logger.info(`Dataservice dependency matrix : ${JSON.stringify(dependencyMatrix)}`);
 	dataservices.forEach((dataservice: any) => {
 		delete dataservice.versionValidity;
 
 		logger.info(`${dataservice.name} : Find and repair libraries`);
-		dataservice.definition = repairRelationWithLibrary(dataservice.definition, libraryMap);
+		dataservice.definition = repairRelationWithLibrary(dataservice.definition, dependencyMatrix[dataservice._id].libraries, libraryMap);
 
 		logger.info(`${dataservice.name} : Find and repair User relations`);
 		dataservice.definition = repairRelationWithUser([], dataservice.definition);
@@ -93,7 +90,7 @@ export function parseAndFixDataServices(dataservices: any[]): any[] {
 		dataservice.definition = repairRelationships([], dataservice.definition);
 
 		logger.info(`${dataservice.name} : Find and repair dataservice relationship IDs`);
-		if (dependencyMatrix[dataservice._id].length > 0) dataservice.definition = repairRelationshipIDs(dataservice.definition, dependencyMatrix[dataservice._id], dataserviceMap);
+		if (dependencyMatrix[dataservice._id].length > 0) dataservice.definition = repairRelationshipIDs(dataservice.definition, dependencyMatrix[dataservice._id].dataservices, dataserviceMap);
 
 		if (dataservice.relatedSchemas.incoming) dataservice.relatedSchemas.incoming = [];
 		if (dataservice.relatedSchemas.outgoing) dataservice.relatedSchemas.outgoing = [];
@@ -103,28 +100,15 @@ export function parseAndFixDataServices(dataservices: any[]): any[] {
 }
 
 export function buildDependencyMatrix(dataservices: any[]) {
-	let dependencyMatrix = new DependencyMatrix();
-	// INIT
+	let dependencyMatrix: any = {};
 	dataservices.forEach((dataservice: any) => {
-		dependencyMatrix.matrix[dataservice._id] = [];
-		dependencyMatrix.rank[dataservice._id] = 0;
-	});
-	// BUILD MATRIX
-	dataservices.forEach((dataservice: any) => {
-		if (!dataservice.relatedSchemas.outgoing) return;
+		dependencyMatrix[dataservice._id] = { dataservices: [], libraries: [] };
 		dataservice.relatedSchemas.outgoing.forEach((outgoing: any) => {
-			if (dependencyMatrix.matrix[dataservice._id].indexOf(outgoing.service) == -1) dependencyMatrix.matrix[dataservice._id].push(outgoing.service);
-			dependencyMatrix.rank[outgoing.service] += 1;
-			if (dependencyMatrix.rank[outgoing.service] > dependencyMatrix.largest) dependencyMatrix.largest = dependencyMatrix.rank[outgoing.service];
+			if (dependencyMatrix[dataservice._id].dataservices.indexOf(outgoing.service) == -1) dependencyMatrix[dataservice._id].dataservices.push(outgoing.service);
 		});
+		let libraries = findLibraries(dataservice.definition);
+		libraries = getUniqueElements(libraries);
+		dependencyMatrix[dataservice._id].libraries = libraries;
 	});
-	let largest = dependencyMatrix.largest;
-	while (largest > -1) {
-		dependencyMatrix.ordered[largest] = [];
-		Object.keys(dependencyMatrix.rank).forEach((key: string) => {
-			if (dependencyMatrix.rank[key] == largest) dependencyMatrix.ordered[largest].push(key);
-		});
-		largest -= 1;
-	}
 	return dependencyMatrix;
 }

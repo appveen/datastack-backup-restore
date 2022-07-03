@@ -49,9 +49,9 @@ export function read(key: string) {
 	return backupData.data[key];
 }
 
-export function readBackupMap(token: string, key: string) {
+export function readBackupMap(token: string) {
 	let backupData = readJSON(global.backupFileName);
-	return backupData.map[token][key];
+	return backupData.map[token];
 }
 
 export function readDependencyMatrix() {

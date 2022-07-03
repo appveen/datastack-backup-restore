@@ -1,4 +1,4 @@
-import { isNotAnAcceptableValue, killThySelf } from "./lib.misc";
+import { isNotAnAcceptableValue } from "./lib.misc";
 import { registerPrompt, Separator, prompt } from "inquirer";
 import { Credentials } from "@appveen/ds-sdk/dist/types";
 registerPrompt("autocomplete", require("inquirer-autocomplete-prompt"));
@@ -15,34 +15,40 @@ const mainMenu = [
 
 export async function validateCLIParams(): Promise<Credentials> {
 	let credentials = new Credentials();
-	let terminate = false;
-	if (isNotAnAcceptableValue(process.env.DS_BR_HOST)) {
-		logger.error("DS_BR_HOST is invalid.");
-		terminate = true;
-	}
-
-	if (isNotAnAcceptableValue(process.env.DS_BR_USERNAME)) {
-		logger.error("DS_BR_USERNAME is invalid.");
-		terminate = true;
-	}
-
-	if (terminate) await killThySelf(100);
-
 	credentials.host = process.env.DS_BR_HOST;
-	global.host = process.env.DS_BR_HOST || "";
+	if (isNotAnAcceptableValue(process.env.DS_BR_HOST)) {
+		logger.info("Env var DS_BR_HOST not set or is invalid.");
+		credentials.host = await promptUser("Host", "https://cloud.appveen.com", false);
+	}
+
 	credentials.username = process.env.DS_BR_USERNAME;
-	logger.info(`Host      : ${credentials.host}`);
-	logger.info(`Username  : ${credentials.username}`);
+	if (isNotAnAcceptableValue(process.env.DS_BR_USERNAME)) {
+		logger.info("Env var DS_BR_USERNAME not set or is invalid.");
+		credentials.username = await promptUser("Username", null, false);
+	}
+
 	credentials.password = process.env.DS_BR_PASSWORD;
 	if (isNotAnAcceptableValue(process.env.DS_BR_PASSWORD)) {
-		await prompt([{
-			type: "password",
-			name: "password",
-			message: "Password>"
-		}]).then(data => credentials.password = data.password);
+		logger.info("Env var DS_BR_PASSWORD not set or is invalid.");
+		credentials.password = await promptUser("Password", null, true);
 	}
 
+	global.host = credentials.host || "";
+	logger.info(`Host      : ${credentials.host}`);
+	logger.info(`Username  : ${credentials.username}`);
+
 	return credentials;
+}
+
+export async function promptUser(message: string, defaultValue: string | null, isPassword: boolean): Promise<any> {
+	return await prompt([
+		{
+			type: isPassword ? "password" : "input",
+			name: "value",
+			message: `${message}>`,
+			default: defaultValue
+		}
+	]).then(data => data.value);
 }
 
 export async function startMenu() {
@@ -71,30 +77,27 @@ export async function selectApp(apps: any) {
 	});
 }
 
-// e.customise = () => {
-// 	return inquirer.prompt([{
-// 		type: 'confirm',
-// 		name: 'mode',
-// 		message: 'Do you want to customise the backup?',
-// 		default: false
-// 	}]).then(_d => {
-// 		logger.info(`Customization -  : ${_d.mode}`);
-// 		if (_d.mode) return Promise.resolve();
-// 		return Promise.reject();
-// 	});
-// };
+export async function customise() {
+	return await prompt([{
+		type: "confirm",
+		name: "mode",
+		message: "Do you want to customise the backup?",
+		default: false
+	}]).then(_d => {
+		logger.info(`Customization -  : ${_d.mode}`);
+		return _d.mode;
+	});
+}
 
-// e.selections = (_type, _options) => {
-// 	if (_options.length == 0) return Promise.resolve([]);
-// 	return inquirer.prompt([{
-// 		type: 'checkbox',
-// 		name: 'selections',
-// 		message: `Select ${_type} to backup`,
-// 		choices: _options
-// 	}]).then(_d => {
-// 		logger.info(`Selected : ${_d.selections}`);
-// 		return _d.selections;
-// 	});
-// };
-
-// module.exports = e;
+export async function selections(type: string, choices: string[]) {
+	if (choices.length == 0) return Promise.resolve([]);
+	return await prompt([{
+		type: "checkbox",
+		name: "selections",
+		message: `Select ${type} to backup`,
+		choices: choices
+	}]).then(_d => {
+		logger.info(`Selected ${type} to backup: ${_d.selections.join(", ") || "Nil"}`);
+		return _d.selections;
+	});
+}

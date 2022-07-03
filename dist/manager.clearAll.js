@@ -25,6 +25,7 @@ function clearAllManager(apps) {
         yield clearGroups(selectedApp);
         yield clearDataServices(selectedApp);
         yield clearLibrary(selectedApp);
+        yield clearFunctions(selectedApp);
         (0, lib_misc_1.header)("Cleanup complete!");
     });
 }
@@ -73,17 +74,17 @@ function clearLibrary(selectedApp) {
         }), Promise.resolve());
     });
 }
-// function fetchBookmarks() {
-// 	var numberOfBookmarks = 0;
-// 	var qs = {
-// 			count: -1
-// 	};
-// 	return api.get(`/api/a/rbac/app/${selectedApp}/bookmark/count`, null)
-// 			.then(_count => numberOfBookmarks = _count)
-// 			.then(_ => api.get(`/api/a/rbac/app/${selectedApp}/bookmark`, qs))
-// 			.then(_bookmarks => {
-// 					backup.save("bookmarks", _bookmarks);
-// 					_bookmarks.forEach(_d => backup.backupMapper("bookmarks", _d._id, _d.name));
-// 			})
-// 			.then(_ => misc.done("Bookmarks", numberOfBookmarks.toString()))
-// };
+function clearFunctions(selectedApp) {
+    return __awaiter(this, void 0, void 0, function* () {
+        (0, lib_misc_1.header)("Function");
+        let BASE_URL = `/api/a/bm/${selectedApp}/faas`;
+        let functions = yield (0, manager_api_1.get)(BASE_URL, searchParams);
+        (0, lib_misc_1.printInfo)(`${functions.length} Function(s) found.`);
+        yield functions.reduce((p, fn) => __awaiter(this, void 0, void 0, function* () {
+            yield p;
+            (0, lib_misc_1.printInfo)(`  * Removing function ${fn._id} ${fn.name}`);
+            let FN_URL = `${BASE_URL}/${fn._id}`;
+            yield (0, manager_api_1.del)(FN_URL);
+        }), Promise.resolve());
+    });
+}

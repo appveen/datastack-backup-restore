@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.selectApp = exports.startMenu = exports.validateCLIParams = void 0;
+exports.selections = exports.customise = exports.selectApp = exports.startMenu = exports.promptUser = exports.validateCLIParams = void 0;
 const lib_misc_1 = require("./lib.misc");
 const inquirer_1 = require("inquirer");
 const types_1 = require("@appveen/ds-sdk/dist/types");
@@ -25,34 +25,41 @@ const mainMenu = [
 function validateCLIParams() {
     return __awaiter(this, void 0, void 0, function* () {
         let credentials = new types_1.Credentials();
-        let terminate = false;
-        if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_HOST)) {
-            logger.error("DS_BR_HOST is invalid.");
-            terminate = true;
-        }
-        if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_USERNAME)) {
-            logger.error("DS_BR_USERNAME is invalid.");
-            terminate = true;
-        }
-        if (terminate)
-            yield (0, lib_misc_1.killThySelf)(100);
         credentials.host = process.env.DS_BR_HOST;
-        global.host = process.env.DS_BR_HOST || "";
+        if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_HOST)) {
+            logger.info("Env var DS_BR_HOST not set or is invalid.");
+            credentials.host = yield promptUser("Host", "https://cloud.appveen.com", false);
+        }
         credentials.username = process.env.DS_BR_USERNAME;
-        logger.info(`Host      : ${credentials.host}`);
-        logger.info(`Username  : ${credentials.username}`);
+        if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_USERNAME)) {
+            logger.info("Env var DS_BR_USERNAME not set or is invalid.");
+            credentials.username = yield promptUser("Username", null, false);
+        }
         credentials.password = process.env.DS_BR_PASSWORD;
         if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_PASSWORD)) {
-            yield (0, inquirer_1.prompt)([{
-                    type: "password",
-                    name: "password",
-                    message: "Password>"
-                }]).then(data => credentials.password = data.password);
+            logger.info("Env var DS_BR_PASSWORD not set or is invalid.");
+            credentials.password = yield promptUser("Password", null, true);
         }
+        global.host = credentials.host || "";
+        logger.info(`Host      : ${credentials.host}`);
+        logger.info(`Username  : ${credentials.username}`);
         return credentials;
     });
 }
 exports.validateCLIParams = validateCLIParams;
+function promptUser(message, defaultValue, isPassword) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield (0, inquirer_1.prompt)([
+            {
+                type: isPassword ? "password" : "input",
+                name: "value",
+                message: `${message}>`,
+                default: defaultValue
+            }
+        ]).then(data => data.value);
+    });
+}
+exports.promptUser = promptUser;
 function startMenu() {
     return __awaiter(this, void 0, void 0, function* () {
         return yield (0, inquirer_1.prompt)([{
@@ -83,28 +90,33 @@ function selectApp(apps) {
     });
 }
 exports.selectApp = selectApp;
-// e.customise = () => {
-// 	return inquirer.prompt([{
-// 		type: 'confirm',
-// 		name: 'mode',
-// 		message: 'Do you want to customise the backup?',
-// 		default: false
-// 	}]).then(_d => {
-// 		logger.info(`Customization -  : ${_d.mode}`);
-// 		if (_d.mode) return Promise.resolve();
-// 		return Promise.reject();
-// 	});
-// };
-// e.selections = (_type, _options) => {
-// 	if (_options.length == 0) return Promise.resolve([]);
-// 	return inquirer.prompt([{
-// 		type: 'checkbox',
-// 		name: 'selections',
-// 		message: `Select ${_type} to backup`,
-// 		choices: _options
-// 	}]).then(_d => {
-// 		logger.info(`Selected : ${_d.selections}`);
-// 		return _d.selections;
-// 	});
-// };
-// module.exports = e;
+function customise() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield (0, inquirer_1.prompt)([{
+                type: "confirm",
+                name: "mode",
+                message: "Do you want to customise the backup?",
+                default: false
+            }]).then(_d => {
+            logger.info(`Customization -  : ${_d.mode}`);
+            return _d.mode;
+        });
+    });
+}
+exports.customise = customise;
+function selections(type, choices) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (choices.length == 0)
+            return Promise.resolve([]);
+        return yield (0, inquirer_1.prompt)([{
+                type: "checkbox",
+                name: "selections",
+                message: `Select ${type} to backup`,
+                choices: choices
+            }]).then(_d => {
+            logger.info(`Selected ${type} to backup: ${_d.selections.join(", ") || "Nil"}`);
+            return _d.selections;
+        });
+    });
+}
+exports.selections = selections;
