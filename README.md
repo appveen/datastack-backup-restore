@@ -31,7 +31,6 @@ Commands:
 
 * Backup customization is only supported in the interactove mode.
 * Environment variables take priority over command line values.
-* 
 
 # Installation
 
