@@ -18,7 +18,7 @@ export async function validateCLIParams(): Promise<Credentials> {
 	credentials.host = process.env.DS_BR_HOST;
 	if (isNotAnAcceptableValue(process.env.DS_BR_HOST)) {
 		logger.info("Env var DS_BR_HOST not set or is invalid.");
-		credentials.host = await promptUser("Host", "https://cloud.appveen.com", false);
+		credentials.host = await promptUser("Host", null, false);
 	}
 
 	credentials.username = process.env.DS_BR_USERNAME;

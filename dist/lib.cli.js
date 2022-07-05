@@ -28,7 +28,7 @@ function validateCLIParams() {
         credentials.host = process.env.DS_BR_HOST;
         if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_HOST)) {
             logger.info("Env var DS_BR_HOST not set or is invalid.");
-            credentials.host = yield promptUser("Host", "https://cloud.appveen.com", false);
+            credentials.host = yield promptUser("Host", null, false);
         }
         credentials.username = process.env.DS_BR_USERNAME;
         if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_USERNAME)) {
