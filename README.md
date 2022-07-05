@@ -23,22 +23,29 @@ Commands:
 # Table of contents
 - [datastack-backup-restore](#datastack-backup-restore)
 - [Table of contents](#table-of-contents)
-- [Info](#info)
 - [Installation](#installation)
+- [Instructions](#instructions)
+  - [Info](#info)
 - [Environment variables](#environment-variables)
-
-# Info
-
-* Backup customization is only supported in the interactive mode. Run `ds-backup-restore` without any *commands* to enter into interactove mode.
-* Environment variables take priority over command line values.
 
 # Installation
 
 Download and run the executable from the [Releases](https://github.com/appveen/datastack-backup-restore/releases) page.
 
+# Instructions
+
+* `-b, --backupfile <backup JSON file>` is a required option while restoring the data.
+* You can use `-b` during backup and restore.
+  * While backing up the backup file specified will be used to write the backup data.
+  * While restoring the backup configuration would be read from the file specified.
+## Info
+
+* Backup customization is only supported in the interactive mode. Run `ds-backup-restore` without any *commands* to enter into interactove mode.
+* Environment variables take priority over command line options.
+
 # Environment variables
 
-> Environment variables takes priority over CLI params.
+> Environment variables takes priority over command line options/parameters.
 
 | Variable | Description |
 |---|---|
