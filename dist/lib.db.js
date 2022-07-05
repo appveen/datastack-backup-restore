@@ -5,9 +5,29 @@ const path_1 = require("path");
 const fs_1 = require("fs");
 const lib_misc_1 = require("./lib.misc");
 let logger = global.logger;
+let sampleBackupData = {
+    "version": `${global.version}`,
+    "map": {
+        "dataservice": {},
+        "dataservice_lookup": {},
+        "library": {},
+        "library_lookup": {},
+        "function": {},
+        "function_lookup": {},
+        "group": {},
+        "group_lookup": {}
+    },
+    "data": {
+        "dataservice": [],
+        "library": [],
+        "function": [],
+        "group": []
+    },
+    "dependencyMatrix": {}
+};
 function backupInit() {
     (0, lib_misc_1.printInfo)(`Backup file - ${global.backupFileName}`);
-    writeJSON(global.backupFileName, `{"version":"${global.version}", "map": {}, "data": {}}`);
+    writeJSON(global.backupFileName, JSON.stringify(sampleBackupData));
 }
 exports.backupInit = backupInit;
 function restoreInit() {

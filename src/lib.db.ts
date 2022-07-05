@@ -4,9 +4,30 @@ import { killThySelf, printInfo } from "./lib.misc";
 
 let logger = global.logger;
 
+let sampleBackupData = {
+	"version": `${global.version}`,
+	"map": {
+		"dataservice": {},
+		"dataservice_lookup": {},
+		"library": {},
+		"library_lookup": {},
+		"function": {},
+		"function_lookup": {},
+		"group": {},
+		"group_lookup": {}
+	},
+	"data": {
+		"dataservice": [],
+		"library": [],
+		"function": [],
+		"group": []
+	},
+	"dependencyMatrix": {}
+};
+
 export function backupInit() {
 	printInfo(`Backup file - ${global.backupFileName}`);
-	writeJSON(global.backupFileName, `{"version":"${global.version}", "map": {}, "data": {}}`);
+	writeJSON(global.backupFileName, JSON.stringify(sampleBackupData));
 }
 
 export function restoreInit() {
