@@ -17,8 +17,8 @@ export async function restoreManager(apps: any) {
 	printInfo("Scanning the configurations...");
 
 	await restoreLibrary(selectedApp);
-	await restoreDataServices(selectedApp);
 	await restoreFunctions(selectedApp);
+	await restoreDataServices(selectedApp);
 	await restoreGroups(selectedApp);
 	header("Restore complete!");
 }
@@ -104,7 +104,7 @@ async function restoreDataServices(selectedApp: string) {
 		return restoreMapper("dataservice", dataservice._id, newData._id);
 	}, Promise.resolve());
 
-	dataservices = parseAndFixDataServices(dataservices);
+	dataservices = parseAndFixDataServices(selectedApp, dataservices);
 	let dataserviceMap = readRestoreMap("dataservice");
 
 	await dataservices.reduce(async (prev: any, dataservice: any) => {
@@ -127,9 +127,10 @@ async function restoreFunctions(selectedApp: string) {
 		delete fn.version;
 		let existingID = await configExists(BASE_URL, fn.name, selectedApp);
 		let newData = null;
-		if (existingID) newData = await update("Library", BASE_URL, selectedApp, fn, existingID);
-		else newData = await insert("Library", BASE_URL, selectedApp, fn);
+		if (existingID) newData = await update("Function", BASE_URL, selectedApp, fn, existingID);
+		else newData = await insert("Function", BASE_URL, selectedApp, fn);
 		restoreMapper("function", fn._id, newData._id);
+		restoreMapper("functionURL", newData._id, newData.url);
 	}, Promise.resolve());
 }
 

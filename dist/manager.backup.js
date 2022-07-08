@@ -122,9 +122,14 @@ function customiseBackup() {
                 if (selectedLibraries.indexOf(library) == -1)
                     selectedLibraries.push(library);
             });
+            dependencyMatrix[dataserviceID].functions.forEach((fn) => {
+                if (selectedFunctions.indexOf(fn) == -1)
+                    selectedFunctions.push(fn);
+            });
         });
         logger.info(`Superset Dataservices : ${superSetOfDataservices.join(", ")}`);
         logger.info(`Superset Libraries    : ${selectedLibraries.join(", ")}`);
+        logger.info(`Superset Functions    : ${selectedFunctions.join(", ")}`);
         let dataservices = (0, lib_db_1.read)("dataservice").filter((dataservice) => superSetOfDataservices.indexOf(dataservice._id) != -1);
         let libraries = (0, lib_db_1.read)("library").filter((library) => selectedLibraries.indexOf(library._id) != -1);
         let functions = (0, lib_db_1.read)("function").filter((fn) => selectedFunctions.indexOf(fn._id) != -1);

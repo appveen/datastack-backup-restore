@@ -115,9 +115,13 @@ async function customiseBackup() {
 		dependencyMatrix[dataserviceID].libraries.forEach((library: string) => {
 			if (selectedLibraries.indexOf(library) == -1) selectedLibraries.push(library);
 		});
+		dependencyMatrix[dataserviceID].functions.forEach((fn: string) => {
+			if (selectedFunctions.indexOf(fn) == -1) selectedFunctions.push(fn);
+		});
 	});
 	logger.info(`Superset Dataservices : ${superSetOfDataservices.join(", ")}`);
 	logger.info(`Superset Libraries    : ${selectedLibraries.join(", ")}`);
+	logger.info(`Superset Functions    : ${selectedFunctions.join(", ")}`);
 
 	let dataservices = read("dataservice").filter((dataservice: any) => superSetOfDataservices.indexOf(dataservice._id) != -1);
 	let libraries = read("library").filter((library: any) => selectedLibraries.indexOf(library._id) != -1);

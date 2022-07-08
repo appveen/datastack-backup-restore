@@ -27,6 +27,18 @@ function findLibraries(def: any) {
 	return librariesUsed;
 }
 
+function findFunctions(dataservice: any) {
+	let functions: string[] = [];
+	dataservice.workflowHooks.postHooks.submit.forEach((hook: any) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+	dataservice.workflowHooks.postHooks.approve.forEach((hook: any) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+	dataservice.workflowHooks.postHooks.discard.forEach((hook: any) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+	dataservice.workflowHooks.postHooks.reject.forEach((hook: any) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+	dataservice.workflowHooks.postHooks.rework.forEach((hook: any) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+	dataservice.webHooks.forEach((hook: any) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+	dataservice.preHooks.forEach((hook: any) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+	return functions;
+}
+
 function repairRelationWithLibrary(definition: any, librariesUsed: string[], libraryMap: any) {
 	if (librariesUsed.length == 0) {
 		logger.info("No libraries foud");
@@ -74,8 +86,56 @@ function repairRelationshipIDs(definition: any, dependencies: string[], dataserv
 	return JSON.parse(stringifiedDefinition);
 }
 
-export function parseAndFixDataServices(dataservices: any[]): any[] {
+function repairFunctions(dataservice: any, functionMap: any, functionURLMap: any) {
+	dataservice.workflowHooks.postHooks.submit.forEach((hook: any) => {
+		if (hook.type == "function") {
+			hook.refId = functionMap[hook.refId];
+			hook.url = functionURLMap[hook.refId];
+		}
+	});
+	dataservice.workflowHooks.postHooks.approve.forEach((hook: any) => {
+		if (hook.type == "function") {
+			hook.refId = functionMap[hook.refId];
+			hook.url = functionURLMap[hook.refId];
+		}
+	});
+	dataservice.workflowHooks.postHooks.discard.forEach((hook: any) => {
+		if (hook.type == "function") {
+			hook.refId = functionMap[hook.refId];
+			hook.url = functionURLMap[hook.refId];
+		}
+	});
+	dataservice.workflowHooks.postHooks.reject.forEach((hook: any) => {
+		if (hook.type == "function") {
+			hook.refId = functionMap[hook.refId];
+			hook.url = functionURLMap[hook.refId];
+		}
+	});
+	dataservice.workflowHooks.postHooks.rework.forEach((hook: any) => {
+		if (hook.type == "function") {
+			hook.refId = functionMap[hook.refId];
+			hook.url = functionURLMap[hook.refId];
+		}
+	});
+	dataservice.webHooks.forEach((hook: any) => {
+		if (hook.type == "function") {
+			hook.refId = functionMap[hook.refId];
+			hook.url = functionURLMap[hook.refId];
+		}
+	});
+	dataservice.preHooks.forEach((hook: any) => {
+		if (hook.type == "function") {
+			hook.refId = functionMap[hook.refId];
+			hook.url = functionURLMap[hook.refId];
+		}
+	});
+	return dataservice;
+}
+
+export function parseAndFixDataServices(selectedApp: string, dataservices: any[]): any[] {
 	let libraryMap = readRestoreMap("library");
+	let functionMap = readRestoreMap("function");
+	let functionURLMap = readRestoreMap("functionURL");
 	let dataserviceMap = readRestoreMap("dataservice");
 	logger.info(`Dataservice ID Map : ${JSON.stringify(dataserviceMap)}`);
 	let dependencyMatrix = readDependencyMatrix();
@@ -106,6 +166,8 @@ export function parseAndFixDataServices(dataservices: any[]): any[] {
 		if (dataservice.relatedSchemas.incoming) dataservice.relatedSchemas.incoming = [];
 		if (dataservice.relatedSchemas.outgoing) dataservice.relatedSchemas.outgoing = [];
 
+		dataservice = repairFunctions(dataservice, functionMap, functionURLMap);
+
 	});
 	return dataservices;
 }
@@ -113,13 +175,16 @@ export function parseAndFixDataServices(dataservices: any[]): any[] {
 export function buildDependencyMatrix(dataservices: any[]) {
 	let dependencyMatrix: any = {};
 	dataservices.forEach((dataservice: any) => {
-		dependencyMatrix[dataservice._id] = { dataservices: [], libraries: [] };
+		dependencyMatrix[dataservice._id] = { dataservices: [], libraries: [], functions: [] };
 		dataservice.relatedSchemas.outgoing.forEach((outgoing: any) => {
 			if (dependencyMatrix[dataservice._id].dataservices.indexOf(outgoing.service) == -1) dependencyMatrix[dataservice._id].dataservices.push(outgoing.service);
 		});
+		// get list of libraries
 		let libraries = findLibraries(dataservice.definition);
 		libraries = getUniqueElements(libraries);
 		dependencyMatrix[dataservice._id].libraries = libraries;
+		// get list of functions
+		dependencyMatrix[dataservice._id].functions = findFunctions(dataservice);
 	});
 	return dependencyMatrix;
 }

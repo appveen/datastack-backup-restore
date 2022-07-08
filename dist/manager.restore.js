@@ -24,8 +24,8 @@ function restoreManager(apps) {
         (0, lib_db_1.restoreInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations...");
         yield restoreLibrary(selectedApp);
-        yield restoreDataServices(selectedApp);
         yield restoreFunctions(selectedApp);
+        yield restoreDataServices(selectedApp);
         yield restoreGroups(selectedApp);
         (0, lib_misc_1.header)("Restore complete!");
     });
@@ -120,7 +120,7 @@ function restoreDataServices(selectedApp) {
             let newData = yield insert("Dataservice", BASE_URL, selectedApp, newDS);
             return (0, lib_db_1.restoreMapper)("dataservice", dataservice._id, newData._id);
         }), Promise.resolve());
-        dataservices = (0, lib_dsParser_1.parseAndFixDataServices)(dataservices);
+        dataservices = (0, lib_dsParser_1.parseAndFixDataServices)(selectedApp, dataservices);
         let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservice");
         yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
             yield prev;
@@ -146,10 +146,11 @@ function restoreFunctions(selectedApp) {
             let existingID = yield configExists(BASE_URL, fn.name, selectedApp);
             let newData = null;
             if (existingID)
-                newData = yield update("Library", BASE_URL, selectedApp, fn, existingID);
+                newData = yield update("Function", BASE_URL, selectedApp, fn, existingID);
             else
-                newData = yield insert("Library", BASE_URL, selectedApp, fn);
+                newData = yield insert("Function", BASE_URL, selectedApp, fn);
             (0, lib_db_1.restoreMapper)("function", fn._id, newData._id);
+            (0, lib_db_1.restoreMapper)("functionURL", newData._id, newData.url);
         }), Promise.resolve());
     });
 }

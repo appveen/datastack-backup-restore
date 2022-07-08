@@ -27,6 +27,17 @@ function findLibraries(def) {
     });
     return librariesUsed;
 }
+function findFunctions(dataservice) {
+    let functions = [];
+    dataservice.workflowHooks.postHooks.submit.forEach((hook) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+    dataservice.workflowHooks.postHooks.approve.forEach((hook) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+    dataservice.workflowHooks.postHooks.discard.forEach((hook) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+    dataservice.workflowHooks.postHooks.reject.forEach((hook) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+    dataservice.workflowHooks.postHooks.rework.forEach((hook) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+    dataservice.webHooks.forEach((hook) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+    dataservice.preHooks.forEach((hook) => (hook.type == "function" && functions.indexOf(hook.refId) == -1) ? functions.push(hook.refId) : null);
+    return functions;
+}
 function repairRelationWithLibrary(definition, librariesUsed, libraryMap) {
     if (librariesUsed.length == 0) {
         logger.info("No libraries foud");
@@ -70,8 +81,55 @@ function repairRelationshipIDs(definition, dependencies, dataserviceMap) {
     });
     return JSON.parse(stringifiedDefinition);
 }
-function parseAndFixDataServices(dataservices) {
+function repairFunctions(dataservice, functionMap, functionURLMap) {
+    dataservice.workflowHooks.postHooks.submit.forEach((hook) => {
+        if (hook.type == "function") {
+            hook.refId = functionMap[hook.refId];
+            hook.url = functionURLMap[hook.refId];
+        }
+    });
+    dataservice.workflowHooks.postHooks.approve.forEach((hook) => {
+        if (hook.type == "function") {
+            hook.refId = functionMap[hook.refId];
+            hook.url = functionURLMap[hook.refId];
+        }
+    });
+    dataservice.workflowHooks.postHooks.discard.forEach((hook) => {
+        if (hook.type == "function") {
+            hook.refId = functionMap[hook.refId];
+            hook.url = functionURLMap[hook.refId];
+        }
+    });
+    dataservice.workflowHooks.postHooks.reject.forEach((hook) => {
+        if (hook.type == "function") {
+            hook.refId = functionMap[hook.refId];
+            hook.url = functionURLMap[hook.refId];
+        }
+    });
+    dataservice.workflowHooks.postHooks.rework.forEach((hook) => {
+        if (hook.type == "function") {
+            hook.refId = functionMap[hook.refId];
+            hook.url = functionURLMap[hook.refId];
+        }
+    });
+    dataservice.webHooks.forEach((hook) => {
+        if (hook.type == "function") {
+            hook.refId = functionMap[hook.refId];
+            hook.url = functionURLMap[hook.refId];
+        }
+    });
+    dataservice.preHooks.forEach((hook) => {
+        if (hook.type == "function") {
+            hook.refId = functionMap[hook.refId];
+            hook.url = functionURLMap[hook.refId];
+        }
+    });
+    return dataservice;
+}
+function parseAndFixDataServices(selectedApp, dataservices) {
     let libraryMap = (0, lib_db_1.readRestoreMap)("library");
+    let functionMap = (0, lib_db_1.readRestoreMap)("function");
+    let functionURLMap = (0, lib_db_1.readRestoreMap)("functionURL");
     let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservice");
     logger.info(`Dataservice ID Map : ${JSON.stringify(dataserviceMap)}`);
     let dependencyMatrix = (0, lib_db_1.readDependencyMatrix)();
@@ -98,6 +156,7 @@ function parseAndFixDataServices(dataservices) {
             dataservice.relatedSchemas.incoming = [];
         if (dataservice.relatedSchemas.outgoing)
             dataservice.relatedSchemas.outgoing = [];
+        dataservice = repairFunctions(dataservice, functionMap, functionURLMap);
     });
     return dataservices;
 }
@@ -105,14 +164,17 @@ exports.parseAndFixDataServices = parseAndFixDataServices;
 function buildDependencyMatrix(dataservices) {
     let dependencyMatrix = {};
     dataservices.forEach((dataservice) => {
-        dependencyMatrix[dataservice._id] = { dataservices: [], libraries: [] };
+        dependencyMatrix[dataservice._id] = { dataservices: [], libraries: [], functions: [] };
         dataservice.relatedSchemas.outgoing.forEach((outgoing) => {
             if (dependencyMatrix[dataservice._id].dataservices.indexOf(outgoing.service) == -1)
                 dependencyMatrix[dataservice._id].dataservices.push(outgoing.service);
         });
+        // get list of libraries
         let libraries = findLibraries(dataservice.definition);
         libraries = getUniqueElements(libraries);
         dependencyMatrix[dataservice._id].libraries = libraries;
+        // get list of functions
+        dependencyMatrix[dataservice._id].functions = findFunctions(dataservice);
     });
     return dependencyMatrix;
 }
