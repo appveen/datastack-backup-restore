@@ -40,7 +40,6 @@ async function insert(type: string, baseURL: string, selectedApp: string, backed
 	let data = JSON.parse(JSON.stringify(backedUpData));
 	data.app = selectedApp;
 	delete data._id;
-	data.status = "Undeployed";
 	let newData = await post(baseURL, data);
 	printInfo(`${type} created : ${backedUpData.name}`);
 	logger.info(JSON.stringify(newData));
@@ -110,6 +109,7 @@ async function restoreDataServices(selectedApp: string) {
 
 	await dataservices.reduce(async (prev: any, dataservice: any) => {
 		await prev;
+		if (newDataServices.indexOf(dataservice._id) != -1) dataservice.status = "Draft";
 		return await update("Dataservice", BASE_URL, selectedApp, dataservice, dataserviceMap[dataservice._id]);
 	}, Promise.resolve());
 }

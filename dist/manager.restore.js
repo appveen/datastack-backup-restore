@@ -51,7 +51,6 @@ function insert(type, baseURL, selectedApp, backedUpData) {
         let data = JSON.parse(JSON.stringify(backedUpData));
         data.app = selectedApp;
         delete data._id;
-        data.status = "Undeployed";
         let newData = yield (0, manager_api_1.post)(baseURL, data);
         (0, lib_misc_1.printInfo)(`${type} created : ${backedUpData.name}`);
         logger.info(JSON.stringify(newData));
@@ -125,6 +124,8 @@ function restoreDataServices(selectedApp) {
         let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservice");
         yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
             yield prev;
+            if (newDataServices.indexOf(dataservice._id) != -1)
+                dataservice.status = "Draft";
             return yield update("Dataservice", BASE_URL, selectedApp, dataservice, dataserviceMap[dataservice._id]);
         }), Promise.resolve());
     });

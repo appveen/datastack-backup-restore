@@ -16,11 +16,8 @@ const version = require("../package.json").version;
 global.version = version;
 let timestamp = (new Date()).toISOString().replace(/:/gi, "-");
 let fileName = `dsBR_${global.version.split(".").join("_")}_${timestamp}.log`;
-if (process.env.DS_BR_SINGLELOGFILE) {
+if (process.env.DS_BR_SINGLELOGFILE)
     fileName = "out.log";
-    global.backupFileName = "backup.json";
-    global.restoreFileName = "restore.json";
-}
 (0, log4js_1.configure)({
     appenders: {
         fileOut: {

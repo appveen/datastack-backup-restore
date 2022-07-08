@@ -80,6 +80,11 @@ export function parseCliParams(options: any, timestamp: string) {
 
 	global.restoreFileName = `restore-${timestamp}.json`;
 
+	if (process.env.DS_BR_SINGLELOGFILE) {
+		global.backupFileName = "backup.json";
+		global.restoreFileName = "restore.json";
+	}
+
 	if (options.host) process.env.DS_BR_HOST = options.host;
 	if (options.username) process.env.DS_BR_USERNAME = options.username;
 	if (options.password) process.env.DS_BR_PASSWORD = options.password;

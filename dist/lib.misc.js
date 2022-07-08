@@ -95,6 +95,10 @@ function parseCliParams(options, timestamp) {
         global.backupFileName = options.backupfile;
     global.backupFileName = process.env.DS_BR_BACKUPFILE ? process.env.DS_BR_BACKUPFILE : global.backupFileName;
     global.restoreFileName = `restore-${timestamp}.json`;
+    if (process.env.DS_BR_SINGLELOGFILE) {
+        global.backupFileName = "backup.json";
+        global.restoreFileName = "restore.json";
+    }
     if (options.host)
         process.env.DS_BR_HOST = options.host;
     if (options.username)

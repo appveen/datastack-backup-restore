@@ -28,8 +28,11 @@ function findLibraries(def: any) {
 }
 
 function repairRelationWithLibrary(definition: any, librariesUsed: string[], libraryMap: any) {
+	if (librariesUsed.length == 0) {
+		logger.info("No libraries foud");
+		return definition;
+	}
 	let stringifiedDefinition = JSON.stringify(definition);
-	if (librariesUsed.length == 0) logger.info("No libraries foud");
 	logger.info(`Libraries used : ${librariesUsed.join(",")}`);
 	librariesUsed.forEach(lib => {
 		stringifiedDefinition = stringifiedDefinition.split(lib).join(libraryMap[lib]);
@@ -78,7 +81,15 @@ export function parseAndFixDataServices(dataservices: any[]): any[] {
 	let dependencyMatrix = readDependencyMatrix();
 	logger.info(`Dataservice dependency matrix : ${JSON.stringify(dependencyMatrix)}`);
 	dataservices.forEach((dataservice: any) => {
+		delete dataservice.version;
 		delete dataservice.versionValidity;
+		delete dataservice.permanentDeleteData;
+		delete dataservice.disableInsights;
+		delete dataservice.enableSearchIndex;
+		delete dataservice.attributeCount;
+		delete dataservice.collectionName;
+		delete dataservice.instances;
+		delete dataservice.status;
 
 		logger.info(`${dataservice.name} : Find and repair libraries`);
 		dataservice.definition = repairRelationWithLibrary(dataservice.definition, dependencyMatrix[dataservice._id].libraries, libraryMap);
