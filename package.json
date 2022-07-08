@@ -1,6 +1,6 @@
 {
   "name": "datastack-backup-restore",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Utility to backup and restore data.stack",
   "main": "dist/app.js",
   "types": "dist/app.d.ts",
