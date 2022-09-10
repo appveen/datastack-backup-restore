@@ -1,6 +1,6 @@
 import got, { HTTPError } from "got";
 import { authenticateByCredentials, DataStack } from "@appveen/ds-sdk";
-import { Credentials } from "@appveen/ds-sdk/dist/types";
+import { Credentials, ListOptions } from "@appveen/ds-sdk/dist/types";
 import { killThySelf, printError, printInfo } from "./lib.misc";
 
 var logger = global.logger;
@@ -8,7 +8,7 @@ var dataStack: DataStack;
 
 
 export async function login(config: Credentials) {
-	logger.trace(config);
+	logger.trace(JSON.stringify(config));
 	try {
 		dataStack = await authenticateByCredentials(config);
 		printInfo("Logged into data.stack.");
@@ -16,12 +16,15 @@ export async function login(config: Credentials) {
 	} catch (e) {
 		printError("Unable to login to data.stack server");
 		logger.error(e);
+		logger.trace(e);
 		killThySelf(400);
 	}
 }
 
 export async function getApps() {
-	let apps = await dataStack.ListApps();
+	let listOptions = new ListOptions();
+	listOptions.count = -1;
+	let apps = await dataStack.ListApps(listOptions);
 	return apps.map(a => a.app._id).sort();
 }
 

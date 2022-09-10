@@ -15,12 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.del = exports.put = exports.post = exports.get = exports.getApps = exports.login = void 0;
 const got_1 = __importDefault(require("got"));
 const ds_sdk_1 = require("@appveen/ds-sdk");
+const types_1 = require("@appveen/ds-sdk/dist/types");
 const lib_misc_1 = require("./lib.misc");
 var logger = global.logger;
 var dataStack;
 function login(config) {
     return __awaiter(this, void 0, void 0, function* () {
-        logger.trace(config);
+        logger.trace(JSON.stringify(config));
         try {
             dataStack = yield (0, ds_sdk_1.authenticateByCredentials)(config);
             (0, lib_misc_1.printInfo)("Logged into data.stack.");
@@ -29,6 +30,7 @@ function login(config) {
         catch (e) {
             (0, lib_misc_1.printError)("Unable to login to data.stack server");
             logger.error(e);
+            logger.trace(e);
             (0, lib_misc_1.killThySelf)(400);
         }
     });
@@ -36,7 +38,9 @@ function login(config) {
 exports.login = login;
 function getApps() {
     return __awaiter(this, void 0, void 0, function* () {
-        let apps = yield dataStack.ListApps();
+        let listOptions = new types_1.ListOptions();
+        listOptions.count = -1;
+        let apps = yield dataStack.ListApps(listOptions);
         return apps.map(a => a.app._id).sort();
     });
 }

@@ -22,7 +22,7 @@
   "bin": "dist/app.js",
   "homepage": "https://github.com/appveen/datastack-backup-restore#readme",
   "dependencies": {
-    "@appveen/ds-sdk": "^2.3.0",
+    "@appveen/ds-sdk": "^2.3.2",
     "commander": "^9.3.0",
     "got": "^11.8.3",
     "inquirer": "^8.2.1",

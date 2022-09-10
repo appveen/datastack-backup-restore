@@ -15,6 +15,8 @@ const mainMenu = [
 
 export async function validateCLIParams(): Promise<Credentials> {
 	let credentials = new Credentials();
+	credentials.logger = logger;
+	if (logger.level.toString() == "TRACE") credentials.trace = true;
 	credentials.host = process.env.DS_BR_HOST;
 	if (isNotAnAcceptableValue(process.env.DS_BR_HOST)) {
 		logger.info("Env var DS_BR_HOST not set or is invalid.");
@@ -36,6 +38,8 @@ export async function validateCLIParams(): Promise<Credentials> {
 	global.host = credentials.host || "";
 	printInfo(`Host      : ${credentials.host}`);
 	printInfo(`Username  : ${credentials.username}`);
+
+	logger.trace(`Credentials : ${JSON.stringify(credentials)}`);
 
 	return credentials;
 }

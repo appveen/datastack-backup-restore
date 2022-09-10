@@ -25,6 +25,9 @@ const mainMenu = [
 function validateCLIParams() {
     return __awaiter(this, void 0, void 0, function* () {
         let credentials = new types_1.Credentials();
+        credentials.logger = logger;
+        if (logger.level.toString() == "TRACE")
+            credentials.trace = true;
         credentials.host = process.env.DS_BR_HOST;
         if ((0, lib_misc_1.isNotAnAcceptableValue)(process.env.DS_BR_HOST)) {
             logger.info("Env var DS_BR_HOST not set or is invalid.");
@@ -43,6 +46,7 @@ function validateCLIParams() {
         global.host = credentials.host || "";
         (0, lib_misc_1.printInfo)(`Host      : ${credentials.host}`);
         (0, lib_misc_1.printInfo)(`Username  : ${credentials.username}`);
+        logger.trace(`Credentials : ${JSON.stringify(credentials)}`);
         return credentials;
     });
 }
