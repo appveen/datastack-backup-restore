@@ -10,3 +10,5 @@ restore*.json
 restoreMap.json
 del
 builds
+coverage
+.nyc_output
