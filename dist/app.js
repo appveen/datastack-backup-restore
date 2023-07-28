@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const log4js_1 = require("log4js");
 "log4js";
 const commander_1 = require("commander");
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 const version = require("../package.json").version;
 global.version = version;
 let timestamp = (new Date()).toISOString().replace(/:/gi, "-");

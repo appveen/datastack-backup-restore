@@ -177,7 +177,7 @@ export function parseAndFixDataServices(selectedApp: string, dataservices: any[]
 	return dataservices;
 }
 
-export function buildDependencyMatrix(dataservices: any[]) {
+export function buildDependencyMatrixForDataServices(dataservices: any[]) {
 	let dependencyMatrix: any = {};
 	dataservices.forEach((dataservice: any) => {
 		dependencyMatrix[dataservice._id] = { dataservices: [], libraries: [], functions: [] };

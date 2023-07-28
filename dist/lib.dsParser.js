@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildDependencyMatrix = exports.parseAndFixDataServices = exports.generateSampleDataSerivce = void 0;
+exports.buildDependencyMatrixForDataServices = exports.parseAndFixDataServices = exports.generateSampleDataSerivce = void 0;
 const lib_db_1 = require("./lib.db");
 let logger = global.logger;
 function generateSampleDataSerivce(name, selectedApp) {
@@ -169,7 +169,7 @@ function parseAndFixDataServices(selectedApp, dataservices) {
     return dataservices;
 }
 exports.parseAndFixDataServices = parseAndFixDataServices;
-function buildDependencyMatrix(dataservices) {
+function buildDependencyMatrixForDataServices(dataservices) {
     let dependencyMatrix = {};
     dataservices.forEach((dataservice) => {
         dependencyMatrix[dataservice._id] = { dataservices: [], libraries: [], functions: [] };
@@ -188,4 +188,4 @@ function buildDependencyMatrix(dataservices) {
     });
     return dependencyMatrix;
 }
-exports.buildDependencyMatrix = buildDependencyMatrix;
+exports.buildDependencyMatrixForDataServices = buildDependencyMatrixForDataServices;

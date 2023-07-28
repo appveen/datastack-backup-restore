@@ -4,6 +4,7 @@ let logger = global.logger;
 
 export async function killThySelf(killCode: number) {
 	printError(`Terminating with exit code(${killCode})`);
+	// process.exit(killCode);
 	await shutdown(function () { process.exit(killCode); });
 }
 

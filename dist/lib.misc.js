@@ -15,6 +15,7 @@ let logger = global.logger;
 function killThySelf(killCode) {
     return __awaiter(this, void 0, void 0, function* () {
         printError(`Terminating with exit code(${killCode})`);
+        // process.exit(killCode);
         yield (0, log4js_1.shutdown)(function () { process.exit(killCode); });
     });
 }

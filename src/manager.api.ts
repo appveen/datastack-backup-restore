@@ -12,12 +12,14 @@ export async function login(config: Credentials) {
 	try {
 		dataStack = await authenticateByCredentials(config);
 		printInfo("Logged into data.stack.");
+		let message = `User ${dataStack.authData._id} is not a super admin. You will not be able to backup Mapper Functions, Plugins and NPM Libraries.`;
+		if (dataStack.authData.isSuperAdmin) message = `User ${dataStack.authData._id} is a super admin.`;
+		printInfo(message);
 		global.dataStack = dataStack;
 	} catch (e) {
 		printError("Unable to login to data.stack server");
 		logger.error(e);
-		logger.trace(e);
-		killThySelf(400);
+		await killThySelf(400);
 	}
 }
 

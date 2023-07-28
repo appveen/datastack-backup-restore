@@ -4,4 +4,4 @@ export declare function generateSampleDataSerivce(name: string, selectedApp: Str
     app: String;
 };
 export declare function parseAndFixDataServices(selectedApp: string, dataservices: any[]): any[];
-export declare function buildDependencyMatrix(dataservices: any[]): any;
+export declare function buildDependencyMatrixForDataServices(dataservices: any[]): any;

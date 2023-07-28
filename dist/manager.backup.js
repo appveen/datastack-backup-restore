@@ -27,6 +27,11 @@ function backupManager(apps) {
         searchParams.append("sort", "_id");
         (0, lib_db_1.backupInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations within the app...");
+        if (global.dataStack.authData.isSuperAdmin) {
+            yield fetchMapperFormulas();
+            yield fetchPlugins();
+            yield fetchNPMLibraries();
+        }
         yield fetchDataServices(selectedApp);
         yield fetchLibrary(selectedApp);
         yield fetchFunctions(selectedApp);
@@ -36,6 +41,50 @@ function backupManager(apps) {
     });
 }
 exports.backupManager = backupManager;
+function fetchMapperFormulas() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const URL_DATA = "/api/a/rbac/admin/metadata/mapper/formula";
+        const URL_COUNT = "/api/a/rbac/admin/metadata/mapper/formula/count";
+        const mapperFormulaCount = yield (0, manager_api_1.get)(URL_COUNT, new URLSearchParams());
+        const searchParams = new URLSearchParams();
+        searchParams.append("count", mapperFormulaCount);
+        const mapperFormulas = yield (0, manager_api_1.get)(URL_DATA, searchParams);
+        (0, lib_db_1.save)("mapperformula", mapperFormulas);
+        mapperFormulas.forEach((mf) => {
+            (0, lib_db_1.backupMapper)("mapperformula", mf._id, mf.name);
+            (0, lib_db_1.backupMapper)("mapperformula_lookup", mf.name, mf._id);
+        });
+        (0, lib_misc_1.printDone)("Mapper Formulas(!)", mapperFormulaCount);
+    });
+}
+function fetchPlugins() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const URL_DATA = "/api/a/bm/admin/node";
+        const URL_COUNT = "/api/a/bm/admin/node/utils/count";
+        const pluginCount = yield (0, manager_api_1.get)(URL_COUNT, new URLSearchParams());
+        const searchParams = new URLSearchParams();
+        searchParams.append("count", pluginCount);
+        const plugins = yield (0, manager_api_1.get)(URL_DATA, searchParams);
+        (0, lib_db_1.save)("plugin", plugins);
+        plugins.forEach((plugin) => {
+            (0, lib_db_1.backupMapper)("plugin", plugin._id, plugin.name);
+            (0, lib_db_1.backupMapper)("plugin_lookup", plugin.name, plugin._id);
+        });
+        (0, lib_misc_1.printDone)("Plugins(!)", pluginCount);
+    });
+}
+function fetchNPMLibraries() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const URL_DATA = "/api/a/bm/admin/flow/utils/node-library";
+        const npmLibraries = yield (0, manager_api_1.get)(URL_DATA, searchParams);
+        (0, lib_db_1.save)("npmlibrary", npmLibraries);
+        npmLibraries.forEach((lib) => {
+            (0, lib_db_1.backupMapper)("npmlibrary", lib._id, lib.name);
+            (0, lib_db_1.backupMapper)("npmlibrary_lookup", lib.name, lib._id);
+        });
+        (0, lib_misc_1.printDone)("NPM Library(!)", npmLibraries.length);
+    });
+}
 function fetchDataServices(selectedApp) {
     return __awaiter(this, void 0, void 0, function* () {
         var URL = `/api/a/sm/${selectedApp}/service`;
@@ -45,7 +94,7 @@ function fetchDataServices(selectedApp) {
             (0, lib_db_1.backupMapper)("dataservice", ds._id, ds.name);
             (0, lib_db_1.backupMapper)("dataservice_lookup", ds.name, ds._id);
         });
-        (0, lib_db_1.backupDependencyMatrix)((0, lib_dsParser_1.buildDependencyMatrix)(dataservices));
+        (0, lib_db_1.backupDependencyMatrix)((0, lib_dsParser_1.buildDependencyMatrixForDataServices)(dataservices));
         (0, lib_misc_1.printDone)("Data services", dataservices.length);
     });
 }

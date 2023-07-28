@@ -2,7 +2,7 @@ import { customise, selectApp, selections } from "./lib.cli";
 import { header, printDone, printInfo } from "./lib.misc";
 import { get } from "./manager.api";
 import { backupDependencyMatrix, backupInit, backupMapper, readBackupMap, readDependencyMatrix, save, read } from "./lib.db";
-import { buildDependencyMatrix } from "./lib.dsParser";
+import { buildDependencyMatrixForDataServices } from "./lib.dsParser";
 
 let logger = global.logger;
 
@@ -20,12 +20,58 @@ export async function backupManager(apps: any) {
 	backupInit();
 	printInfo("Scanning the configurations within the app...");
 
+	if (global.dataStack.authData.isSuperAdmin) {
+		await fetchMapperFormulas();
+		await fetchPlugins();
+		await fetchNPMLibraries();
+	}
 	await fetchDataServices(selectedApp);
 	await fetchLibrary(selectedApp);
 	await fetchFunctions(selectedApp);
 	await fetchGroups(selectedApp);
 	await customiseBackup();
 	header("Backup complete!");
+}
+
+async function fetchMapperFormulas() {
+	const URL_DATA = "/api/a/rbac/admin/metadata/mapper/formula";
+	const URL_COUNT = "/api/a/rbac/admin/metadata/mapper/formula/count";
+	const mapperFormulaCount = await get(URL_COUNT, new URLSearchParams());
+	const searchParams = new URLSearchParams();
+	searchParams.append("count", mapperFormulaCount);
+	const mapperFormulas = await get(URL_DATA, searchParams);
+	save("mapperformula", mapperFormulas);
+	mapperFormulas.forEach((mf: any) => {
+		backupMapper("mapperformula", mf._id, mf.name);
+		backupMapper("mapperformula_lookup", mf.name, mf._id);
+	});
+	printDone("Mapper Formulas(!)", mapperFormulaCount);
+}
+
+async function fetchPlugins() {
+	const URL_DATA = "/api/a/bm/admin/node";
+	const URL_COUNT = "/api/a/bm/admin/node/utils/count";
+	const pluginCount = await get(URL_COUNT, new URLSearchParams());
+	const searchParams = new URLSearchParams();
+	searchParams.append("count", pluginCount);
+	const plugins = await get(URL_DATA, searchParams);
+	save("plugin", plugins);
+	plugins.forEach((plugin: any) => {
+		backupMapper("plugin", plugin._id, plugin.name);
+		backupMapper("plugin_lookup", plugin.name, plugin._id);
+	});
+	printDone("Plugins(!)", pluginCount);
+}
+
+async function fetchNPMLibraries() {
+	const URL_DATA = "/api/a/bm/admin/flow/utils/node-library";
+	const npmLibraries = await get(URL_DATA, searchParams);
+	save("npmlibrary", npmLibraries);
+	npmLibraries.forEach((lib: any) => {
+		backupMapper("npmlibrary", lib._id, lib.name);
+		backupMapper("npmlibrary_lookup", lib.name, lib._id);
+	});
+	printDone("NPM Library(!)", npmLibraries.length);
 }
 
 async function fetchDataServices(selectedApp: string) {
@@ -36,7 +82,7 @@ async function fetchDataServices(selectedApp: string) {
 		backupMapper("dataservice", ds._id, ds.name);
 		backupMapper("dataservice_lookup", ds.name, ds._id);
 	});
-	backupDependencyMatrix(buildDependencyMatrix(dataservices));
+	backupDependencyMatrix(buildDependencyMatrixForDataServices(dataservices));
 	printDone("Data services", dataservices.length);
 }
 

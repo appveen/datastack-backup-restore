@@ -25,13 +25,16 @@ function login(config) {
         try {
             dataStack = yield (0, ds_sdk_1.authenticateByCredentials)(config);
             (0, lib_misc_1.printInfo)("Logged into data.stack.");
+            let message = `User ${dataStack.authData._id} is not a super admin. You will not be able to backup Mapper Functions, Plugins and NPM Libraries.`;
+            if (dataStack.authData.isSuperAdmin)
+                message = `User ${dataStack.authData._id} is a super admin.`;
+            (0, lib_misc_1.printInfo)(message);
             global.dataStack = dataStack;
         }
         catch (e) {
             (0, lib_misc_1.printError)("Unable to login to data.stack server");
             logger.error(e);
-            logger.trace(e);
-            (0, lib_misc_1.killThySelf)(400);
+            yield (0, lib_misc_1.killThySelf)(400);
         }
     });
 }
