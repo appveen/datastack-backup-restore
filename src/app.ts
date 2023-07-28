@@ -1,8 +1,6 @@
 import { getLogger as GetLogger, configure as Log4JSConfig } from "log4js"; "log4js";
 import { Command } from "commander";
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 const version = require("../package.json").version;
 global.version = version;
 

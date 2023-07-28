@@ -54,3 +54,4 @@ Download and run the executable from the [Releases](https://github.com/appveen/d
 | DS_BR_PASSWORD | data.stack password. |
 | DS_BR_SINGLELOGFILE | `true/false`. If enabled, then backup, restore, and logs will use `backup.json`, `restore.json` and `out.log` as the files to write to.|
 | LOGLEVEL | Logging level to set. |
+| NODE_TLS_REJECT_UNAUTHORIZED | `0/1`. Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.  |
