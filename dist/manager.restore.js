@@ -14,7 +14,7 @@ const lib_cli_1 = require("./lib.cli");
 const lib_misc_1 = require("./lib.misc");
 const manager_api_1 = require("./manager.api");
 const lib_db_1 = require("./lib.db");
-const lib_dsParser_1 = require("./lib.dsParser");
+const lib_parser_ds_1 = require("./lib.parser.ds");
 let logger = global.logger;
 function restoreManager(apps) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -116,11 +116,11 @@ function restoreDataServices(selectedApp) {
             yield prev;
             if (newDataServices.indexOf(dataservice._id) == -1)
                 return;
-            let newDS = (0, lib_dsParser_1.generateSampleDataSerivce)(dataservice.name, selectedApp);
+            let newDS = (0, lib_parser_ds_1.generateSampleDataSerivce)(dataservice.name, selectedApp);
             let newData = yield insert("Dataservice", BASE_URL, selectedApp, newDS);
             return (0, lib_db_1.restoreMapper)("dataservice", dataservice._id, newData._id);
         }), Promise.resolve());
-        dataservices = (0, lib_dsParser_1.parseAndFixDataServices)(selectedApp, dataservices);
+        dataservices = (0, lib_parser_ds_1.parseAndFixDataServices)(selectedApp, dataservices);
         let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservice");
         yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
             yield prev;

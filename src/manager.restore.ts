@@ -2,7 +2,7 @@ import { selectApp } from "./lib.cli";
 import { header, printInfo } from "./lib.misc";
 import { get, post, put } from "./manager.api";
 import { read, readRestoreMap, restoreInit, restoreMapper } from "./lib.db";
-import { generateSampleDataSerivce, parseAndFixDataServices } from "./lib.dsParser";
+import { generateSampleDataSerivce, parseAndFixDataServices } from "./lib.parser.ds";
 
 let logger = global.logger;
 

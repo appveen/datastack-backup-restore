@@ -138,7 +138,7 @@ function parseAndFixDataServices(selectedApp, dataservices) {
     let functionURLMap = (0, lib_db_1.readRestoreMap)("functionURL");
     let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservice");
     logger.info(`Dataservice ID Map : ${JSON.stringify(dataserviceMap)}`);
-    let dependencyMatrix = (0, lib_db_1.readDependencyMatrix)();
+    let dependencyMatrix = (0, lib_db_1.readDependencyMatrixofDataService)();
     logger.info(`Dataservice dependency matrix : ${JSON.stringify(dependencyMatrix)}`);
     dataservices.forEach((dataservice) => {
         delete dataservice.version;

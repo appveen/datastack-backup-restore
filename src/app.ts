@@ -52,7 +52,7 @@ program
 	.option("-b, --backupfile <backup JSON file>", "Custom backup file to use during backup or restore")
 	.action(async () => {
 		parseCliParams(program.opts(), timestamp);
-		header(`data.stack Backup and Restore Utility ${version}`);
+		header(` data.stack Backup and Restore Utility ${version} `);
 		let dsConfig = await validateCLIParams();
 		await login(dsConfig);
 		let apps = await getApps();

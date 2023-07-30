@@ -7,22 +7,44 @@ let logger = global.logger;
 let sampleBackupData = {
 	"version": `${global.version}`,
 	"map": {
+		"mapperformula": {},
+		"mapperformula_lookup": {},
+		"plugin": {},
+		"plugin_lookup": {},
+		"npmlibrary": {},
+		"npmlibrary_lookup": {},
 		"dataservice": {},
 		"dataservice_lookup": {},
 		"library": {},
 		"library_lookup": {},
 		"function": {},
 		"function_lookup": {},
+		"connectors": {},
+		"connectors_lookup": {},
+		"dataformats": {},
+		"dataformats_lookup": {},
+		"agents": {},
+		"agents_lookup": {},
+		"datapipes": {},
+		"datapipes_lookup": {},
 		"group": {},
 		"group_lookup": {}
 	},
 	"data": {
+		"mapperformula": [],
+		"plugin": [],
+		"npmlibrary": [],
 		"dataservice": [],
 		"library": [],
 		"function": [],
+		"connectors": [],
+		"dataformats": [],
+		"agents": [],
+		"datapipes": [],
 		"group": []
 	},
-	"dependencyMatrix": {}
+	"dependencyMatrixOfDataService": {},
+	"dependencyMatrixOfDataPipe": {}
 };
 
 export function backupInit() {
@@ -53,12 +75,20 @@ export function backupMapper(token: string, key: string, value: string) {
 	logger.trace(`Updated ${global.backupFileName} : ${token} : ${key} : ${value}`);
 }
 
-export function backupDependencyMatrix(data: any) {
+export function backupDependencyMatrixOfDataService(data: any) {
 	let backupData = readJSON(global.backupFileName);
-	if (!backupData.dependencyMatrix) backupData["dependencyMatrix"] = {};
-	backupData.dependencyMatrix = data;
+	if (!backupData.dependencyMatrixOfDataService) backupData["dependencyMatrixOfDataService"] = {};
+	backupData.dependencyMatrixOfDataService = data;
 	writeJSON(global.backupFileName, backupData);
-	logger.trace(`Updated ${global.backupFileName} : dependencyMatrix`);
+	logger.trace(`Updated ${global.backupFileName} : dependencyMatrixOfDataService`);
+}
+
+export function backupDependencyMatrixOfDataPipe(data: any) {
+	let backupData = readJSON(global.backupFileName);
+	if (!backupData.dependencyMatrixOfDataPipe) backupData["dependencyMatrixOfDataPipe"] = {};
+	backupData.dependencyMatrixOfDataPipe = data;
+	writeJSON(global.backupFileName, backupData);
+	logger.trace(`Updated ${global.backupFileName} : dependencyMatrixOfDataPipe`);
 }
 
 export function restoreMapper(token: string, key: string, value: string) {
@@ -79,9 +109,14 @@ export function readBackupMap(token: string) {
 	return backupData.map[token];
 }
 
-export function readDependencyMatrix() {
+export function readDependencyMatrixofDataService() {
 	let backupData = readJSON(global.backupFileName);
-	return backupData.dependencyMatrix;
+	return backupData.dependencyMatrixOfDataService;
+}
+
+export function readDependencyMatrixofDataPipe() {
+	let backupData = readJSON(global.backupFileName);
+	return backupData.dependencyMatrixOfDataPipe;
 }
 
 export function readRestoreMap(token: string) {

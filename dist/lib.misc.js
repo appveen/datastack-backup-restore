@@ -45,7 +45,6 @@ function header(_s) {
     let top = "┌" + liner + middle + liner + "┐";
     let bottom = "└" + liner + middle + liner + "┘";
     let center = "│" + spacer + _s + spacer + "│";
-    console.log("");
     printInfo(top);
     printInfo(center);
     printInfo(bottom);

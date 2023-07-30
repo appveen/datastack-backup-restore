@@ -57,7 +57,7 @@ program
     .option("-b, --backupfile <backup JSON file>", "Custom backup file to use during backup or restore")
     .action(() => __awaiter(void 0, void 0, void 0, function* () {
     (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
-    (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
+    (0, lib_misc_1.header)(` data.stack Backup and Restore Utility ${version} `);
     let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
     yield (0, manager_api_1.login)(dsConfig);
     let apps = yield (0, manager_api_1.getApps)();
