@@ -1,4 +1,4 @@
-import { readRestoreMap, readDependencyMatrixofDataService } from "./lib.db";
+import { readRestoreMap, readDependencyMatrixOfDataServices } from "./lib.db";
 
 let logger = global.logger;
 
@@ -141,7 +141,7 @@ export function parseAndFixDataServices(selectedApp: string, dataservices: any[]
 	let functionURLMap = readRestoreMap("functionURL");
 	let dataserviceMap = readRestoreMap("dataservice");
 	logger.info(`Dataservice ID Map : ${JSON.stringify(dataserviceMap)}`);
-	let dependencyMatrix = readDependencyMatrixofDataService();
+	let dependencyMatrix = readDependencyMatrixOfDataServices();
 	logger.info(`Dataservice dependency matrix : ${JSON.stringify(dependencyMatrix)}`);
 	dataservices.forEach((dataservice: any) => {
 		delete dataservice.version;

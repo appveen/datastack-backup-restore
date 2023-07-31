@@ -10,4 +10,5 @@ declare global {
 	var host: string;
 	var backupFileName: string;
 	var restoreFileName: string;
+	var isSuperAdmin: boolean;
 }

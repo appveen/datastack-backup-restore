@@ -28,6 +28,7 @@ function login(config) {
             let message = `User ${dataStack.authData._id} is not a super admin. You will not be able to backup Mapper Functions, Plugins and NPM Libraries.`;
             if (dataStack.authData.isSuperAdmin)
                 message = `User ${dataStack.authData._id} is a super admin.`;
+            global.isSuperAdmin = dataStack.authData.isSuperAdmin;
             (0, lib_misc_1.printInfo)(message);
             global.dataStack = dataStack;
         }

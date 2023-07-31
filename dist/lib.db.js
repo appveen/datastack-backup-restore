@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.readRestoreMap = exports.readDependencyMatrixofDataPipe = exports.readDependencyMatrixofDataService = exports.readBackupMap = exports.read = exports.restoreMapper = exports.backupDependencyMatrixOfDataPipe = exports.backupDependencyMatrixOfDataService = exports.backupMapper = exports.save = exports.restoreInit = exports.backupInit = void 0;
+exports.readRestoreMap = exports.readDependencyMatrixOfDataPipes = exports.readDependencyMatrixOfDataServices = exports.readBackupMap = exports.read = exports.restoreMapper = exports.backupDependencyMatrixOfDataPipe = exports.backupDependencyMatrixOfDataService = exports.backupMapper = exports.save = exports.restoreInit = exports.backupInit = void 0;
 const path_1 = require("path");
 const fs_1 = require("fs");
 const lib_misc_1 = require("./lib.misc");
@@ -8,18 +8,18 @@ let logger = global.logger;
 let sampleBackupData = {
     "version": `${global.version}`,
     "map": {
-        "mapperformula": {},
-        "mapperformula_lookup": {},
-        "plugin": {},
-        "plugin_lookup": {},
-        "npmlibrary": {},
-        "npmlibrary_lookup": {},
-        "dataservice": {},
-        "dataservice_lookup": {},
-        "library": {},
-        "library_lookup": {},
-        "function": {},
-        "function_lookup": {},
+        "mapperformulas": {},
+        "mapperformulas_lookup": {},
+        "plugins": {},
+        "plugins_lookup": {},
+        "npmlibraries": {},
+        "npmlibraries_lookup": {},
+        "dataservices": {},
+        "dataservices_lookup": {},
+        "libraries": {},
+        "libraries_lookup": {},
+        "functions": {},
+        "functions_lookup": {},
         "connectors": {},
         "connectors_lookup": {},
         "dataformats": {},
@@ -28,24 +28,24 @@ let sampleBackupData = {
         "agents_lookup": {},
         "datapipes": {},
         "datapipes_lookup": {},
-        "group": {},
-        "group_lookup": {}
+        "groups": {},
+        "groups_lookup": {}
     },
     "data": {
-        "mapperformula": [],
-        "plugin": [],
-        "npmlibrary": [],
-        "dataservice": [],
-        "library": [],
-        "function": [],
+        "mapperformulas": [],
+        "plugins": [],
+        "npmlibraries": [],
+        "dataservices": [],
+        "libraries": [],
+        "functions": [],
         "connectors": [],
         "dataformats": [],
         "agents": [],
         "datapipes": [],
-        "group": []
+        "groups": []
     },
-    "dependencyMatrixOfDataService": {},
-    "dependencyMatrixOfDataPipe": {}
+    "dependencyMatrixOfDataServices": {},
+    "dependencyMatrixOfDataPipes": {}
 };
 function backupInit() {
     (0, lib_misc_1.printInfo)(`Backup file - ${global.backupFileName}`);
@@ -79,19 +79,19 @@ exports.backupMapper = backupMapper;
 function backupDependencyMatrixOfDataService(data) {
     let backupData = readJSON(global.backupFileName);
     if (!backupData.dependencyMatrixOfDataService)
-        backupData["dependencyMatrixOfDataService"] = {};
-    backupData.dependencyMatrixOfDataService = data;
+        backupData["dependencyMatrixOfDataServices"] = {};
+    backupData.dependencyMatrixOfDataServices = data;
     writeJSON(global.backupFileName, backupData);
-    logger.trace(`Updated ${global.backupFileName} : dependencyMatrixOfDataService`);
+    logger.trace(`Updated ${global.backupFileName} : dependencyMatrixOfDataServices`);
 }
 exports.backupDependencyMatrixOfDataService = backupDependencyMatrixOfDataService;
 function backupDependencyMatrixOfDataPipe(data) {
     let backupData = readJSON(global.backupFileName);
     if (!backupData.dependencyMatrixOfDataPipe)
-        backupData["dependencyMatrixOfDataPipe"] = {};
-    backupData.dependencyMatrixOfDataPipe = data;
+        backupData["dependencyMatrixOfDataPipes"] = {};
+    backupData.dependencyMatrixOfDataPipes = data;
     writeJSON(global.backupFileName, backupData);
-    logger.trace(`Updated ${global.backupFileName} : dependencyMatrixOfDataPipe`);
+    logger.trace(`Updated ${global.backupFileName} : dependencyMatrixOfDataPipes`);
 }
 exports.backupDependencyMatrixOfDataPipe = backupDependencyMatrixOfDataPipe;
 function restoreMapper(token, key, value) {
@@ -113,16 +113,16 @@ function readBackupMap(token) {
     return backupData.map[token];
 }
 exports.readBackupMap = readBackupMap;
-function readDependencyMatrixofDataService() {
+function readDependencyMatrixOfDataServices() {
     let backupData = readJSON(global.backupFileName);
-    return backupData.dependencyMatrixOfDataService;
+    return backupData.dependencyMatrixOfDataServices;
 }
-exports.readDependencyMatrixofDataService = readDependencyMatrixofDataService;
-function readDependencyMatrixofDataPipe() {
+exports.readDependencyMatrixOfDataServices = readDependencyMatrixOfDataServices;
+function readDependencyMatrixOfDataPipes() {
     let backupData = readJSON(global.backupFileName);
-    return backupData.dependencyMatrixOfDataPipe;
+    return backupData.dependencyMatrixOfDataPipes;
 }
-exports.readDependencyMatrixofDataPipe = readDependencyMatrixofDataPipe;
+exports.readDependencyMatrixOfDataPipes = readDependencyMatrixOfDataPipes;
 function readRestoreMap(token) {
     let restoreMapData = readJSON(global.restoreFileName);
     return restoreMapData[token];

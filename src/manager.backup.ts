@@ -1,7 +1,7 @@
 import { customise, selectApp, selections } from "./lib.cli";
 import { header, printDone, printInfo } from "./lib.misc";
 import { get } from "./manager.api";
-import { backupDependencyMatrixOfDataService, backupInit, backupMapper, readBackupMap, readDependencyMatrixofDataService, save, read, backupDependencyMatrixOfDataPipe } from "./lib.db";
+import { backupDependencyMatrixOfDataService, backupInit, backupMapper, readBackupMap, readDependencyMatrixOfDataServices, save, read, backupDependencyMatrixOfDataPipe, readDependencyMatrixOfDataPipes } from "./lib.db";
 import { buildDependencyMatrixForDataServices } from "./lib.parser.ds";
 import { buildDependencyMatrixForDataPipe } from "./lib.parser.pipe";
 
@@ -31,13 +31,15 @@ export async function backupManager(apps: any) {
 	backupInit();
 	printInfo("Scanning the configurations within the app...");
 
-	if (global.dataStack.authData.isSuperAdmin) {
+	if (global.isSuperAdmin) {
 		await fetchMapperFormulas();
 		await fetchPlugins();
 		await fetchNPMLibraries();
+	} else {
+		printInfo("Skipping Mapper Formulas, Plugins and NPM Libraries as you are not a super admin.");
 	}
 	await fetchDataServices();
-	await fetchLibrary();
+	await fetchLibraries();
 	await fetchFunctions();
 	await fetchConnectors();
 	await fetchDataFormats();
@@ -54,11 +56,12 @@ async function fetchMapperFormulas() {
 	const mapperFormulaCount = await get(URL_COUNT, new URLSearchParams());
 	const searchParams = new URLSearchParams();
 	searchParams.append("count", mapperFormulaCount);
+	searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
 	const mapperFormulas = await get(URL_DATA, searchParams);
-	save("mapperformula", mapperFormulas);
+	save("mapperformulas", mapperFormulas);
 	mapperFormulas.forEach((mf: any) => {
-		backupMapper("mapperformula", mf._id, mf.name);
-		backupMapper("mapperformula_lookup", mf.name, mf._id);
+		backupMapper("mapperformulas", mf._id, mf.name);
+		backupMapper("mapperformulas_lookup", mf.name, mf._id);
 	});
 	printDone("Mapper Formulas(!)", mapperFormulaCount);
 }
@@ -69,11 +72,12 @@ async function fetchPlugins() {
 	const pluginCount = await get(URL_COUNT, new URLSearchParams());
 	const searchParams = new URLSearchParams();
 	searchParams.append("count", pluginCount);
+	searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
 	const plugins = await get(URL_DATA, searchParams);
-	save("plugin", plugins);
+	save("plugins", plugins);
 	plugins.forEach((plugin: any) => {
-		backupMapper("plugin", plugin._id, plugin.name);
-		backupMapper("plugin_lookup", plugin.name, plugin._id);
+		backupMapper("plugins", plugin._id, plugin.name);
+		backupMapper("plugins_lookup", plugin.name, plugin._id);
 	});
 	printDone("Plugins(!)", pluginCount);
 }
@@ -81,10 +85,10 @@ async function fetchPlugins() {
 async function fetchNPMLibraries() {
 	const URL_DATA = "/api/a/bm/admin/flow/utils/node-library";
 	const npmLibraries = await get(URL_DATA, new URLSearchParams());
-	save("npmlibrary", npmLibraries);
+	save("npmlibraries", npmLibraries);
 	npmLibraries.forEach((lib: any) => {
-		backupMapper("npmlibrary", lib._id, lib.name);
-		backupMapper("npmlibrary_lookup", lib.name, lib._id);
+		backupMapper("npmlibraries", lib._id, lib.name);
+		backupMapper("npmlibraries_lookup", lib.name, lib._id);
 	});
 	printDone("NPM Library(!)", npmLibraries.length);
 }
@@ -94,25 +98,25 @@ async function fetchDataServices() {
 	var URL_DATA = `/api/a/sm/${selectedApp}/service`;
 	const dataservicesCount = await get(URL_COUNT, getURLParamsForCount());
 	let dataservices = await get(URL_DATA, getURLParamsForData(dataservicesCount));
-	save("dataservice", dataservices);
+	save("dataservices", dataservices);
 	dataservices.forEach((ds: any) => {
-		backupMapper("dataservice", ds._id, ds.name);
-		backupMapper("dataservice_lookup", ds.name, ds._id);
+		backupMapper("dataservices", ds._id, ds.name);
+		backupMapper("dataservices_lookup", ds.name, ds._id);
 	});
 	backupDependencyMatrixOfDataService(buildDependencyMatrixForDataServices(dataservices));
 	printDone("Data services", dataservicesCount);
 }
 
-async function fetchLibrary() {
+async function fetchLibraries() {
 	var URL_COUNT = `/api/a/sm/${selectedApp}/globalSchema/utils/count`;
 	var URL_DATA = `/api/a/sm/${selectedApp}/globalSchema`;
 	const librariesCount = await get(URL_COUNT, getURLParamsForCount());
 	let libraries = await get(URL_DATA, getURLParamsForData(librariesCount));
-	save("library", libraries);
+	save("libraries", libraries);
 	libraries.forEach((library: any) => {
 		library.services = [];
-		backupMapper("library", library._id, library.name);
-		backupMapper("library_lookup", library.name, library._id);
+		backupMapper("libraries", library._id, library.name);
+		backupMapper("libraries_lookup", library.name, library._id);
 	});
 	printDone("Libraries", librariesCount);
 }
@@ -122,11 +126,11 @@ async function fetchFunctions() {
 	let URL_DATA = `/api/a/bm/${selectedApp}/faas`;
 	let functionsCount = await get(URL_COUNT, getURLParamsForCount());
 	let functions = await get(URL_DATA, getURLParamsForData(functionsCount));
-	save("function", functions);
+	save("functions", functions);
 	functions.forEach((fn: any) => {
 		fn.services = [];
-		backupMapper("function", fn._id, fn.name);
-		backupMapper("function_lookup", fn.name, fn._id);
+		backupMapper("functions", fn._id, fn.name);
+		backupMapper("functions_lookup", fn.name, fn._id);
 	});
 	printDone("Functions", functionsCount);
 }
@@ -192,10 +196,10 @@ async function fetchGroups() {
 	const groupsCount = await get(URL_COUNT, getURLParamsForCount());
 	let groups = await get(URL_DATA, getURLParamsForData(groupsCount));
 	groups = groups.filter((group: any) => group.name != "#");
-	save("group", groups);
+	save("groups", groups);
 	groups.forEach((group: any) => {
-		backupMapper("group", group._id, group.name);
-		backupMapper("group_lookup", group.name, group._id);
+		backupMapper("groups", group._id, group.name);
+		backupMapper("groups_lookup", group.name, group._id);
 	});
 	printDone("Groups", groups.length);
 }
@@ -208,54 +212,138 @@ async function customiseBackup() {
 		return;
 	}
 	header("Customizing the backup");
-	let dataserviceLookup = readBackupMap("dataservice_lookup");
+
+	let selectedMapperFormulas: string[] = [];
+	let selectedPlugins: string[] = [];
+	if (global.isSuperAdmin) {
+		let mapperformulasLookup = readBackupMap("mapperformulas_lookup");
+		(await selections("Mapper Formulas", Object.keys(mapperformulasLookup))).forEach((mf: string) => selectedMapperFormulas.push(mapperformulasLookup[mf]));
+
+		let pluginsLookup = readBackupMap("plugins_lookup");
+		(await selections("Plugins", Object.keys(pluginsLookup))).forEach((plugin: string) => selectedPlugins.push(pluginsLookup[plugin]));
+	} else {
+		printInfo("Skipping Mapper Formulas, Plugins and NPM Libraries as you are not a super admin.");
+	}
+
+	let dataservicesLookup = readBackupMap("dataservices_lookup");
 	let selectedDataservices: string[] = [];
-	(await selections("dataservices", Object.keys(dataserviceLookup))).forEach((ds: string) => selectedDataservices.push(dataserviceLookup[ds]));
+	(await selections("Data Services", Object.keys(dataservicesLookup))).forEach((ds: string) => selectedDataservices.push(dataservicesLookup[ds]));
 
-	let libraryLookup = readBackupMap("library_lookup");
+	let librariesLookup = readBackupMap("libraries_lookup");
 	let selectedLibraries: string[] = [];
-	(await selections("libraries", Object.keys(libraryLookup))).forEach((lib: string) => selectedLibraries.push(libraryLookup[lib]));
+	(await selections("Libraries", Object.keys(librariesLookup))).forEach((lib: string) => selectedLibraries.push(librariesLookup[lib]));
 
-	let functionLookup = readBackupMap("function_lookup");
+	let functionsLookup = readBackupMap("functions_lookup");
 	let selectedFunctions: string[] = [];
-	(await selections("functions", Object.keys(functionLookup))).forEach((fn: string) => selectedFunctions.push(functionLookup[fn]));
+	(await selections("Functions", Object.keys(functionsLookup))).forEach((fn: string) => selectedFunctions.push(functionsLookup[fn]));
 
-	let groupLookup = readBackupMap("group_lookup");
+	let connectorsLookup = readBackupMap("connectors_lookup");
+	let selectedConnectors: string[] = [];
+	(await selections("Connectors", Object.keys(connectorsLookup))).forEach((connector: string) => selectedConnectors.push(connectorsLookup[connector]));
+
+	let dataformatsLookup = readBackupMap("dataformats_lookup");
+	let selectedDataFormats: string[] = [];
+	(await selections("Data Formats", Object.keys(dataformatsLookup))).forEach((dataformat: string) => selectedDataFormats.push(dataformatsLookup[dataformat]));
+
+	let agentsLookup = readBackupMap("agents_lookup");
+	let selectedAgents: string[] = [];
+	(await selections("Agents", Object.keys(agentsLookup))).forEach((agent: string) => selectedAgents.push(agentsLookup[agent]));
+
+	let datapipesLookup = readBackupMap("datapipes_lookup");
+	let selectedDataPipes: string[] = [];
+	(await selections("Data Pipes", Object.keys(datapipesLookup))).forEach((datapipe: string) => selectedDataPipes.push(datapipesLookup[datapipe]));
+
+	let groupsLookup = readBackupMap("groups_lookup");
 	let selectedGroups: string[] = [];
-	(await selections("groups", Object.keys(groupLookup))).forEach((group: string) => selectedGroups.push(groupLookup[group]));
+	(await selections("groups", Object.keys(groupsLookup))).forEach((group: string) => selectedGroups.push(groupsLookup[group]));
 
+	if (global.isSuperAdmin) {
+		logger.info(`Mapper Formulas : ${selectedMapperFormulas.join(", ") || "Nil"}`);
+		logger.info(`Plugins : ${selectedPlugins.join(", ") || "Nil"}`);
+	}
 	logger.info(`Dataservices : ${selectedDataservices.join(", ") || "Nil"}`);
-	logger.info(`Libraries    : ${selectedLibraries.join(", ") || "Nil"}`);
-	logger.info(`Functions    : ${selectedFunctions.join(", ") || "Nil"}`);
-	logger.info(`Groups       : ${selectedGroups.join(", ") || "Nil"}`);
+	logger.info(`Libraries : ${selectedLibraries.join(", ") || "Nil"}`);
+	logger.info(`Functions : ${selectedFunctions.join(", ") || "Nil"}`);
+	logger.info(`Connectors : ${selectedConnectors.join(", ") || "Nil"}`);
+	logger.info(`Data Formats : ${selectedDataFormats.join(", ") || "Nil"}`);
+	logger.info(`Agents : ${selectedAgents.join(", ") || "Nil"}`);
+	logger.info(`Data Pipes : ${selectedDataPipes.join(", ") || "Nil"}`);
+	logger.info(`Groups : ${selectedGroups.join(", ") || "Nil"}`);
 
-	let dependencyMatrix = readDependencyMatrixofDataService();
-
+	let dependencyMatrixOfDataService = readDependencyMatrixOfDataServices();
 	let superSetOfDataservices = selectedDataservices;
 	selectedDataservices.forEach((dataserviceID: string) => {
-		selectAllRelated(dataserviceID, dependencyMatrix)
+		selectAllRelated(dataserviceID, dependencyMatrixOfDataService)
 			.filter(ds => superSetOfDataservices.indexOf(ds) == -1)
 			.forEach(ds => superSetOfDataservices.push(ds));
-		dependencyMatrix[dataserviceID].libraries.forEach((library: string) => {
+		dependencyMatrixOfDataService[dataserviceID].libraries.forEach((library: string) => {
 			if (selectedLibraries.indexOf(library) == -1) selectedLibraries.push(library);
 		});
-		dependencyMatrix[dataserviceID].functions.forEach((fn: string) => {
+		dependencyMatrixOfDataService[dataserviceID].functions.forEach((fn: string) => {
 			if (selectedFunctions.indexOf(fn) == -1) selectedFunctions.push(fn);
 		});
 	});
+
+	let dependencyMatrixOfDataPipe = readDependencyMatrixOfDataPipes();
+	selectedDataPipes.forEach((dataPipeID: string) => {
+		dependencyMatrixOfDataPipe[dataPipeID].dataservices.forEach((dataservice: string) => {
+			if (superSetOfDataservices.indexOf(dataservice) == -1) superSetOfDataservices.push(dataservice);
+		});
+		dependencyMatrixOfDataPipe[dataPipeID].dataformats.forEach((dataformat: string) => {
+			if (selectedLibraries.indexOf(dataformat) == -1) selectedDataFormats.push(dataformat);
+		});
+		dependencyMatrixOfDataPipe[dataPipeID].functions.forEach((fn: string) => {
+			if (selectedFunctions.indexOf(fn) == -1) selectedFunctions.push(fn);
+		});
+		dependencyMatrixOfDataPipe[dataPipeID].agents.forEach((agent: string) => {
+			if (selectedAgents.indexOf(agent) == -1) selectedAgents.push(agent);
+		});
+		dependencyMatrixOfDataPipe[dataPipeID].connectors.forEach((connector: string) => {
+			if (selectedConnectors.indexOf(connector) == -1) selectedConnectors.push(connector);
+		});
+		dependencyMatrixOfDataPipe[dataPipeID].plugins.forEach((plugin: string) => {
+			if (selectedPlugins.indexOf(plugin) == -1) selectedPlugins.push(plugin);
+		});
+		dependencyMatrixOfDataPipe[dataPipeID].mapperformulas.forEach((mf: string) => {
+			if (selectedMapperFormulas.indexOf(mf) == -1) selectedMapperFormulas.push(mf);
+		});
+	});
+
+	if (global.isSuperAdmin) {
+		logger.info(`Superset Mapper Formulas : ${selectedMapperFormulas.join(", ")}`);
+		logger.info(`Superset Plugins : ${selectedPlugins.join(", ")}`);
+	}
 	logger.info(`Superset Dataservices : ${superSetOfDataservices.join(", ")}`);
-	logger.info(`Superset Libraries    : ${selectedLibraries.join(", ")}`);
-	logger.info(`Superset Functions    : ${selectedFunctions.join(", ")}`);
+	logger.info(`Superset Libraries : ${selectedLibraries.join(", ")}`);
+	logger.info(`Superset Functions : ${selectedFunctions.join(", ")}`);
+	logger.info(`Superset Conectors : ${selectedConnectors.join(", ")}`);
+	logger.info(`Superset Data Formats : ${selectedDataFormats.join(", ")}`);
+	logger.info(`Superset Agents : ${selectedAgents.join(", ")}`);
+	logger.info(`Superset Data Pipes : ${selectedDataPipes.join(", ")}`);
 
-	let dataservices = read("dataservice").filter((dataservice: any) => superSetOfDataservices.indexOf(dataservice._id) != -1);
-	let libraries = read("library").filter((library: any) => selectedLibraries.indexOf(library._id) != -1);
-	let functions = read("function").filter((fn: any) => selectedFunctions.indexOf(fn._id) != -1);
-	let groups = read("group").filter((group: any) => selectedGroups.indexOf(group._id) != -1);
+	let mapperformulas = read("mapperformulas").filter((mapperformula: any) => selectedMapperFormulas.indexOf(mapperformula._id) != -1);
+	let plugins = read("plugins").filter((plugin: any) => selectedPlugins.indexOf(plugin._id) != -1);
+	let dataservices = read("dataservices").filter((dataservice: any) => superSetOfDataservices.indexOf(dataservice._id) != -1);
+	let libraries = read("libraries").filter((library: any) => selectedLibraries.indexOf(library._id) != -1);
+	let functions = read("functions").filter((fn: any) => selectedFunctions.indexOf(fn._id) != -1);
+	let connectors = read("connectors").filter((connector: any) => selectedConnectors.indexOf(connector._id) != -1);
+	let dataformats = read("dataformats").filter((dataformat: any) => selectedDataFormats.indexOf(dataformat._id) != -1);
+	let agents = read("agents").filter((agent: any) => selectedAgents.indexOf(agent._id) != -1);
+	let datapipes = read("datapipes").filter((datapipe: any) => selectedDataPipes.indexOf(datapipe._id) != -1);
+	let groups = read("groups").filter((group: any) => selectedGroups.indexOf(group._id) != -1);
 
-	save("dataservice", dataservices);
-	save("library", libraries);
-	save("function", functions);
-	save("group", groups);
+	if (global.isSuperAdmin) {
+		save("mapperformulas", mapperformulas);
+		save("plugins", plugins);
+	}
+	save("dataservices", dataservices);
+	save("libraries", libraries);
+	save("functions", functions);
+	save("connectors", connectors);
+	save("dataformats", dataformats);
+	save("agents", agents);
+	save("datapipes", datapipes);
+	save("groups", groups);
 }
 
 function selectAllRelated(dataserviceID: string, dependencyMatrix: any) {

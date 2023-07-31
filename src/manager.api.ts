@@ -14,6 +14,7 @@ export async function login(config: Credentials) {
 		printInfo("Logged into data.stack.");
 		let message = `User ${dataStack.authData._id} is not a super admin. You will not be able to backup Mapper Functions, Plugins and NPM Libraries.`;
 		if (dataStack.authData.isSuperAdmin) message = `User ${dataStack.authData._id} is a super admin.`;
+		global.isSuperAdmin = dataStack.authData.isSuperAdmin;
 		printInfo(message);
 		global.dataStack = dataStack;
 	} catch (e) {
