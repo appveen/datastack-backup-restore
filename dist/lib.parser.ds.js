@@ -133,10 +133,10 @@ function repairFunctions(dataservice, functionMap, functionURLMap) {
     return dataservice;
 }
 function parseAndFixDataServices(selectedApp, dataservices) {
-    let libraryMap = (0, lib_db_1.readRestoreMap)("library");
-    let functionMap = (0, lib_db_1.readRestoreMap)("function");
+    let libraryMap = (0, lib_db_1.readRestoreMap)("libraries");
+    let functionMap = (0, lib_db_1.readRestoreMap)("functions");
     let functionURLMap = (0, lib_db_1.readRestoreMap)("functionURL");
-    let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservice");
+    let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservices");
     logger.info(`Dataservice ID Map : ${JSON.stringify(dataserviceMap)}`);
     let dependencyMatrix = (0, lib_db_1.readDependencyMatrixOfDataServices)();
     logger.info(`Dataservice dependency matrix : ${JSON.stringify(dependencyMatrix)}`);

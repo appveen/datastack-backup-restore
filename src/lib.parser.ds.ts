@@ -136,10 +136,10 @@ function repairFunctions(dataservice: any, functionMap: any, functionURLMap: any
 }
 
 export function parseAndFixDataServices(selectedApp: string, dataservices: any[]): any[] {
-	let libraryMap = readRestoreMap("library");
-	let functionMap = readRestoreMap("function");
+	let libraryMap = readRestoreMap("libraries");
+	let functionMap = readRestoreMap("functions");
 	let functionURLMap = readRestoreMap("functionURL");
-	let dataserviceMap = readRestoreMap("dataservice");
+	let dataserviceMap = readRestoreMap("dataservices");
 	logger.info(`Dataservice ID Map : ${JSON.stringify(dataserviceMap)}`);
 	let dependencyMatrix = readDependencyMatrixOfDataServices();
 	logger.info(`Dataservice dependency matrix : ${JSON.stringify(dependencyMatrix)}`);

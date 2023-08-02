@@ -60,7 +60,7 @@ async function update(type: string, baseURL: string, selectedApp: string, backed
 }
 
 async function restoreLibrary(selectedApp: string) {
-	let libraries = read("library");
+	let libraries = read("libraries");
 	if (libraries.length < 1) return;
 	header("Library");
 	printInfo(`Libraries to restore - ${libraries.length}`);
@@ -72,50 +72,12 @@ async function restoreLibrary(selectedApp: string) {
 		let newData = null;
 		if (existingID) newData = await update("Library", BASE_URL, selectedApp, library, existingID);
 		else newData = await insert("Library", BASE_URL, selectedApp, library);
-		restoreMapper("library", library._id, newData._id);
-	}, Promise.resolve());
-}
-
-async function restoreDataServices(selectedApp: string) {
-	let dataservices = read("dataservice");
-	if (dataservices.length < 1) return;
-
-	header("Dataservice");
-	printInfo(`Dataservices to restore - ${dataservices.length}`);
-
-	var BASE_URL = `/api/a/sm/${selectedApp}/service`;
-	// Find which data services exists and which doesn't
-	let newDataServices: string[] = [];
-	await dataservices.reduce(async (prev: any, dataservice: any) => {
-		await prev;
-		let existingID = await configExists(BASE_URL, dataservice.name, selectedApp);
-		if (existingID) return restoreMapper("dataservice", dataservice._id, existingID);
-		newDataServices.push(dataservice._id);
-	}, Promise.resolve());
-
-	// Create new data services
-	logger.info(`New dataservices - ${newDataServices.join(", ")}`);
-	printInfo(`New dataservices to be created - ${newDataServices.length}`);
-	await dataservices.reduce(async (prev: any, dataservice: any) => {
-		await prev;
-		if (newDataServices.indexOf(dataservice._id) == -1) return;
-		let newDS = generateSampleDataSerivce(dataservice.name, selectedApp);
-		let newData = await insert("Dataservice", BASE_URL, selectedApp, newDS);
-		return restoreMapper("dataservice", dataservice._id, newData._id);
-	}, Promise.resolve());
-
-	dataservices = parseAndFixDataServices(selectedApp, dataservices);
-	let dataserviceMap = readRestoreMap("dataservice");
-
-	await dataservices.reduce(async (prev: any, dataservice: any) => {
-		await prev;
-		if (newDataServices.indexOf(dataservice._id) != -1) dataservice.status = "Draft";
-		return await update("Dataservice", BASE_URL, selectedApp, dataservice, dataserviceMap[dataservice._id]);
+		restoreMapper("libraries", library._id, newData._id);
 	}, Promise.resolve());
 }
 
 async function restoreFunctions(selectedApp: string) {
-	let functions = read("function");
+	let functions = read("functions");
 	if (functions.length < 1) return;
 	header("Functions");
 	printInfo(`Functions to restore - ${functions.length}`);
@@ -129,18 +91,58 @@ async function restoreFunctions(selectedApp: string) {
 		let newData = null;
 		if (existingID) newData = await update("Function", BASE_URL, selectedApp, fn, existingID);
 		else newData = await insert("Function", BASE_URL, selectedApp, fn);
-		restoreMapper("function", fn._id, newData._id);
+		restoreMapper("functions", fn._id, newData._id);
 		restoreMapper("functionURL", newData._id, newData.url);
 	}, Promise.resolve());
 }
 
+async function restoreDataServices(selectedApp: string) {
+	let dataservices = read("dataservices");
+	if (dataservices.length < 1) return;
+
+	header("Dataservice");
+	printInfo(`Dataservices to restore - ${dataservices.length}`);
+
+	var BASE_URL = `/api/a/sm/${selectedApp}/service`;
+	// Find which data services exists and which doesn't
+	let newDataServices: string[] = [];
+	await dataservices.reduce(async (prev: any, dataservice: any) => {
+		await prev;
+		let existingID = await configExists(BASE_URL, dataservice.name, selectedApp);
+		if (existingID) return restoreMapper("dataservices", dataservice._id, existingID);
+		newDataServices.push(dataservice._id);
+	}, Promise.resolve());
+
+	// Create new data services
+	logger.info(`New dataservices - ${newDataServices.join(", ")}`);
+	printInfo(`New dataservices to be created - ${newDataServices.length}`);
+	await dataservices.reduce(async (prev: any, dataservice: any) => {
+		await prev;
+		if (newDataServices.indexOf(dataservice._id) == -1) return;
+		let newDS = generateSampleDataSerivce(dataservice.name, selectedApp);
+		let newData = await insert("Dataservice", BASE_URL, selectedApp, newDS);
+		return restoreMapper("dataservices", dataservice._id, newData._id);
+	}, Promise.resolve());
+
+	dataservices = parseAndFixDataServices(selectedApp, dataservices);
+	let dataserviceMap = readRestoreMap("dataservices");
+
+	await dataservices.reduce(async (prev: any, dataservice: any) => {
+		await prev;
+		if (newDataServices.indexOf(dataservice._id) != -1) dataservice.status = "Draft";
+		return await update("Dataservice", BASE_URL, selectedApp, dataservice, dataserviceMap[dataservice._id]);
+	}, Promise.resolve());
+}
+
+
+
 async function restoreGroups(selectedApp: string) {
-	let groups = read("group");
+	let groups = read("groups");
 	if (groups.length < 1) return;
 	header("Group");
 	printInfo(`Groups to restore - ${groups.length}`);
 	let BASE_URL = `/api/a/rbac/${selectedApp}/group`;
-	let dataServiceIDMap = readRestoreMap("dataservice");
+	let dataServiceIDMap = readRestoreMap("dataservices");
 	await groups.reduce(async (prev: any, group: any) => {
 		await prev;
 

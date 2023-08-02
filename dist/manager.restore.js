@@ -73,7 +73,7 @@ function update(type, baseURL, selectedApp, backedUpData, existinID) {
 }
 function restoreLibrary(selectedApp) {
     return __awaiter(this, void 0, void 0, function* () {
-        let libraries = (0, lib_db_1.read)("library");
+        let libraries = (0, lib_db_1.read)("libraries");
         if (libraries.length < 1)
             return;
         (0, lib_misc_1.header)("Library");
@@ -88,51 +88,13 @@ function restoreLibrary(selectedApp) {
                 newData = yield update("Library", BASE_URL, selectedApp, library, existingID);
             else
                 newData = yield insert("Library", BASE_URL, selectedApp, library);
-            (0, lib_db_1.restoreMapper)("library", library._id, newData._id);
-        }), Promise.resolve());
-    });
-}
-function restoreDataServices(selectedApp) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let dataservices = (0, lib_db_1.read)("dataservice");
-        if (dataservices.length < 1)
-            return;
-        (0, lib_misc_1.header)("Dataservice");
-        (0, lib_misc_1.printInfo)(`Dataservices to restore - ${dataservices.length}`);
-        var BASE_URL = `/api/a/sm/${selectedApp}/service`;
-        // Find which data services exists and which doesn't
-        let newDataServices = [];
-        yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
-            yield prev;
-            let existingID = yield configExists(BASE_URL, dataservice.name, selectedApp);
-            if (existingID)
-                return (0, lib_db_1.restoreMapper)("dataservice", dataservice._id, existingID);
-            newDataServices.push(dataservice._id);
-        }), Promise.resolve());
-        // Create new data services
-        logger.info(`New dataservices - ${newDataServices.join(", ")}`);
-        (0, lib_misc_1.printInfo)(`New dataservices to be created - ${newDataServices.length}`);
-        yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
-            yield prev;
-            if (newDataServices.indexOf(dataservice._id) == -1)
-                return;
-            let newDS = (0, lib_parser_ds_1.generateSampleDataSerivce)(dataservice.name, selectedApp);
-            let newData = yield insert("Dataservice", BASE_URL, selectedApp, newDS);
-            return (0, lib_db_1.restoreMapper)("dataservice", dataservice._id, newData._id);
-        }), Promise.resolve());
-        dataservices = (0, lib_parser_ds_1.parseAndFixDataServices)(selectedApp, dataservices);
-        let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservice");
-        yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
-            yield prev;
-            if (newDataServices.indexOf(dataservice._id) != -1)
-                dataservice.status = "Draft";
-            return yield update("Dataservice", BASE_URL, selectedApp, dataservice, dataserviceMap[dataservice._id]);
+            (0, lib_db_1.restoreMapper)("libraries", library._id, newData._id);
         }), Promise.resolve());
     });
 }
 function restoreFunctions(selectedApp) {
     return __awaiter(this, void 0, void 0, function* () {
-        let functions = (0, lib_db_1.read)("function");
+        let functions = (0, lib_db_1.read)("functions");
         if (functions.length < 1)
             return;
         (0, lib_misc_1.header)("Functions");
@@ -149,20 +111,58 @@ function restoreFunctions(selectedApp) {
                 newData = yield update("Function", BASE_URL, selectedApp, fn, existingID);
             else
                 newData = yield insert("Function", BASE_URL, selectedApp, fn);
-            (0, lib_db_1.restoreMapper)("function", fn._id, newData._id);
+            (0, lib_db_1.restoreMapper)("functions", fn._id, newData._id);
             (0, lib_db_1.restoreMapper)("functionURL", newData._id, newData.url);
+        }), Promise.resolve());
+    });
+}
+function restoreDataServices(selectedApp) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let dataservices = (0, lib_db_1.read)("dataservices");
+        if (dataservices.length < 1)
+            return;
+        (0, lib_misc_1.header)("Dataservice");
+        (0, lib_misc_1.printInfo)(`Dataservices to restore - ${dataservices.length}`);
+        var BASE_URL = `/api/a/sm/${selectedApp}/service`;
+        // Find which data services exists and which doesn't
+        let newDataServices = [];
+        yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
+            yield prev;
+            let existingID = yield configExists(BASE_URL, dataservice.name, selectedApp);
+            if (existingID)
+                return (0, lib_db_1.restoreMapper)("dataservices", dataservice._id, existingID);
+            newDataServices.push(dataservice._id);
+        }), Promise.resolve());
+        // Create new data services
+        logger.info(`New dataservices - ${newDataServices.join(", ")}`);
+        (0, lib_misc_1.printInfo)(`New dataservices to be created - ${newDataServices.length}`);
+        yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
+            yield prev;
+            if (newDataServices.indexOf(dataservice._id) == -1)
+                return;
+            let newDS = (0, lib_parser_ds_1.generateSampleDataSerivce)(dataservice.name, selectedApp);
+            let newData = yield insert("Dataservice", BASE_URL, selectedApp, newDS);
+            return (0, lib_db_1.restoreMapper)("dataservices", dataservice._id, newData._id);
+        }), Promise.resolve());
+        dataservices = (0, lib_parser_ds_1.parseAndFixDataServices)(selectedApp, dataservices);
+        let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservices");
+        yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
+            yield prev;
+            if (newDataServices.indexOf(dataservice._id) != -1)
+                dataservice.status = "Draft";
+            return yield update("Dataservice", BASE_URL, selectedApp, dataservice, dataserviceMap[dataservice._id]);
         }), Promise.resolve());
     });
 }
 function restoreGroups(selectedApp) {
     return __awaiter(this, void 0, void 0, function* () {
-        let groups = (0, lib_db_1.read)("group");
+        let groups = (0, lib_db_1.read)("groups");
         if (groups.length < 1)
             return;
         (0, lib_misc_1.header)("Group");
         (0, lib_misc_1.printInfo)(`Groups to restore - ${groups.length}`);
         let BASE_URL = `/api/a/rbac/${selectedApp}/group`;
-        let dataServiceIDMap = (0, lib_db_1.readRestoreMap)("dataservice");
+        let dataServiceIDMap = (0, lib_db_1.readRestoreMap)("dataservices");
         yield groups.reduce((prev, group) => __awaiter(this, void 0, void 0, function* () {
             yield prev;
             group.roles.forEach((role) => {
