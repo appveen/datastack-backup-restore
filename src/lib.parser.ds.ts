@@ -135,10 +135,17 @@ function repairFunctions(dataservice: any, functionMap: any, functionURLMap: any
 	return dataservice;
 }
 
-export function parseAndFixDataServices(selectedApp: string, dataservices: any[]): any[] {
+function repairConnectors(dataservice: any, connectorMap: any) {
+	dataservice.connectors.data._id = connectorMap[dataservice.connectors.data._id];
+	dataservice.connectors.file._id = connectorMap[dataservice.connectors.file._id];
+	return dataservice;
+}
+
+export function parseAndFixDataServices(dataservices: any[]): any[] {
 	let libraryMap = readRestoreMap("libraries");
 	let functionMap = readRestoreMap("functions");
 	let functionURLMap = readRestoreMap("functionURL");
+	let connectorMap = readRestoreMap("connectors");
 	let dataserviceMap = readRestoreMap("dataservices");
 	logger.info(`Dataservice ID Map : ${JSON.stringify(dataserviceMap)}`);
 	let dependencyMatrix = readDependencyMatrixOfDataServices();
@@ -156,6 +163,9 @@ export function parseAndFixDataServices(selectedApp: string, dataservices: any[]
 
 		logger.info(`${dataservice.name} : Find and repair libraries`);
 		dataservice.definition = repairRelationWithLibrary(dataservice.definition, dependencyMatrix[dataservice._id].libraries, libraryMap);
+
+		logger.info(`${dataservice.name} : Find and repair connectors`);
+		dataservice = repairConnectors(dataservice, connectorMap);
 
 		logger.info(`${dataservice.name} : Find and repair User relations`);
 		dataservice.definition = repairRelationWithUser([], dataservice.definition);

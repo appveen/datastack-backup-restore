@@ -132,10 +132,16 @@ function repairFunctions(dataservice, functionMap, functionURLMap) {
     });
     return dataservice;
 }
-function parseAndFixDataServices(selectedApp, dataservices) {
+function repairConnectors(dataservice, connectorMap) {
+    dataservice.connectors.data._id = connectorMap[dataservice.connectors.data._id];
+    dataservice.connectors.file._id = connectorMap[dataservice.connectors.file._id];
+    return dataservice;
+}
+function parseAndFixDataServices(dataservices) {
     let libraryMap = (0, lib_db_1.readRestoreMap)("libraries");
     let functionMap = (0, lib_db_1.readRestoreMap)("functions");
     let functionURLMap = (0, lib_db_1.readRestoreMap)("functionURL");
+    let connectorMap = (0, lib_db_1.readRestoreMap)("connectors");
     let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservices");
     logger.info(`Dataservice ID Map : ${JSON.stringify(dataserviceMap)}`);
     let dependencyMatrix = (0, lib_db_1.readDependencyMatrixOfDataServices)();
@@ -152,6 +158,8 @@ function parseAndFixDataServices(selectedApp, dataservices) {
         delete dataservice.status;
         logger.info(`${dataservice.name} : Find and repair libraries`);
         dataservice.definition = repairRelationWithLibrary(dataservice.definition, dependencyMatrix[dataservice._id].libraries, libraryMap);
+        logger.info(`${dataservice.name} : Find and repair connectors`);
+        dataservice = repairConnectors(dataservice, connectorMap);
         logger.info(`${dataservice.name} : Find and repair User relations`);
         dataservice.definition = repairRelationWithUser([], dataservice.definition);
         logger.info(`${dataservice.name} : Find and repair dataservice relationships with default values`);

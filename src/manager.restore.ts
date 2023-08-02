@@ -5,10 +5,11 @@ import { read, readRestoreMap, restoreInit, restoreMapper } from "./lib.db";
 import { generateSampleDataSerivce, parseAndFixDataServices } from "./lib.parser.ds";
 
 let logger = global.logger;
+let selectedApp = "";
 
 export async function restoreManager(apps: any) {
 	header("Restore configuration");
-	let selectedApp = await selectApp(apps);
+	selectedApp = await selectApp(apps);
 
 	printInfo(`Backup file being used - ${global.backupFileName}`);
 
@@ -16,13 +17,56 @@ export async function restoreManager(apps: any) {
 
 	printInfo("Scanning the configurations...");
 
-	await restoreLibrary(selectedApp);
-	await restoreFunctions(selectedApp);
-	await restoreDataServices(selectedApp);
-	await restoreGroups(selectedApp);
+	if (global.isSuperAdmin) {
+		await restoreMapperFormulas();
+		await restorePlugins();
+	}
+
+	await restoreLibrary();
+	await restoreFunctions();
+	await restoreConnectors();
+	await restoreDataServices();
+	await restoreDataFormats();
+	await restoreAgents();
+	await restoreGroups();
 	header("Restore complete!");
 }
+// SuperAdmin level APIs
+async function superadminConfigExists(api: string, name: string): Promise<string | null> {
+	let searchParams = new URLSearchParams();
+	searchParams.append("filter", JSON.stringify({ name: name }));
+	searchParams.append("count", "-1");
+	searchParams.append("select", "name");
+	logger.debug(`Check for existing config - ${api} ${searchParams}`);
+	let data = await get(api, searchParams);
+	logger.debug(`Check for existing config result - ${api} : ${JSON.stringify(data)}`);
+	if (data.length > 0 && data[0]._id) return data[0]._id;
+	return null;
+}
 
+async function superadminInsert(type: string, baseURL: string, backedUpData: any): Promise<any> {
+	logger.info(`SuperAdmin : Insert ${type} : ${backedUpData.name}`);
+	let data = JSON.parse(JSON.stringify(backedUpData));
+	delete data._id;
+	let newData = await post(baseURL, data);
+	printInfo(`${type} created : ${backedUpData.name}`);
+	logger.info(JSON.stringify(newData));
+	return newData;
+}
+
+async function superadminUpdate(type: string, baseURL: string, backedUpData: any, existinID: string): Promise<any> {
+	logger.info(`SuperAdmin : Update ${type} : ${backedUpData.name}`);
+	let data = JSON.parse(JSON.stringify(backedUpData));
+	data._id = existinID;
+	delete data.status;
+	let updateURL = `${baseURL}/${existinID}`;
+	let newData = await put(updateURL, data);
+	printInfo(`${type} updated : ${backedUpData.name}`);
+	logger.info(JSON.stringify(newData));
+	return newData;
+}
+
+// APP Level APIs
 async function configExists(api: string, name: string, selectedApp: string): Promise<string | null> {
 	let searchParams = new URLSearchParams();
 	searchParams.append("filter", JSON.stringify({ app: selectedApp, name: name }));
@@ -59,7 +103,48 @@ async function update(type: string, baseURL: string, selectedApp: string, backed
 	return newData;
 }
 
-async function restoreLibrary(selectedApp: string) {
+// SuperAdmin level restores
+async function restoreMapperFormulas() {
+	let mapperFormulas = read("mapperformulas");
+	if (mapperFormulas.length < 1) return;
+	header("Mapper Formulas");
+	printInfo(`Mapper Formulas to restore - ${mapperFormulas.length}`);
+	let BASE_URL = "/api/a/rbac/admin/metadata/mapper/formula";
+	await mapperFormulas.reduce(async (prev: any, mapperFormula: any) => {
+		await prev;
+		delete mapperFormula._metadata;
+		delete mapperFormula.__v;
+		delete mapperFormula.version;
+		let existingID = await superadminConfigExists(BASE_URL, mapperFormula.name);
+		let newData = null;
+		if (existingID) newData = await superadminUpdate("Mapper Formula", BASE_URL, mapperFormula, existingID);
+		else newData = await superadminInsert("Mapper Formula", BASE_URL, mapperFormula);
+		restoreMapper("mapperFormulas", mapperFormula._id, newData._id);
+	}, Promise.resolve());
+}
+
+async function restorePlugins() {
+	let plugins = read("plugins");
+	if (plugins.length < 1) return;
+	header("Plugins");
+	printInfo(`Plugins to restore - ${plugins.length}`);
+	let BASE_URL = "/api/a/bm/admin/node";
+	await plugins.reduce(async (prev: any, plugin: any) => {
+		await prev;
+		delete plugin._metadata;
+		delete plugin.__v;
+		delete plugin.version;
+		let existingID = await superadminConfigExists(BASE_URL, plugin.name);
+		let newData = null;
+		if (existingID) newData = await superadminUpdate("Plugin", BASE_URL, plugin, existingID);
+		else newData = await superadminInsert("Plugin", BASE_URL, plugin);
+		restoreMapper("plugins", plugin._id, newData._id);
+	}, Promise.resolve());
+}
+
+
+// App level restores
+async function restoreLibrary() {
 	let libraries = read("libraries");
 	if (libraries.length < 1) return;
 	header("Library");
@@ -76,7 +161,7 @@ async function restoreLibrary(selectedApp: string) {
 	}, Promise.resolve());
 }
 
-async function restoreFunctions(selectedApp: string) {
+async function restoreFunctions() {
 	let functions = read("functions");
 	if (functions.length < 1) return;
 	header("Functions");
@@ -96,7 +181,26 @@ async function restoreFunctions(selectedApp: string) {
 	}, Promise.resolve());
 }
 
-async function restoreDataServices(selectedApp: string) {
+async function restoreConnectors() {
+	let connectors = read("connectors");
+	if (connectors.length < 1) return;
+	header("Connectors");
+	printInfo(`Connectors to restore - ${connectors.length}`);
+	let BASE_URL = `/api/a/rbac/${selectedApp}/connector`;
+	await connectors.reduce(async (prev: any, connector: any) => {
+		await prev;
+		delete connector._metadata;
+		delete connector.__v;
+		delete connector.version;
+		let existingID = await configExists(BASE_URL, connector.name, selectedApp);
+		let newData = null;
+		if (existingID) newData = await update("Connector", BASE_URL, selectedApp, connector, existingID);
+		else newData = await insert("Connector", BASE_URL, selectedApp, connector);
+		restoreMapper("connectors", connector._id, newData._id);
+	}, Promise.resolve());
+}
+
+async function restoreDataServices() {
 	let dataservices = read("dataservices");
 	if (dataservices.length < 1) return;
 
@@ -124,7 +228,7 @@ async function restoreDataServices(selectedApp: string) {
 		return restoreMapper("dataservices", dataservice._id, newData._id);
 	}, Promise.resolve());
 
-	dataservices = parseAndFixDataServices(selectedApp, dataservices);
+	dataservices = parseAndFixDataServices(dataservices);
 	let dataserviceMap = readRestoreMap("dataservices");
 
 	await dataservices.reduce(async (prev: any, dataservice: any) => {
@@ -134,9 +238,45 @@ async function restoreDataServices(selectedApp: string) {
 	}, Promise.resolve());
 }
 
+async function restoreDataFormats() {
+	let dataformats = read("dataformats");
+	if (dataformats.length < 1) return;
+	header("Dataformat");
+	printInfo(`Dataformats to restore - ${dataformats.length}`);
+	let BASE_URL = `/api/a/bm/${selectedApp}/dataFormat`;
+	await dataformats.reduce(async (prev: any, dataformat: any) => {
+		await prev;
+		delete dataformat._metadata;
+		delete dataformat.__v;
+		delete dataformat.version;
+		let existingID = await configExists(BASE_URL, dataformat.name, selectedApp);
+		let newData = null;
+		if (existingID) newData = await update("Dataformat", BASE_URL, selectedApp, dataformat, existingID);
+		else newData = await insert("Dataformat", BASE_URL, selectedApp, dataformat);
+		restoreMapper("dataformats", dataformat._id, newData._id);
+	}, Promise.resolve());
+}
 
+async function restoreAgents() {
+	let agents = read("agents");
+	if (agents.length < 1) return;
+	header("Agent");
+	printInfo(`Agents to restore - ${agents.length}`);
+	let BASE_URL = `/api/a/bm/${selectedApp}/agent`;
+	await agents.reduce(async (prev: any, agent: any) => {
+		await prev;
+		delete agent._metadata;
+		delete agent.__v;
+		delete agent.version;
+		let existingID = await configExists(BASE_URL, agent.name, selectedApp);
+		let newData = null;
+		if (existingID) newData = await update("Agent", BASE_URL, selectedApp, agent, existingID);
+		else newData = await insert("Agent", BASE_URL, selectedApp, agent);
+		restoreMapper("agents", agent._id, newData._id);
+	}, Promise.resolve());
+}
 
-async function restoreGroups(selectedApp: string) {
+async function restoreGroups() {
 	let groups = read("groups");
 	if (groups.length < 1) return;
 	header("Group");
