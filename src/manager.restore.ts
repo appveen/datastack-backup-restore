@@ -18,17 +18,17 @@ export async function restoreManager(apps: any) {
 	printInfo("Scanning the configurations...");
 
 	if (global.isSuperAdmin) {
-		await restoreMapperFormulas();
-		await restorePlugins();
+		// await restoreMapperFormulas();
+		// await restorePlugins();
 	}
 
-	await restoreLibrary();
-	await restoreFunctions();
-	await restoreConnectors();
-	await restoreDataServices();
-	await restoreDataFormats();
+	// await restoreLibrary();
+	// await restoreFunctions();
+	// await restoreConnectors();
+	// await restoreDataServices();
+	// await restoreDataFormats();
 	await restoreAgents();
-	await restoreGroups();
+	// await restoreGroups();
 	header("Restore complete!");
 }
 // SuperAdmin level APIs
@@ -268,6 +268,7 @@ async function restoreAgents() {
 		delete agent._metadata;
 		delete agent.__v;
 		delete agent.version;
+		delete agent.agentId;
 		let existingID = await configExists(BASE_URL, agent.name, selectedApp);
 		let newData = null;
 		if (existingID) newData = await update("Agent", BASE_URL, selectedApp, agent, existingID);

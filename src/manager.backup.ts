@@ -172,6 +172,7 @@ async function fetchAgents() {
 	agents.forEach((agent: any) => {
 		backupMapper("agents", agent._id, agent.name);
 		backupMapper("agents_lookup", agent.name, agent._id);
+		backupMapper("agentIDs", agent._id, agent.agentId);
 	});
 	printDone("Agents", agentsCount);
 }
