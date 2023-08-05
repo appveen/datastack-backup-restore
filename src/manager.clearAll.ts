@@ -3,6 +3,7 @@ import { header, printInfo } from "./lib.misc";
 import { del, get } from "./manager.api";
 
 let searchParams = new URLSearchParams();
+let logger = global.logger;
 
 export async function clearAllManager(apps: any) {
 	header("Clear all configurations");

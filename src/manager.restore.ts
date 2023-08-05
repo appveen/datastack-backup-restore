@@ -18,7 +18,7 @@ export async function restoreManager(apps: any) {
 
 	printInfo("Scanning the configurations...");
 
-	if (!global.isSuperAdmin) {
+	if (global.isSuperAdmin) {
 		await restoreMapperFormulas();
 		await restorePlugins();
 	}
@@ -34,7 +34,7 @@ export async function restoreManager(apps: any) {
 	header("Restore complete!");
 }
 // SuperAdmin level APIs
-async function superadminConfigExists(api: string, name: string): Promise<string | null> {
+async function superadminConfigExists(api: string, name: string) {
 	try {
 		let searchParams = new URLSearchParams();
 		searchParams.append("filter", JSON.stringify({ name: name }));
@@ -81,7 +81,7 @@ async function superadminUpdate(type: string, baseURL: string, backedUpData: any
 }
 
 // APP Level APIs
-async function configExists(api: string, name: string, selectedApp: string): Promise<string | null> {
+async function configExists(api: string, name: string, selectedApp: string) {
 	try {
 		let searchParams = new URLSearchParams();
 		searchParams.append("filter", JSON.stringify({ app: selectedApp, name: name }));

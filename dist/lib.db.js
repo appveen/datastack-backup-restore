@@ -7,6 +7,7 @@ const lib_misc_1 = require("./lib.misc");
 let logger = global.logger;
 let sampleBackupData = {
     "version": `${global.version}`,
+    "host": `${global.host}`,
     "map": {
         "mapperformulas": {},
         "mapperformulas_lookup": {},
@@ -56,10 +57,9 @@ exports.backupInit = backupInit;
 function restoreInit() {
     logger.debug(`Restore file - ${global.restoreFileName}`);
     if (!(0, fs_1.existsSync)(global.backupFileName)) {
-        (0, lib_misc_1.printInfo)(`Backup file ${global.backupFileName} doesn't exist!`);
-        (0, lib_misc_1.killThySelf)(400);
+        (0, lib_misc_1.printError)(`Backup file ${global.backupFileName} doesn't exist!`);
     }
-    writeJSON(global.restoreFileName, `{"version":"${global.version}"}`);
+    writeJSON(global.restoreFileName, `{"version":"${global.version}", "host":"${global.host}"}`);
 }
 exports.restoreInit = restoreInit;
 function save(key, data) {

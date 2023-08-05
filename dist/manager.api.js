@@ -41,10 +41,15 @@ function login(config) {
 exports.login = login;
 function getApps() {
     return __awaiter(this, void 0, void 0, function* () {
-        let listOptions = new types_1.ListOptions();
-        listOptions.count = -1;
-        let apps = yield dataStack.ListApps(listOptions);
-        return apps.map(a => a.app._id).sort();
+        try {
+            let listOptions = new types_1.ListOptions();
+            listOptions.count = -1;
+            let apps = yield dataStack.ListApps(listOptions);
+            return apps.map(a => a.app._id).sort();
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 exports.getApps = getApps;
@@ -61,13 +66,11 @@ function get(endpoint, searchParams) {
                 .catch((e) => __awaiter(this, void 0, void 0, function* () {
                 (0, lib_misc_1.printError)(`Error on GET ${global.host}${endpoint}`);
                 (0, lib_misc_1.printError)(`${e.response.statusCode} ${e.response.body}`);
-                yield (0, lib_misc_1.killThySelf)(500);
             }));
         }
         catch (e) {
             logger.error(e);
             (0, lib_misc_1.printError)(`Error on GET ${global.host}${endpoint}`);
-            yield (0, lib_misc_1.killThySelf)(500);
         }
     });
 }
@@ -86,13 +89,11 @@ function post(endpoint, payload) {
                 .catch((e) => __awaiter(this, void 0, void 0, function* () {
                 (0, lib_misc_1.printError)(`Error on POST ${global.host}${endpoint}`);
                 (0, lib_misc_1.printError)(`${e.response.statusCode} ${e.response.body}`);
-                yield (0, lib_misc_1.killThySelf)(500);
             }));
         }
         catch (e) {
             logger.error(e);
             (0, lib_misc_1.printError)(`Error on POST ${global.host}${endpoint}`);
-            yield (0, lib_misc_1.killThySelf)(500);
         }
     });
 }
@@ -111,13 +112,11 @@ function put(endpoint, payload) {
                 .catch((e) => __awaiter(this, void 0, void 0, function* () {
                 (0, lib_misc_1.printError)(`Error on PUT ${global.host}${endpoint}`);
                 (0, lib_misc_1.printError)(`${e.response.statusCode} ${e.response.body}`);
-                yield (0, lib_misc_1.killThySelf)(500);
             }));
         }
         catch (e) {
             (0, lib_misc_1.printError)(`Error on PUT ${global.host}${endpoint}`);
             logger.error(e);
-            yield (0, lib_misc_1.killThySelf)(500);
         }
     });
 }
@@ -134,13 +133,11 @@ function del(endpoint) {
                 .catch((e) => __awaiter(this, void 0, void 0, function* () {
                 (0, lib_misc_1.printError)(`Error on DELETE ${global.host}${endpoint}`);
                 (0, lib_misc_1.printError)(`${e.response.statusCode} ${e.response.body}`);
-                yield (0, lib_misc_1.killThySelf)(500);
             }));
         }
         catch (e) {
             logger.error(e);
             (0, lib_misc_1.printError)(`Error on DELETE ${global.host}${endpoint}`);
-            yield (0, lib_misc_1.killThySelf)(500);
         }
     });
 }

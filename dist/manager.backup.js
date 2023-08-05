@@ -60,168 +60,223 @@ function backupManager(apps) {
 exports.backupManager = backupManager;
 function fetchMapperFormulas() {
     return __awaiter(this, void 0, void 0, function* () {
-        const URL_COUNT = "/api/a/rbac/admin/metadata/mapper/formula/count";
-        const URL_DATA = "/api/a/rbac/admin/metadata/mapper/formula";
-        const mapperFormulaCount = yield (0, manager_api_1.get)(URL_COUNT, new URLSearchParams());
-        const searchParams = new URLSearchParams();
-        searchParams.append("count", mapperFormulaCount);
-        searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
-        const mapperFormulas = yield (0, manager_api_1.get)(URL_DATA, searchParams);
-        (0, lib_db_1.save)("mapperformulas", mapperFormulas);
-        mapperFormulas.forEach((mf) => {
-            (0, lib_db_1.backupMapper)("mapperformulas", mf._id, mf.name);
-            (0, lib_db_1.backupMapper)("mapperformulas_lookup", mf.name, mf._id);
-        });
-        (0, lib_misc_1.printDone)("Mapper Formulas(!)", mapperFormulaCount);
+        try {
+            const URL_COUNT = "/api/a/rbac/admin/metadata/mapper/formula/count";
+            const URL_DATA = "/api/a/rbac/admin/metadata/mapper/formula";
+            const mapperFormulaCount = yield (0, manager_api_1.get)(URL_COUNT, new URLSearchParams());
+            const searchParams = new URLSearchParams();
+            searchParams.append("count", mapperFormulaCount);
+            searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
+            const mapperFormulas = yield (0, manager_api_1.get)(URL_DATA, searchParams);
+            (0, lib_db_1.save)("mapperformulas", mapperFormulas);
+            mapperFormulas.forEach((mf) => {
+                (0, lib_db_1.backupMapper)("mapperformulas", mf._id, mf.name);
+                (0, lib_db_1.backupMapper)("mapperformulas_lookup", mf.name, mf._id);
+            });
+            (0, lib_misc_1.printDone)("Mapper Formulas(!)", mapperFormulaCount);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function fetchPlugins() {
     return __awaiter(this, void 0, void 0, function* () {
-        const URL_COUNT = "/api/a/bm/admin/node/utils/count";
-        const URL_DATA = "/api/a/bm/admin/node";
-        const pluginCount = yield (0, manager_api_1.get)(URL_COUNT, new URLSearchParams());
-        const searchParams = new URLSearchParams();
-        searchParams.append("count", pluginCount);
-        searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
-        const plugins = yield (0, manager_api_1.get)(URL_DATA, searchParams);
-        (0, lib_db_1.save)("plugins", plugins);
-        plugins.forEach((plugin) => {
-            (0, lib_db_1.backupMapper)("plugins", plugin._id, plugin.name);
-            (0, lib_db_1.backupMapper)("plugins_lookup", plugin.name, plugin._id);
-        });
-        (0, lib_misc_1.printDone)("Plugins(!)", pluginCount);
+        try {
+            const URL_COUNT = "/api/a/bm/admin/node/utils/count";
+            const URL_DATA = "/api/a/bm/admin/node";
+            const pluginCount = yield (0, manager_api_1.get)(URL_COUNT, new URLSearchParams());
+            const searchParams = new URLSearchParams();
+            searchParams.append("count", pluginCount);
+            searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
+            const plugins = yield (0, manager_api_1.get)(URL_DATA, searchParams);
+            (0, lib_db_1.save)("plugins", plugins);
+            plugins.forEach((plugin) => {
+                (0, lib_db_1.backupMapper)("plugins", plugin._id, plugin.name);
+                (0, lib_db_1.backupMapper)("plugins_lookup", plugin.name, plugin._id);
+            });
+            (0, lib_misc_1.printDone)("Plugins(!)", pluginCount);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function fetchNPMLibraries() {
     return __awaiter(this, void 0, void 0, function* () {
-        const URL_DATA = "/api/a/bm/admin/flow/utils/node-library";
-        const npmLibraries = yield (0, manager_api_1.get)(URL_DATA, new URLSearchParams());
-        (0, lib_db_1.save)("npmlibraries", npmLibraries);
-        npmLibraries.forEach((lib) => {
-            (0, lib_db_1.backupMapper)("npmlibraries", lib._id, lib.name);
-            (0, lib_db_1.backupMapper)("npmlibraries_lookup", lib.name, lib._id);
-        });
-        (0, lib_misc_1.printDone)("NPM Library(!)", npmLibraries.length);
+        try {
+            const URL_DATA = "/api/a/bm/admin/flow/utils/node-library";
+            const npmLibraries = yield (0, manager_api_1.get)(URL_DATA, new URLSearchParams());
+            (0, lib_db_1.save)("npmlibraries", npmLibraries);
+            npmLibraries.forEach((lib) => {
+                (0, lib_db_1.backupMapper)("npmlibraries", lib._id, lib.name);
+                (0, lib_db_1.backupMapper)("npmlibraries_lookup", lib.name, lib._id);
+            });
+            (0, lib_misc_1.printDone)("NPM Library(!)", npmLibraries.length);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function fetchDataServices() {
     return __awaiter(this, void 0, void 0, function* () {
-        var URL_COUNT = `/api/a/sm/${selectedApp}/service/utils/count`;
-        var URL_DATA = `/api/a/sm/${selectedApp}/service`;
-        const dataservicesCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
-        let dataservices = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(dataservicesCount));
-        (0, lib_db_1.save)("dataservices", dataservices);
-        dataservices.forEach((ds) => {
-            (0, lib_db_1.backupMapper)("dataservices", ds._id, ds.name);
-            (0, lib_db_1.backupMapper)("dataservices_lookup", ds.name, ds._id);
-        });
-        (0, lib_db_1.backupDependencyMatrixOfDataService)((0, lib_parser_ds_1.buildDependencyMatrixForDataServices)(dataservices));
-        (0, lib_misc_1.printDone)("Data services", dataservicesCount);
+        try {
+            var URL_COUNT = `/api/a/sm/${selectedApp}/service/utils/count`;
+            var URL_DATA = `/api/a/sm/${selectedApp}/service`;
+            const dataservicesCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
+            let dataservices = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(dataservicesCount));
+            (0, lib_db_1.save)("dataservices", dataservices);
+            dataservices.forEach((ds) => {
+                (0, lib_db_1.backupMapper)("dataservices", ds._id, ds.name);
+                (0, lib_db_1.backupMapper)("dataservices_lookup", ds.name, ds._id);
+            });
+            (0, lib_db_1.backupDependencyMatrixOfDataService)((0, lib_parser_ds_1.buildDependencyMatrixForDataServices)(dataservices));
+            (0, lib_misc_1.printDone)("Data services", dataservicesCount);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function fetchLibraries() {
     return __awaiter(this, void 0, void 0, function* () {
-        var URL_COUNT = `/api/a/sm/${selectedApp}/globalSchema/utils/count`;
-        var URL_DATA = `/api/a/sm/${selectedApp}/globalSchema`;
-        const librariesCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
-        let libraries = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(librariesCount));
-        (0, lib_db_1.save)("libraries", libraries);
-        libraries.forEach((library) => {
-            library.services = [];
-            (0, lib_db_1.backupMapper)("libraries", library._id, library.name);
-            (0, lib_db_1.backupMapper)("libraries_lookup", library.name, library._id);
-        });
-        (0, lib_misc_1.printDone)("Libraries", librariesCount);
+        try {
+            var URL_COUNT = `/api/a/sm/${selectedApp}/globalSchema/utils/count`;
+            var URL_DATA = `/api/a/sm/${selectedApp}/globalSchema`;
+            const librariesCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
+            let libraries = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(librariesCount));
+            (0, lib_db_1.save)("libraries", libraries);
+            libraries.forEach((library) => {
+                library.services = [];
+                (0, lib_db_1.backupMapper)("libraries", library._id, library.name);
+                (0, lib_db_1.backupMapper)("libraries_lookup", library.name, library._id);
+            });
+            (0, lib_misc_1.printDone)("Libraries", librariesCount);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function fetchFunctions() {
     return __awaiter(this, void 0, void 0, function* () {
-        let URL_COUNT = `/api/a/bm/${selectedApp}/faas/utils/count`;
-        let URL_DATA = `/api/a/bm/${selectedApp}/faas`;
-        let functionsCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
-        let functions = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(functionsCount));
-        (0, lib_db_1.save)("functions", functions);
-        functions.forEach((fn) => {
-            fn.services = [];
-            (0, lib_db_1.backupMapper)("functions", fn._id, fn.name);
-            (0, lib_db_1.backupMapper)("functions_lookup", fn.name, fn._id);
-        });
-        (0, lib_misc_1.printDone)("Functions", functionsCount);
+        try {
+            let URL_COUNT = `/api/a/bm/${selectedApp}/faas/utils/count`;
+            let URL_DATA = `/api/a/bm/${selectedApp}/faas`;
+            let functionsCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
+            let functions = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(functionsCount));
+            (0, lib_db_1.save)("functions", functions);
+            functions.forEach((fn) => {
+                fn.services = [];
+                (0, lib_db_1.backupMapper)("functions", fn._id, fn.name);
+                (0, lib_db_1.backupMapper)("functions_lookup", fn.name, fn._id);
+            });
+            (0, lib_misc_1.printDone)("Functions", functionsCount);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function fetchConnectors() {
     return __awaiter(this, void 0, void 0, function* () {
-        const URL_DATA = `/api/a/rbac/${selectedApp}/connector`;
-        const URL_COUNT = `/api/a/rbac/${selectedApp}/connector/utils/count`;
-        const connectorsCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
-        const connectors = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(connectorsCount));
-        (0, lib_db_1.save)("connectors", connectors);
-        connectors.forEach((connector) => {
-            (0, lib_db_1.backupMapper)("connectors", connector._id, connector.name);
-            (0, lib_db_1.backupMapper)("connectors_lookup", connector.name, connector._id);
-        });
-        (0, lib_misc_1.printDone)("Connectors", connectorsCount);
+        try {
+            const URL_DATA = `/api/a/rbac/${selectedApp}/connector`;
+            const URL_COUNT = `/api/a/rbac/${selectedApp}/connector/utils/count`;
+            const connectorsCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
+            const connectors = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(connectorsCount));
+            (0, lib_db_1.save)("connectors", connectors);
+            connectors.forEach((connector) => {
+                (0, lib_db_1.backupMapper)("connectors", connector._id, connector.name);
+                (0, lib_db_1.backupMapper)("connectors_lookup", connector.name, connector._id);
+            });
+            (0, lib_misc_1.printDone)("Connectors", connectorsCount);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function fetchDataFormats() {
     return __awaiter(this, void 0, void 0, function* () {
-        const URL_DATA = `/api/a/bm/${selectedApp}/dataFormat`;
-        const URL_COUNT = `/api/a/bm/${selectedApp}/dataFormat`;
-        let searchParams = getURLParamsForCount();
-        searchParams.append("countOnly", "true");
-        const dataFormatsCount = yield (0, manager_api_1.get)(URL_COUNT, searchParams);
-        const dataFormats = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(dataFormatsCount));
-        (0, lib_db_1.save)("dataformats", dataFormats);
-        dataFormats.forEach((dataFormat) => {
-            (0, lib_db_1.backupMapper)("dataformats", dataFormat._id, dataFormat.name);
-            (0, lib_db_1.backupMapper)("dataformats_lookup", dataFormat.name, dataFormat._id);
-        });
-        (0, lib_misc_1.printDone)("Data Formats", dataFormatsCount);
+        try {
+            const URL_DATA = `/api/a/bm/${selectedApp}/dataFormat`;
+            const URL_COUNT = `/api/a/bm/${selectedApp}/dataFormat`;
+            let searchParams = getURLParamsForCount();
+            searchParams.append("countOnly", "true");
+            const dataFormatsCount = yield (0, manager_api_1.get)(URL_COUNT, searchParams);
+            const dataFormats = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(dataFormatsCount));
+            (0, lib_db_1.save)("dataformats", dataFormats);
+            dataFormats.forEach((dataFormat) => {
+                (0, lib_db_1.backupMapper)("dataformats", dataFormat._id, dataFormat.name);
+                (0, lib_db_1.backupMapper)("dataformats_lookup", dataFormat.name, dataFormat._id);
+            });
+            (0, lib_misc_1.printDone)("Data Formats", dataFormatsCount);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function fetchAgents() {
     return __awaiter(this, void 0, void 0, function* () {
-        const URL_DATA = `/api/a/bm/${selectedApp}/agent`;
-        const URL_COUNT = `/api/a/bm/${selectedApp}/agent/utils/count`;
-        const agentsCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
-        const agents = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(agentsCount));
-        (0, lib_db_1.save)("agents", agents);
-        agents.forEach((agent) => {
-            (0, lib_db_1.backupMapper)("agents", agent._id, agent.name);
-            (0, lib_db_1.backupMapper)("agents_lookup", agent.name, agent._id);
-            (0, lib_db_1.backupMapper)("agentIDs", agent._id, agent.agentId);
-        });
-        (0, lib_misc_1.printDone)("Agents", agentsCount);
+        try {
+            const URL_DATA = `/api/a/bm/${selectedApp}/agent`;
+            const URL_COUNT = `/api/a/bm/${selectedApp}/agent/utils/count`;
+            const agentsCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
+            const agents = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(agentsCount));
+            (0, lib_db_1.save)("agents", agents);
+            agents.forEach((agent) => {
+                (0, lib_db_1.backupMapper)("agents", agent._id, agent.name);
+                (0, lib_db_1.backupMapper)("agents_lookup", agent.name, agent._id);
+                (0, lib_db_1.backupMapper)("agentIDs", agent._id, agent.agentId);
+            });
+            (0, lib_misc_1.printDone)("Agents", agentsCount);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function fetchDataPipes() {
     return __awaiter(this, void 0, void 0, function* () {
-        const URL_DATA = `/api/a/bm/${selectedApp}/flow`;
-        const URL_COUNT = `/api/a/bm/${selectedApp}/flow/utils/count`;
-        const dataPipesCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
-        const dataPipes = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(dataPipesCount));
-        (0, lib_db_1.save)("datapipes", dataPipes);
-        dataPipes.forEach((dataPipe) => {
-            (0, lib_db_1.backupMapper)("datapipes", dataPipe._id, dataPipe.name);
-            (0, lib_db_1.backupMapper)("datapipes_lookup", dataPipe.name, dataPipe._id);
-        });
-        (0, lib_db_1.backupDependencyMatrixOfDataPipe)((0, lib_parser_pipe_1.buildDependencyMatrixForDataPipe)(dataPipes));
-        (0, lib_misc_1.printDone)("Data Pipes", dataPipesCount);
+        try {
+            const URL_DATA = `/api/a/bm/${selectedApp}/flow`;
+            const URL_COUNT = `/api/a/bm/${selectedApp}/flow/utils/count`;
+            const dataPipesCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
+            const dataPipes = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(dataPipesCount));
+            (0, lib_db_1.save)("datapipes", dataPipes);
+            dataPipes.forEach((dataPipe) => {
+                (0, lib_db_1.backupMapper)("datapipes", dataPipe._id, dataPipe.name);
+                (0, lib_db_1.backupMapper)("datapipes_lookup", dataPipe.name, dataPipe._id);
+            });
+            (0, lib_db_1.backupDependencyMatrixOfDataPipe)((0, lib_parser_pipe_1.buildDependencyMatrixForDataPipe)(dataPipes));
+            (0, lib_misc_1.printDone)("Data Pipes", dataPipesCount);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function fetchGroups() {
     return __awaiter(this, void 0, void 0, function* () {
-        let URL_COUNT = `/api/a/rbac/${selectedApp}/group/count`;
-        let URL_DATA = `/api/a/rbac/${selectedApp}/group`;
-        const groupsCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
-        let groups = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(groupsCount));
-        groups = groups.filter((group) => group.name != "#");
-        (0, lib_db_1.save)("groups", groups);
-        groups.forEach((group) => {
-            (0, lib_db_1.backupMapper)("groups", group._id, group.name);
-            (0, lib_db_1.backupMapper)("groups_lookup", group.name, group._id);
-        });
-        (0, lib_misc_1.printDone)("Groups", groups.length);
+        try {
+            let URL_COUNT = `/api/a/rbac/${selectedApp}/group/count`;
+            let URL_DATA = `/api/a/rbac/${selectedApp}/group`;
+            const groupsCount = yield (0, manager_api_1.get)(URL_COUNT, getURLParamsForCount());
+            let groups = yield (0, manager_api_1.get)(URL_DATA, getURLParamsForData(groupsCount));
+            groups = groups.filter((group) => group.name != "#");
+            (0, lib_db_1.save)("groups", groups);
+            groups.forEach((group) => {
+                (0, lib_db_1.backupMapper)("groups", group._id, group.name);
+                (0, lib_db_1.backupMapper)("groups_lookup", group.name, group._id);
+            });
+            (0, lib_misc_1.printDone)("Groups", groups.length);
+        }
+        catch (e) {
+            logger.error(e.message);
+        }
     });
 }
 function customiseBackup() {

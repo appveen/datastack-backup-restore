@@ -59,7 +59,7 @@ export function printInfo(message: string) {
 
 export function printError(message: string) {
 	logger.error(message);
-	console.error(`!!! ${message} !!!`);
+	console.error(`\n!!! ${message} !!!\n`);
 }
 
 export function printDone(_msg: string, _count: number) {
