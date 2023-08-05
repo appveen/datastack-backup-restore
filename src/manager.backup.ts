@@ -51,158 +51,202 @@ export async function backupManager(apps: any) {
 }
 
 async function fetchMapperFormulas() {
-	const URL_COUNT = "/api/a/rbac/admin/metadata/mapper/formula/count";
-	const URL_DATA = "/api/a/rbac/admin/metadata/mapper/formula";
-	const mapperFormulaCount = await get(URL_COUNT, new URLSearchParams());
-	const searchParams = new URLSearchParams();
-	searchParams.append("count", mapperFormulaCount);
-	searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
-	const mapperFormulas = await get(URL_DATA, searchParams);
-	save("mapperformulas", mapperFormulas);
-	mapperFormulas.forEach((mf: any) => {
-		backupMapper("mapperformulas", mf._id, mf.name);
-		backupMapper("mapperformulas_lookup", mf.name, mf._id);
-	});
-	printDone("Mapper Formulas(!)", mapperFormulaCount);
+	try {
+		const URL_COUNT = "/api/a/rbac/admin/metadata/mapper/formula/count";
+		const URL_DATA = "/api/a/rbac/admin/metadata/mapper/formula";
+		const mapperFormulaCount = await get(URL_COUNT, new URLSearchParams());
+		const searchParams = new URLSearchParams();
+		searchParams.append("count", mapperFormulaCount);
+		searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
+		const mapperFormulas = await get(URL_DATA, searchParams);
+		save("mapperformulas", mapperFormulas);
+		mapperFormulas.forEach((mf: any) => {
+			backupMapper("mapperformulas", mf._id, mf.name);
+			backupMapper("mapperformulas_lookup", mf.name, mf._id);
+		});
+		printDone("Mapper Formulas(!)", mapperFormulaCount);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function fetchPlugins() {
-	const URL_COUNT = "/api/a/bm/admin/node/utils/count";
-	const URL_DATA = "/api/a/bm/admin/node";
-	const pluginCount = await get(URL_COUNT, new URLSearchParams());
-	const searchParams = new URLSearchParams();
-	searchParams.append("count", pluginCount);
-	searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
-	const plugins = await get(URL_DATA, searchParams);
-	save("plugins", plugins);
-	plugins.forEach((plugin: any) => {
-		backupMapper("plugins", plugin._id, plugin.name);
-		backupMapper("plugins_lookup", plugin.name, plugin._id);
-	});
-	printDone("Plugins(!)", pluginCount);
+	try {
+		const URL_COUNT = "/api/a/bm/admin/node/utils/count";
+		const URL_DATA = "/api/a/bm/admin/node";
+		const pluginCount = await get(URL_COUNT, new URLSearchParams());
+		const searchParams = new URLSearchParams();
+		searchParams.append("count", pluginCount);
+		searchParams.append("select", "-_metadata,-allowedFileTypes,-port,-__v,-users");
+		const plugins = await get(URL_DATA, searchParams);
+		save("plugins", plugins);
+		plugins.forEach((plugin: any) => {
+			backupMapper("plugins", plugin._id, plugin.name);
+			backupMapper("plugins_lookup", plugin.name, plugin._id);
+		});
+		printDone("Plugins(!)", pluginCount);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function fetchNPMLibraries() {
-	const URL_DATA = "/api/a/bm/admin/flow/utils/node-library";
-	const npmLibraries = await get(URL_DATA, new URLSearchParams());
-	save("npmlibraries", npmLibraries);
-	npmLibraries.forEach((lib: any) => {
-		backupMapper("npmlibraries", lib._id, lib.name);
-		backupMapper("npmlibraries_lookup", lib.name, lib._id);
-	});
-	printDone("NPM Library(!)", npmLibraries.length);
+	try {
+		const URL_DATA = "/api/a/bm/admin/flow/utils/node-library";
+		const npmLibraries = await get(URL_DATA, new URLSearchParams());
+		save("npmlibraries", npmLibraries);
+		npmLibraries.forEach((lib: any) => {
+			backupMapper("npmlibraries", lib._id, lib.name);
+			backupMapper("npmlibraries_lookup", lib.name, lib._id);
+		});
+		printDone("NPM Library(!)", npmLibraries.length);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function fetchDataServices() {
-	var URL_COUNT = `/api/a/sm/${selectedApp}/service/utils/count`;
-	var URL_DATA = `/api/a/sm/${selectedApp}/service`;
-	const dataservicesCount = await get(URL_COUNT, getURLParamsForCount());
-	let dataservices = await get(URL_DATA, getURLParamsForData(dataservicesCount));
-	save("dataservices", dataservices);
-	dataservices.forEach((ds: any) => {
-		backupMapper("dataservices", ds._id, ds.name);
-		backupMapper("dataservices_lookup", ds.name, ds._id);
-	});
-	backupDependencyMatrixOfDataService(buildDependencyMatrixForDataServices(dataservices));
-	printDone("Data services", dataservicesCount);
+	try {
+		var URL_COUNT = `/api/a/sm/${selectedApp}/service/utils/count`;
+		var URL_DATA = `/api/a/sm/${selectedApp}/service`;
+		const dataservicesCount = await get(URL_COUNT, getURLParamsForCount());
+		let dataservices = await get(URL_DATA, getURLParamsForData(dataservicesCount));
+		save("dataservices", dataservices);
+		dataservices.forEach((ds: any) => {
+			backupMapper("dataservices", ds._id, ds.name);
+			backupMapper("dataservices_lookup", ds.name, ds._id);
+		});
+		backupDependencyMatrixOfDataService(buildDependencyMatrixForDataServices(dataservices));
+		printDone("Data services", dataservicesCount);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function fetchLibraries() {
-	var URL_COUNT = `/api/a/sm/${selectedApp}/globalSchema/utils/count`;
-	var URL_DATA = `/api/a/sm/${selectedApp}/globalSchema`;
-	const librariesCount = await get(URL_COUNT, getURLParamsForCount());
-	let libraries = await get(URL_DATA, getURLParamsForData(librariesCount));
-	save("libraries", libraries);
-	libraries.forEach((library: any) => {
-		library.services = [];
-		backupMapper("libraries", library._id, library.name);
-		backupMapper("libraries_lookup", library.name, library._id);
-	});
-	printDone("Libraries", librariesCount);
+	try {
+		var URL_COUNT = `/api/a/sm/${selectedApp}/globalSchema/utils/count`;
+		var URL_DATA = `/api/a/sm/${selectedApp}/globalSchema`;
+		const librariesCount = await get(URL_COUNT, getURLParamsForCount());
+		let libraries = await get(URL_DATA, getURLParamsForData(librariesCount));
+		save("libraries", libraries);
+		libraries.forEach((library: any) => {
+			library.services = [];
+			backupMapper("libraries", library._id, library.name);
+			backupMapper("libraries_lookup", library.name, library._id);
+		});
+		printDone("Libraries", librariesCount);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function fetchFunctions() {
-	let URL_COUNT = `/api/a/bm/${selectedApp}/faas/utils/count`;
-	let URL_DATA = `/api/a/bm/${selectedApp}/faas`;
-	let functionsCount = await get(URL_COUNT, getURLParamsForCount());
-	let functions = await get(URL_DATA, getURLParamsForData(functionsCount));
-	save("functions", functions);
-	functions.forEach((fn: any) => {
-		fn.services = [];
-		backupMapper("functions", fn._id, fn.name);
-		backupMapper("functions_lookup", fn.name, fn._id);
-	});
-	printDone("Functions", functionsCount);
+	try {
+		let URL_COUNT = `/api/a/bm/${selectedApp}/faas/utils/count`;
+		let URL_DATA = `/api/a/bm/${selectedApp}/faas`;
+		let functionsCount = await get(URL_COUNT, getURLParamsForCount());
+		let functions = await get(URL_DATA, getURLParamsForData(functionsCount));
+		save("functions", functions);
+		functions.forEach((fn: any) => {
+			fn.services = [];
+			backupMapper("functions", fn._id, fn.name);
+			backupMapper("functions_lookup", fn.name, fn._id);
+		});
+		printDone("Functions", functionsCount);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function fetchConnectors() {
-	const URL_DATA = `/api/a/rbac/${selectedApp}/connector`;
-	const URL_COUNT = `/api/a/rbac/${selectedApp}/connector/utils/count`;
-	const connectorsCount = await get(URL_COUNT, getURLParamsForCount());
-	const connectors = await get(URL_DATA, getURLParamsForData(connectorsCount));
-	save("connectors", connectors);
-	connectors.forEach((connector: any) => {
-		backupMapper("connectors", connector._id, connector.name);
-		backupMapper("connectors_lookup", connector.name, connector._id);
-	});
-	printDone("Connectors", connectorsCount);
+	try {
+		const URL_DATA = `/api/a/rbac/${selectedApp}/connector`;
+		const URL_COUNT = `/api/a/rbac/${selectedApp}/connector/utils/count`;
+		const connectorsCount = await get(URL_COUNT, getURLParamsForCount());
+		const connectors = await get(URL_DATA, getURLParamsForData(connectorsCount));
+		save("connectors", connectors);
+		connectors.forEach((connector: any) => {
+			backupMapper("connectors", connector._id, connector.name);
+			backupMapper("connectors_lookup", connector.name, connector._id);
+		});
+		printDone("Connectors", connectorsCount);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function fetchDataFormats() {
-	const URL_DATA = `/api/a/bm/${selectedApp}/dataFormat`;
-	const URL_COUNT = `/api/a/bm/${selectedApp}/dataFormat`;
-	let searchParams = getURLParamsForCount();
-	searchParams.append("countOnly", "true");
-	const dataFormatsCount = await get(URL_COUNT, searchParams);
-	const dataFormats = await get(URL_DATA, getURLParamsForData(dataFormatsCount));
-	save("dataformats", dataFormats);
-	dataFormats.forEach((dataFormat: any) => {
-		backupMapper("dataformats", dataFormat._id, dataFormat.name);
-		backupMapper("dataformats_lookup", dataFormat.name, dataFormat._id);
-	});
-	printDone("Data Formats", dataFormatsCount);
+	try {
+		const URL_DATA = `/api/a/bm/${selectedApp}/dataFormat`;
+		const URL_COUNT = `/api/a/bm/${selectedApp}/dataFormat`;
+		let searchParams = getURLParamsForCount();
+		searchParams.append("countOnly", "true");
+		const dataFormatsCount = await get(URL_COUNT, searchParams);
+		const dataFormats = await get(URL_DATA, getURLParamsForData(dataFormatsCount));
+		save("dataformats", dataFormats);
+		dataFormats.forEach((dataFormat: any) => {
+			backupMapper("dataformats", dataFormat._id, dataFormat.name);
+			backupMapper("dataformats_lookup", dataFormat.name, dataFormat._id);
+		});
+		printDone("Data Formats", dataFormatsCount);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function fetchAgents() {
-	const URL_DATA = `/api/a/bm/${selectedApp}/agent`;
-	const URL_COUNT = `/api/a/bm/${selectedApp}/agent/utils/count`;
-	const agentsCount = await get(URL_COUNT, getURLParamsForCount());
-	const agents = await get(URL_DATA, getURLParamsForData(agentsCount));
-	save("agents", agents);
-	agents.forEach((agent: any) => {
-		backupMapper("agents", agent._id, agent.name);
-		backupMapper("agents_lookup", agent.name, agent._id);
-		backupMapper("agentIDs", agent._id, agent.agentId);
-	});
-	printDone("Agents", agentsCount);
+	try {
+		const URL_DATA = `/api/a/bm/${selectedApp}/agent`;
+		const URL_COUNT = `/api/a/bm/${selectedApp}/agent/utils/count`;
+		const agentsCount = await get(URL_COUNT, getURLParamsForCount());
+		const agents = await get(URL_DATA, getURLParamsForData(agentsCount));
+		save("agents", agents);
+		agents.forEach((agent: any) => {
+			backupMapper("agents", agent._id, agent.name);
+			backupMapper("agents_lookup", agent.name, agent._id);
+			backupMapper("agentIDs", agent._id, agent.agentId);
+		});
+		printDone("Agents", agentsCount);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function fetchDataPipes() {
-	const URL_DATA = `/api/a/bm/${selectedApp}/flow`;
-	const URL_COUNT = `/api/a/bm/${selectedApp}/flow/utils/count`;
-	const dataPipesCount = await get(URL_COUNT, getURLParamsForCount());
-	const dataPipes = await get(URL_DATA, getURLParamsForData(dataPipesCount));
-	save("datapipes", dataPipes);
-	dataPipes.forEach((dataPipe: any) => {
-		backupMapper("datapipes", dataPipe._id, dataPipe.name);
-		backupMapper("datapipes_lookup", dataPipe.name, dataPipe._id);
-	});
-	backupDependencyMatrixOfDataPipe(buildDependencyMatrixForDataPipe(dataPipes));
-	printDone("Data Pipes", dataPipesCount);
+	try {
+		const URL_DATA = `/api/a/bm/${selectedApp}/flow`;
+		const URL_COUNT = `/api/a/bm/${selectedApp}/flow/utils/count`;
+		const dataPipesCount = await get(URL_COUNT, getURLParamsForCount());
+		const dataPipes = await get(URL_DATA, getURLParamsForData(dataPipesCount));
+		save("datapipes", dataPipes);
+		dataPipes.forEach((dataPipe: any) => {
+			backupMapper("datapipes", dataPipe._id, dataPipe.name);
+			backupMapper("datapipes_lookup", dataPipe.name, dataPipe._id);
+		});
+		backupDependencyMatrixOfDataPipe(buildDependencyMatrixForDataPipe(dataPipes));
+		printDone("Data Pipes", dataPipesCount);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function fetchGroups() {
-	let URL_COUNT = `/api/a/rbac/${selectedApp}/group/count`;
-	let URL_DATA = `/api/a/rbac/${selectedApp}/group`;
-	const groupsCount = await get(URL_COUNT, getURLParamsForCount());
-	let groups = await get(URL_DATA, getURLParamsForData(groupsCount));
-	groups = groups.filter((group: any) => group.name != "#");
-	save("groups", groups);
-	groups.forEach((group: any) => {
-		backupMapper("groups", group._id, group.name);
-		backupMapper("groups_lookup", group.name, group._id);
-	});
-	printDone("Groups", groups.length);
+	try {
+		let URL_COUNT = `/api/a/rbac/${selectedApp}/group/count`;
+		let URL_DATA = `/api/a/rbac/${selectedApp}/group`;
+		const groupsCount = await get(URL_COUNT, getURLParamsForCount());
+		let groups = await get(URL_DATA, getURLParamsForData(groupsCount));
+		groups = groups.filter((group: any) => group.name != "#");
+		save("groups", groups);
+		groups.forEach((group: any) => {
+			backupMapper("groups", group._id, group.name);
+			backupMapper("groups_lookup", group.name, group._id);
+		});
+		printDone("Groups", groups.length);
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function customiseBackup() {

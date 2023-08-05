@@ -56,56 +56,76 @@ program
     .option("-p, --password <password>", "data.stack password.")
     .option("-b, --backupfile <backup JSON file>", "Custom backup file to use during backup or restore")
     .action(() => __awaiter(void 0, void 0, void 0, function* () {
-    (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
-    (0, lib_misc_1.header)(` data.stack Backup and Restore Utility ${version} `);
-    let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
-    yield (0, manager_api_1.login)(dsConfig);
-    let apps = yield (0, manager_api_1.getApps)();
-    var selection = yield (0, lib_cli_1.startMenu)();
-    global.logger.info(`Selected mode :: ${selection.mode}`);
-    if (selection.mode == "Backup")
-        yield (0, manager_backup_1.backupManager)(apps);
-    if (selection.mode == "Restore")
-        yield (0, manager_restore_1.restoreManager)(apps);
-    if (selection.mode == "Clear All")
-        yield (0, manager_clearAll_1.clearAllManager)(apps);
-    // Logout cleanly
-    global.dataStack.Logout();
+    try {
+        (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
+        (0, lib_misc_1.header)(` data.stack Backup and Restore Utility ${version} `);
+        let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
+        yield (0, manager_api_1.login)(dsConfig);
+        let apps = yield (0, manager_api_1.getApps)();
+        var selection = yield (0, lib_cli_1.startMenu)();
+        global.logger.info(`Selected mode :: ${selection.mode}`);
+        if (selection.mode == "Backup")
+            yield (0, manager_backup_1.backupManager)(apps);
+        if (selection.mode == "Restore")
+            yield (0, manager_restore_1.restoreManager)(apps);
+        if (selection.mode == "Clear All")
+            yield (0, manager_clearAll_1.clearAllManager)(apps);
+        // Logout cleanly
+        global.dataStack.Logout();
+    }
+    catch (e) {
+        logger.error(e.message);
+    }
 }));
 program.command("backup")
     .description("backup configuration.")
     .action(() => __awaiter(void 0, void 0, void 0, function* () {
-    (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
-    (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
-    let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
-    yield (0, manager_api_1.login)(dsConfig);
-    let apps = yield (0, manager_api_1.getApps)();
-    yield (0, manager_backup_1.backupManager)(apps);
-    // Logout cleanly
-    global.dataStack.Logout();
+    try {
+        (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
+        (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
+        let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
+        yield (0, manager_api_1.login)(dsConfig);
+        let apps = yield (0, manager_api_1.getApps)();
+        yield (0, manager_backup_1.backupManager)(apps);
+        // Logout cleanly
+        global.dataStack.Logout();
+    }
+    catch (e) {
+        logger.error(e.message);
+    }
 }));
 program.command("restore")
     .description("Restore configuration.")
     .action(() => __awaiter(void 0, void 0, void 0, function* () {
-    (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
-    (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
-    let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
-    yield (0, manager_api_1.login)(dsConfig);
-    let apps = yield (0, manager_api_1.getApps)();
-    yield (0, manager_restore_1.restoreManager)(apps);
-    // Logout cleanly
-    global.dataStack.Logout();
+    try {
+        (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
+        (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
+        let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
+        yield (0, manager_api_1.login)(dsConfig);
+        let apps = yield (0, manager_api_1.getApps)();
+        yield (0, manager_restore_1.restoreManager)(apps);
+        // Logout cleanly
+        global.dataStack.Logout();
+    }
+    catch (e) {
+        logger.error(e.message);
+    }
 }));
 program.command("clear")
     .description("Clear all configuration.")
     .action(() => __awaiter(void 0, void 0, void 0, function* () {
-    (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
-    (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
-    let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
-    yield (0, manager_api_1.login)(dsConfig);
-    let apps = yield (0, manager_api_1.getApps)();
-    yield (0, manager_clearAll_1.clearAllManager)(apps);
-    // Logout cleanly
-    global.dataStack.Logout();
+    try {
+        (0, lib_misc_1.parseCliParams)(program.opts(), timestamp);
+        (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
+        let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
+        yield (0, manager_api_1.login)(dsConfig);
+        let apps = yield (0, manager_api_1.getApps)();
+        yield (0, manager_clearAll_1.clearAllManager)(apps);
+        // Logout cleanly
+        global.dataStack.Logout();
+    }
+    catch (e) {
+        logger.error(e.message);
+    }
 }));
 program.parse();

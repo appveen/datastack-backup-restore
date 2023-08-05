@@ -22,54 +22,70 @@ export async function clearAllManager(apps: any) {
 }
 
 async function clearGroups(selectedApp: string) {
-	header("Group");
-	let BASE_URL = `/api/a/rbac/${selectedApp}/group`;
-	let groups = await get(BASE_URL, searchParams);
-	printInfo(`${groups.length - 1} Group(s) found.`);
-	await groups.reduce(async (p: any, group: any) => {
-		await p;
-		if (group.name == "#") return Promise.resolve();
-		printInfo(`  * Removing group ${group._id} ${group.name}`);
-		let GROUP_URL = `${BASE_URL}/${group._id}`;
-		await del(GROUP_URL);
-	}, Promise.resolve());
+	try {
+		header("Group");
+		let BASE_URL = `/api/a/rbac/${selectedApp}/group`;
+		let groups = await get(BASE_URL, searchParams);
+		printInfo(`${groups.length - 1} Group(s) found.`);
+		await groups.reduce(async (p: any, group: any) => {
+			await p;
+			if (group.name == "#") return Promise.resolve();
+			printInfo(`  * Removing group ${group._id} ${group.name}`);
+			let GROUP_URL = `${BASE_URL}/${group._id}`;
+			await del(GROUP_URL);
+		}, Promise.resolve());
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function clearDataServices(selectedApp: string) {
-	header("Dataservice");
-	var BASE_URL = `/api/a/sm/${selectedApp}/service`;
-	let dataservices = await get(BASE_URL, searchParams);
-	printInfo(`${dataservices.length} Dataservice(s) found.`);
-	await dataservices.reduce(async (p: any, dataservice: any) => {
-		await p;
-		printInfo(`  * Removing dataservice ${dataservice._id} ${dataservice.name}`);
-		let DS_URL = `${BASE_URL}/${dataservice._id}`;
-		await del(DS_URL);
-	}, Promise.resolve());
+	try {
+		header("Dataservice");
+		var BASE_URL = `/api/a/sm/${selectedApp}/service`;
+		let dataservices = await get(BASE_URL, searchParams);
+		printInfo(`${dataservices.length} Dataservice(s) found.`);
+		await dataservices.reduce(async (p: any, dataservice: any) => {
+			await p;
+			printInfo(`  * Removing dataservice ${dataservice._id} ${dataservice.name}`);
+			let DS_URL = `${BASE_URL}/${dataservice._id}`;
+			await del(DS_URL);
+		}, Promise.resolve());
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function clearLibrary(selectedApp: string) {
-	header("Library");
-	let BASE_URL = `/api/a/sm/${selectedApp}/globalSchema`;
-	let libraries = await get(BASE_URL, searchParams);
-	printInfo(`${libraries.length} Library(-ies) found.`);
-	await libraries.reduce(async (p: any, library: any) => {
-		await p;
-		printInfo(`  * Removing library ${library._id} ${library.name}`);
-		let LIB_URL = `${BASE_URL}/${library._id}`;
-		await del(LIB_URL);
-	}, Promise.resolve());
+	try {
+		header("Library");
+		let BASE_URL = `/api/a/sm/${selectedApp}/globalSchema`;
+		let libraries = await get(BASE_URL, searchParams);
+		printInfo(`${libraries.length} Library(-ies) found.`);
+		await libraries.reduce(async (p: any, library: any) => {
+			await p;
+			printInfo(`  * Removing library ${library._id} ${library.name}`);
+			let LIB_URL = `${BASE_URL}/${library._id}`;
+			await del(LIB_URL);
+		}, Promise.resolve());
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }
 
 async function clearFunctions(selectedApp: string) {
-	header("Function");
-	let BASE_URL = `/api/a/bm/${selectedApp}/faas`;
-	let functions = await get(BASE_URL, searchParams);
-	printInfo(`${functions.length} Function(s) found.`);
-	await functions.reduce(async (p: any, fn: any) => {
-		await p;
-		printInfo(`  * Removing function ${fn._id} ${fn.name}`);
-		let FN_URL = `${BASE_URL}/${fn._id}`;
-		await del(FN_URL);
-	}, Promise.resolve());
+	try {
+		header("Function");
+		let BASE_URL = `/api/a/bm/${selectedApp}/faas`;
+		let functions = await get(BASE_URL, searchParams);
+		printInfo(`${functions.length} Function(s) found.`);
+		await functions.reduce(async (p: any, fn: any) => {
+			await p;
+			printInfo(`  * Removing function ${fn._id} ${fn.name}`);
+			let FN_URL = `${BASE_URL}/${fn._id}`;
+			await del(FN_URL);
+		}, Promise.resolve());
+	} catch (e: any) {
+		logger.error(e.message);
+	}
 }

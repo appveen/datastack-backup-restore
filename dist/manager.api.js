@@ -34,8 +34,7 @@ function login(config) {
         }
         catch (e) {
             (0, lib_misc_1.printError)("Unable to login to data.stack server");
-            logger.error(e);
-            yield (0, lib_misc_1.killThySelf)(400);
+            logger.error(e.message);
         }
     });
 }

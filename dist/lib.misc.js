@@ -75,7 +75,7 @@ function printInfo(message) {
 exports.printInfo = printInfo;
 function printError(message) {
     logger.error(message);
-    console.error(message);
+    console.error(`!!! ${message} !!!`);
 }
 exports.printError = printError;
 function printDone(_msg, _count) {

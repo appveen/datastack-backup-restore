@@ -1,11 +1,12 @@
 import { join } from "path";
 import { readFileSync, writeFileSync, existsSync } from "fs";
-import { killThySelf, printInfo } from "./lib.misc";
+import { killThySelf, printError, printInfo } from "./lib.misc";
 
 let logger = global.logger;
 
 let sampleBackupData = {
 	"version": `${global.version}`,
+	"host": `${global.host}`,
 	"map": {
 		"mapperformulas": {},
 		"mapperformulas_lookup": {},
@@ -56,10 +57,9 @@ export function backupInit() {
 export function restoreInit() {
 	logger.debug(`Restore file - ${global.restoreFileName}`);
 	if (!existsSync(global.backupFileName)) {
-		printInfo(`Backup file ${global.backupFileName} doesn't exist!`);
-		killThySelf(400);
+		printError(`Backup file ${global.backupFileName} doesn't exist!`);
 	}
-	writeJSON(global.restoreFileName, `{"version":"${global.version}"}`);
+	writeJSON(global.restoreFileName, `{"version":"${global.version}", "host":"${global.host}"}`);
 }
 
 export function save(key: string, data: any[]) {

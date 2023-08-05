@@ -25,7 +25,7 @@ function restoreManager(apps) {
         (0, lib_misc_1.printInfo)(`Backup file being used - ${global.backupFileName}`);
         (0, lib_db_1.restoreInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations...");
-        if (global.isSuperAdmin) {
+        if (!global.isSuperAdmin) {
             yield restoreMapperFormulas();
             yield restorePlugins();
         }
@@ -341,7 +341,6 @@ function restoreDataPipes() {
             delete datapipe.version;
             let existingID = yield configExists(BASE_URL, datapipe.name, selectedApp);
             let newData = null;
-            console.log(existingID);
             if (existingID)
                 newData = yield update("Data pipe", BASE_URL, selectedApp, datapipe, existingID);
             else
@@ -359,12 +358,17 @@ function restoreGroups() {
         (0, lib_misc_1.printInfo)(`Groups to restore - ${groups.length}`);
         let BASE_URL = `/api/a/rbac/${selectedApp}/group`;
         let dataServiceIDMap = (0, lib_db_1.readRestoreMap)("dataservices");
+        let dataPipesIDMap = (0, lib_db_1.readRestoreMap)("datapipes");
         yield groups.reduce((prev, group) => __awaiter(this, void 0, void 0, function* () {
             yield prev;
             group.roles.forEach((role) => {
                 role.app = selectedApp;
                 if (dataServiceIDMap[role.entity])
                     role.entity = dataServiceIDMap[role.entity];
+                if (dataPipesIDMap[role.entity]) {
+                    role.id = `INTR_${dataPipesIDMap[role.entity]}`;
+                    role.entity = dataPipesIDMap[role.entity];
+                }
                 if (role._id == "ADMIN_role.entity")
                     role._id = `ADMIN_${dataServiceIDMap[role.entity]}`;
             });

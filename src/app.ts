@@ -51,57 +51,73 @@ program
 	.option("-p, --password <password>", "data.stack password.")
 	.option("-b, --backupfile <backup JSON file>", "Custom backup file to use during backup or restore")
 	.action(async () => {
-		parseCliParams(program.opts(), timestamp);
-		header(` data.stack Backup and Restore Utility ${version} `);
-		let dsConfig = await validateCLIParams();
-		await login(dsConfig);
-		let apps = await getApps();
-		var selection = await startMenu();
-		global.logger.info(`Selected mode :: ${selection.mode}`);
-		if (selection.mode == "Backup") await backupManager(apps);
-		if (selection.mode == "Restore") await restoreManager(apps);
-		if (selection.mode == "Clear All") await clearAllManager(apps);
-		// Logout cleanly
-		global.dataStack.Logout();
+		try {
+			parseCliParams(program.opts(), timestamp);
+			header(` data.stack Backup and Restore Utility ${version} `);
+			let dsConfig = await validateCLIParams();
+			await login(dsConfig);
+			let apps = await getApps();
+			var selection = await startMenu();
+			global.logger.info(`Selected mode :: ${selection.mode}`);
+			if (selection.mode == "Backup") await backupManager(apps);
+			if (selection.mode == "Restore") await restoreManager(apps);
+			if (selection.mode == "Clear All") await clearAllManager(apps);
+			// Logout cleanly
+			global.dataStack.Logout();
+		} catch (e: any) {
+			logger.error(e.message);
+		}
 	});
 
 program.command("backup")
 	.description("backup configuration.")
 	.action(async () => {
-		parseCliParams(program.opts(), timestamp);
-		header(`data.stack Backup and Restore Utility ${version}`);
-		let dsConfig = await validateCLIParams();
-		await login(dsConfig);
-		let apps = await getApps();
-		await backupManager(apps);
-		// Logout cleanly
-		global.dataStack.Logout();
+		try {
+			parseCliParams(program.opts(), timestamp);
+			header(`data.stack Backup and Restore Utility ${version}`);
+			let dsConfig = await validateCLIParams();
+			await login(dsConfig);
+			let apps = await getApps();
+			await backupManager(apps);
+			// Logout cleanly
+			global.dataStack.Logout();
+		} catch (e: any) {
+			logger.error(e.message);
+		}
 	});
 
 program.command("restore")
 	.description("Restore configuration.")
 	.action(async () => {
-		parseCliParams(program.opts(), timestamp);
-		header(`data.stack Backup and Restore Utility ${version}`);
-		let dsConfig = await validateCLIParams();
-		await login(dsConfig);
-		let apps = await getApps();
-		await restoreManager(apps);
-		// Logout cleanly
-		global.dataStack.Logout();
+		try {
+			parseCliParams(program.opts(), timestamp);
+			header(`data.stack Backup and Restore Utility ${version}`);
+			let dsConfig = await validateCLIParams();
+			await login(dsConfig);
+			let apps = await getApps();
+			await restoreManager(apps);
+			// Logout cleanly
+			global.dataStack.Logout();
+		} catch (e: any) {
+			logger.error(e.message);
+		}
 	});
 
 program.command("clear")
 	.description("Clear all configuration.")
 	.action(async () => {
-		parseCliParams(program.opts(), timestamp);
-		header(`data.stack Backup and Restore Utility ${version}`);
-		let dsConfig = await validateCLIParams();
-		await login(dsConfig);
-		let apps = await getApps();
-		await clearAllManager(apps);
-		// Logout cleanly
-		global.dataStack.Logout();
+		try {
+			parseCliParams(program.opts(), timestamp);
+			header(`data.stack Backup and Restore Utility ${version}`);
+			let dsConfig = await validateCLIParams();
+			await login(dsConfig);
+			let apps = await getApps();
+			await clearAllManager(apps);
+			// Logout cleanly
+			global.dataStack.Logout();
+		} catch (e: any) {
+			logger.error(e.message);
+		}
 	});
 
 program.parse();
