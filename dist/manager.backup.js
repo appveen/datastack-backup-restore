@@ -189,6 +189,7 @@ function fetchAgents() {
         agents.forEach((agent) => {
             (0, lib_db_1.backupMapper)("agents", agent._id, agent.name);
             (0, lib_db_1.backupMapper)("agents_lookup", agent.name, agent._id);
+            (0, lib_db_1.backupMapper)("agentIDs", agent._id, agent.agentId);
         });
         (0, lib_misc_1.printDone)("Agents", agentsCount);
     });

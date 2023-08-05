@@ -15,6 +15,7 @@ const lib_misc_1 = require("./lib.misc");
 const manager_api_1 = require("./manager.api");
 const lib_db_1 = require("./lib.db");
 const lib_parser_ds_1 = require("./lib.parser.ds");
+const lib_parser_pipe_1 = require("./lib.parser.pipe");
 let logger = global.logger;
 let selectedApp = "";
 function restoreManager(apps) {
@@ -25,16 +26,17 @@ function restoreManager(apps) {
         (0, lib_db_1.restoreInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations...");
         if (global.isSuperAdmin) {
-            // await restoreMapperFormulas();
-            // await restorePlugins();
+            yield restoreMapperFormulas();
+            yield restorePlugins();
         }
-        // await restoreLibrary();
-        // await restoreFunctions();
-        // await restoreConnectors();
-        // await restoreDataServices();
-        // await restoreDataFormats();
+        yield restoreLibrary();
+        yield restoreFunctions();
+        yield restoreConnectors();
+        yield restoreDataServices();
+        yield restoreDataFormats();
         yield restoreAgents();
-        // await restoreGroups();
+        yield restoreDataPipes();
+        yield restoreGroups();
         (0, lib_misc_1.header)("Restore complete!");
     });
 }
@@ -267,6 +269,7 @@ function restoreDataServices() {
         let dataserviceMap = (0, lib_db_1.readRestoreMap)("dataservices");
         yield dataservices.reduce((prev, dataservice) => __awaiter(this, void 0, void 0, function* () {
             yield prev;
+            dataservice.status = "Undeployed";
             if (newDataServices.indexOf(dataservice._id) != -1)
                 dataservice.status = "Draft";
             return yield update("Dataservice", BASE_URL, selectedApp, dataservice, dataserviceMap[dataservice._id]);
@@ -299,6 +302,7 @@ function restoreDataFormats() {
 function restoreAgents() {
     return __awaiter(this, void 0, void 0, function* () {
         let agents = (0, lib_db_1.read)("agents");
+        let agentIDs = (0, lib_db_1.readBackupMap)("agentIDs");
         if (agents.length < 1)
             return;
         (0, lib_misc_1.header)("Agent");
@@ -309,6 +313,7 @@ function restoreAgents() {
             delete agent._metadata;
             delete agent.__v;
             delete agent.version;
+            delete agent.agentId;
             let existingID = yield configExists(BASE_URL, agent.name, selectedApp);
             let newData = null;
             if (existingID)
@@ -316,6 +321,32 @@ function restoreAgents() {
             else
                 newData = yield insert("Agent", BASE_URL, selectedApp, agent);
             (0, lib_db_1.restoreMapper)("agents", agent._id, newData._id);
+            (0, lib_db_1.restoreMapper)("agentIDs", agentIDs[agent._id], newData.agentId);
+        }), Promise.resolve());
+    });
+}
+function restoreDataPipes() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let datapipes = (0, lib_db_1.read)("datapipes");
+        if (datapipes.length < 1)
+            return;
+        (0, lib_misc_1.header)("Data pipe");
+        (0, lib_misc_1.printInfo)(`Data pipes to restore - ${datapipes.length}`);
+        const BASE_URL = `/api/a/bm/${selectedApp}/flow`;
+        datapipes = (0, lib_parser_pipe_1.parseAndFixDataPipes)(datapipes);
+        yield datapipes.reduce((prev, datapipe) => __awaiter(this, void 0, void 0, function* () {
+            yield prev;
+            delete datapipe._metadata;
+            delete datapipe.__v;
+            delete datapipe.version;
+            let existingID = yield configExists(BASE_URL, datapipe.name, selectedApp);
+            let newData = null;
+            console.log(existingID);
+            if (existingID)
+                newData = yield update("Data pipe", BASE_URL, selectedApp, datapipe, existingID);
+            else
+                newData = yield insert("Data pipe", BASE_URL, selectedApp, datapipe);
+            (0, lib_db_1.restoreMapper)("datapipes", datapipe._id, newData._id);
         }), Promise.resolve());
     });
 }

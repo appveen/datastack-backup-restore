@@ -1,8 +1,9 @@
 import { selectApp } from "./lib.cli";
 import { header, printInfo } from "./lib.misc";
 import { get, post, put } from "./manager.api";
-import { read, readRestoreMap, restoreInit, restoreMapper } from "./lib.db";
+import { read, readBackupMap, readRestoreMap, restoreInit, restoreMapper } from "./lib.db";
 import { generateSampleDataSerivce, parseAndFixDataServices } from "./lib.parser.ds";
+import { parseAndFixDataPipes } from "./lib.parser.pipe";
 
 let logger = global.logger;
 let selectedApp = "";
@@ -18,17 +19,18 @@ export async function restoreManager(apps: any) {
 	printInfo("Scanning the configurations...");
 
 	if (global.isSuperAdmin) {
-		// await restoreMapperFormulas();
-		// await restorePlugins();
+		await restoreMapperFormulas();
+		await restorePlugins();
 	}
 
-	// await restoreLibrary();
-	// await restoreFunctions();
-	// await restoreConnectors();
-	// await restoreDataServices();
-	// await restoreDataFormats();
+	await restoreLibrary();
+	await restoreFunctions();
+	await restoreConnectors();
+	await restoreDataServices();
+	await restoreDataFormats();
 	await restoreAgents();
-	// await restoreGroups();
+	await restoreDataPipes();
+	await restoreGroups();
 	header("Restore complete!");
 }
 // SuperAdmin level APIs
@@ -233,6 +235,7 @@ async function restoreDataServices() {
 
 	await dataservices.reduce(async (prev: any, dataservice: any) => {
 		await prev;
+		dataservice.status = "Undeployed";
 		if (newDataServices.indexOf(dataservice._id) != -1) dataservice.status = "Draft";
 		return await update("Dataservice", BASE_URL, selectedApp, dataservice, dataserviceMap[dataservice._id]);
 	}, Promise.resolve());
@@ -259,6 +262,7 @@ async function restoreDataFormats() {
 
 async function restoreAgents() {
 	let agents = read("agents");
+	let agentIDs = readBackupMap("agentIDs");
 	if (agents.length < 1) return;
 	header("Agent");
 	printInfo(`Agents to restore - ${agents.length}`);
@@ -274,6 +278,27 @@ async function restoreAgents() {
 		if (existingID) newData = await update("Agent", BASE_URL, selectedApp, agent, existingID);
 		else newData = await insert("Agent", BASE_URL, selectedApp, agent);
 		restoreMapper("agents", agent._id, newData._id);
+		restoreMapper("agentIDs", agentIDs[agent._id], newData.agentId);
+	}, Promise.resolve());
+}
+
+async function restoreDataPipes() {
+	let datapipes = read("datapipes");
+	if (datapipes.length < 1) return;
+	header("Data pipe");
+	printInfo(`Data pipes to restore - ${datapipes.length}`);
+	const BASE_URL = `/api/a/bm/${selectedApp}/flow`;
+	datapipes = parseAndFixDataPipes(datapipes);
+	await datapipes.reduce(async (prev: any, datapipe: any) => {
+		await prev;
+		delete datapipe._metadata;
+		delete datapipe.__v;
+		delete datapipe.version;
+		let existingID = await configExists(BASE_URL, datapipe.name, selectedApp);
+		let newData = null;
+		if (existingID) newData = await update("Data pipe", BASE_URL, selectedApp, datapipe, existingID);
+		else newData = await insert("Data pipe", BASE_URL, selectedApp, datapipe);
+		restoreMapper("datapipes", datapipe._id, newData._id);
 	}, Promise.resolve());
 }
 

@@ -25,6 +25,7 @@ let sampleBackupData = {
 		"dataformats_lookup": {},
 		"agents": {},
 		"agents_lookup": {},
+		"agentIDs": {},
 		"datapipes": {},
 		"datapipes_lookup": {},
 		"groups": {},
