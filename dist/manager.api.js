@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.del = exports.put = exports.post = exports.get = exports.getApps = exports.login = void 0;
+exports.del = exports.put = exports.post = exports.get = exports.getApps = exports.logout = exports.login = void 0;
 const got_1 = __importDefault(require("got"));
 const lib_misc_1 = require("./lib.misc");
 var logger = global.logger;
@@ -21,7 +21,8 @@ function login(config) {
         logger.trace(JSON.stringify(config));
         try {
             // dataStack = await authenticateByCredentials(config);
-            const loginResponse = yield post("/api/a/rbac/auth/login", config);
+            // const loginResponse = await post("/api/a/rbac/auth/login", config);
+            const loginResponse = yield got_1.default.post("/api/a/rbac/auth/login", { json: config }).json();
             (0, lib_misc_1.printInfo)("Logged into data.stack.");
             let message = `User ${loginResponse._id} is not a super admin. You will not be able to backup Mapper Functions, Plugins and NPM Libraries.`;
             if (loginResponse.isSuperAdmin)
@@ -33,10 +34,28 @@ function login(config) {
         catch (e) {
             (0, lib_misc_1.printError)("Unable to login to data.stack server");
             logger.error(e.message);
+            process.exit(1);
         }
     });
 }
 exports.login = login;
+function logout() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield got_1.default.delete("/api/a/rbac/auth/logout", {
+                "headers": {
+                    "Authorization": `JWT ${global.token}`
+                }
+            });
+            (0, lib_misc_1.printInfo)("Logged out of data.stack.");
+        }
+        catch (e) {
+            (0, lib_misc_1.printError)("Unable to logout of data.stack server");
+            logger.error(e.message);
+        }
+    });
+}
+exports.logout = logout;
 function getApps() {
     return __awaiter(this, void 0, void 0, function* () {
         try {

@@ -1,6 +1,5 @@
 import { isNotAnAcceptableValue, printInfo } from "./lib.misc";
 import { registerPrompt, Separator, prompt } from "inquirer";
-import { Credentials } from "@appveen/ds-sdk/dist/types";
 registerPrompt("autocomplete", require("inquirer-autocomplete-prompt"));
 
 var logger = global.logger;
@@ -13,9 +12,12 @@ const mainMenu = [
 	"Clear All",
 ];
 
-export async function validateCLIParams(): Promise<Credentials> {
-	let credentials = new Credentials();
-	credentials.logger = logger;
+export async function validateCLIParams() {
+	let credentials: any = {
+		"host": "",
+		"username": "",
+		"password": "",
+	};
 	if (logger.level.toString() == "TRACE") credentials.trace = true;
 	credentials.host = process.env.DS_BR_HOST;
 	if (isNotAnAcceptableValue(process.env.DS_BR_HOST)) {

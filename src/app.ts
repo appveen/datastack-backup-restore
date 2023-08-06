@@ -34,7 +34,7 @@ global.logger = logger;
 
 import { header, parseCliParams } from "./lib.misc";
 import { startMenu, validateCLIParams } from "./lib.cli";
-import { getApps, login } from "./manager.api";
+import { getApps, login, logout } from "./manager.api";
 import { backupManager } from "./manager.backup";
 import { restoreManager } from "./manager.restore";
 import { clearAllManager } from "./manager.clearAll";
@@ -63,7 +63,7 @@ program
 			if (selection.mode == "Restore") await restoreManager(apps);
 			if (selection.mode == "Clear All") await clearAllManager(apps);
 			// Logout cleanly
-			global.dataStack.Logout();
+			logout();
 		} catch (e: any) {
 			logger.error(e.message);
 			process.exit(1);
@@ -81,7 +81,7 @@ program.command("backup")
 			let apps = await getApps();
 			await backupManager(apps);
 			// Logout cleanly
-			global.dataStack.Logout();
+			logout();
 		} catch (e: any) {
 			logger.error(e.message);
 			process.exit(1);
@@ -99,7 +99,7 @@ program.command("restore")
 			let apps = await getApps();
 			await restoreManager(apps);
 			// Logout cleanly
-			global.dataStack.Logout();
+			logout();
 		} catch (e: any) {
 			logger.error(e.message);
 			process.exit(1);
@@ -117,7 +117,7 @@ program.command("clear")
 			let apps = await getApps();
 			await clearAllManager(apps);
 			// Logout cleanly
-			global.dataStack.Logout();
+			logout();
 		} catch (e: any) {
 			logger.error(e.message);
 			process.exit(1);

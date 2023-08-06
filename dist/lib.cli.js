@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.selections = exports.customise = exports.selectApp = exports.startMenu = exports.promptUser = exports.validateCLIParams = void 0;
 const lib_misc_1 = require("./lib.misc");
 const inquirer_1 = require("inquirer");
-const types_1 = require("@appveen/ds-sdk/dist/types");
 (0, inquirer_1.registerPrompt)("autocomplete", require("inquirer-autocomplete-prompt"));
 var logger = global.logger;
 const mainMenu = [
@@ -24,8 +23,11 @@ const mainMenu = [
 ];
 function validateCLIParams() {
     return __awaiter(this, void 0, void 0, function* () {
-        let credentials = new types_1.Credentials();
-        credentials.logger = logger;
+        let credentials = {
+            "host": "",
+            "username": "",
+            "password": "",
+        };
         if (logger.level.toString() == "TRACE")
             credentials.trace = true;
         credentials.host = process.env.DS_BR_HOST;

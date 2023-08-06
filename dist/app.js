@@ -71,7 +71,7 @@ program
         if (selection.mode == "Clear All")
             yield (0, manager_clearAll_1.clearAllManager)(apps);
         // Logout cleanly
-        global.dataStack.Logout();
+        (0, manager_api_1.logout)();
     }
     catch (e) {
         logger.error(e.message);
@@ -89,7 +89,7 @@ program.command("backup")
         let apps = yield (0, manager_api_1.getApps)();
         yield (0, manager_backup_1.backupManager)(apps);
         // Logout cleanly
-        global.dataStack.Logout();
+        (0, manager_api_1.logout)();
     }
     catch (e) {
         logger.error(e.message);
@@ -107,7 +107,7 @@ program.command("restore")
         let apps = yield (0, manager_api_1.getApps)();
         yield (0, manager_restore_1.restoreManager)(apps);
         // Logout cleanly
-        global.dataStack.Logout();
+        (0, manager_api_1.logout)();
     }
     catch (e) {
         logger.error(e.message);
@@ -125,7 +125,7 @@ program.command("clear")
         let apps = yield (0, manager_api_1.getApps)();
         yield (0, manager_clearAll_1.clearAllManager)(apps);
         // Logout cleanly
-        global.dataStack.Logout();
+        (0, manager_api_1.logout)();
     }
     catch (e) {
         logger.error(e.message);
