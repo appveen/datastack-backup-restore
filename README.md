@@ -65,7 +65,10 @@ Download and run the executable from the [Releases](https://github.com/appveen/d
 ds-backup-restore-linux
 
 # OPTION 2
-LOGLEVEL=trace DS_BR_SINGLELOGFILE=true DS_BR_HOST=https://datanimbus.myapp.io DS_BR_USERNAME="mysuperadmin@datanimbus.com" DS_BR_PASSWORD="aComplicatedPassword" ds-backup-restore-linux
+DS_BR_HOST=https://datanimbus.myapp.io \
+  DS_BR_USERNAME="mysuperadmin@datanimbus.com" \
+  DS_BR_PASSWORD="aComplicatedPassword" \
+  ds-backup-restore-linux
 
 # OPTION 3
 ds-backup-restore-linux backup \
