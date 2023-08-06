@@ -20,9 +20,7 @@ function login(config) {
     return __awaiter(this, void 0, void 0, function* () {
         logger.trace(JSON.stringify(config));
         try {
-            // dataStack = await authenticateByCredentials(config);
-            // const loginResponse = await post("/api/a/rbac/auth/login", config);
-            const loginResponse = yield got_1.default.post("/api/a/rbac/auth/login", { json: config }).json();
+            const loginResponse = yield got_1.default.post(`${global.host}/api/a/rbac/auth/login`, { json: config }).json();
             (0, lib_misc_1.printInfo)("Logged into data.stack.");
             let message = `User ${loginResponse._id} is not a super admin. You will not be able to backup Mapper Functions, Plugins and NPM Libraries.`;
             if (loginResponse.isSuperAdmin)
@@ -32,6 +30,7 @@ function login(config) {
             (0, lib_misc_1.printInfo)(message);
         }
         catch (e) {
+            console.log(e);
             (0, lib_misc_1.printError)("Unable to login to data.stack server");
             logger.error(e.message);
             process.exit(1);
@@ -42,7 +41,7 @@ exports.login = login;
 function logout() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield got_1.default.delete("/api/a/rbac/auth/logout", {
+            yield got_1.default.delete(`${global.host}/api/a/rbac/auth/logout`, {
                 "headers": {
                     "Authorization": `JWT ${global.token}`
                 }
