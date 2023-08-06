@@ -69,6 +69,8 @@ LOGLEVEL=trace DS_BR_SINGLELOGFILE=true DS_BR_HOST=https://datanimbus.myapp.io D
 
 # OPTION 3
 ds-backup-restore-linux backup -b backup.json -h https://datanimbus.myapp.io -u "mysuperadmin@datanimbus.com" -p "aComplicatedPassword" -a SourceApp
-ds-backup-restore-linux restore -b backup.json -h https://datanimbus.myapp.io -u "mysuperadmin@datanimbus.com" -p "aComplicatedPassword" -a DestApp
+ds-backup-restore-linux restore -b backup.json -h https://datanimbus.myapp.io -u "mysuperadmin@datanimbus.com" -p "aComplicatedPassword"
+
+ -a DestApp
 ```
 
