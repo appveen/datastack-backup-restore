@@ -54,6 +54,7 @@ program
     .option("-h, --host <URL>", "data.stack server to connect.")
     .option("-u, --username <username>", "data.stack username.")
     .option("-p, --password <password>", "data.stack password.")
+    .option("-a, --app <app name>", "data.stack app name to backup or restore.")
     .option("-b, --backupfile <backup JSON file>", "Custom backup file to use during backup or restore")
     .action(() => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -61,7 +62,9 @@ program
         (0, lib_misc_1.header)(` data.stack Backup and Restore Utility ${version} `);
         let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
         yield (0, manager_api_1.login)(dsConfig);
-        let apps = yield (0, manager_api_1.getApps)();
+        let apps = [];
+        if (!global.selectedApp)
+            apps = yield (0, manager_api_1.getApps)();
         const selection = yield (0, lib_cli_1.startMenu)();
         global.logger.info(`Selected mode :: ${selection.mode}`);
         if (selection.mode == "Backup")

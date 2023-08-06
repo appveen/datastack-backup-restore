@@ -26,7 +26,9 @@ function getURLParamsForData(count: number) {
 
 export async function backupManager(apps: any) {
 	header("Backup configurations");
-	selectedApp = await selectApp(apps);
+
+	if (global.selectedApp) selectedApp = global.selectedApp;
+	else selectedApp = await selectApp(apps);
 
 	backupInit();
 	printInfo("Scanning the configurations within the app...");

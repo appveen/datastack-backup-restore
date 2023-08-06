@@ -27,6 +27,7 @@ Commands:
 - [Instructions](#instructions)
   - [Info](#info)
 - [Environment variables](#environment-variables)
+- [Sample commands](#sample-commands)
 
 # Installation
 
@@ -52,6 +53,22 @@ Download and run the executable from the [Releases](https://github.com/appveen/d
 | DS_BR_HOST | data.stack server to connect. e.g. `https://cloud.appveen.com`.|
 | DS_BR_USERNAME | data.stack username. |
 | DS_BR_PASSWORD | data.stack password. |
+| DS_BR_APP | data.stack app. |
 | DS_BR_SINGLELOGFILE | `true/false`. If enabled, then backup, restore, and logs will use `backup.json`, `restore.json` and `out.log` as the files to write to.|
 | LOGLEVEL | Logging level to set. |
 | NODE_TLS_REJECT_UNAUTHORIZED | `0/1`. Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.  |
+
+# Sample commands
+
+```sh
+# OPTION 1
+ds-backup-restore-linux
+
+# OPTION 2
+LOGLEVEL=trace DS_BR_SINGLELOGFILE=true DS_BR_HOST=https://datanimbus.myapp.io DS_BR_USERNAME="mysuperadmin@datanimbus.com" DS_BR_PASSWORD="aComplicatedPassword" ds-backup-restore-linux
+
+# OPTION 3
+ds-backup-restore-linux backup -b backup.json -h https://datanimbus.myapp.io -u "mysuperadmin@datanimbus.com" -p "aComplicatedPassword" -a SourceApp
+ds-backup-restore-linux restore -b backup.json -h https://datanimbus.myapp.io -u "mysuperadmin@datanimbus.com" -p "aComplicatedPassword" -a DestApp
+```
+

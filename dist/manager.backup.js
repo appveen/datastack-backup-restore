@@ -34,7 +34,10 @@ function getURLParamsForData(count) {
 function backupManager(apps) {
     return __awaiter(this, void 0, void 0, function* () {
         (0, lib_misc_1.header)("Backup configurations");
-        selectedApp = yield (0, lib_cli_1.selectApp)(apps);
+        if (global.selectedApp)
+            selectedApp = global.selectedApp;
+        else
+            selectedApp = yield (0, lib_cli_1.selectApp)(apps);
         (0, lib_db_1.backupInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations within the app...");
         if (global.isSuperAdmin) {

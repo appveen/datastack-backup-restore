@@ -10,7 +10,9 @@ let selectedApp = "";
 
 export async function restoreManager(apps: any) {
 	header("Restore configuration");
-	selectedApp = await selectApp(apps);
+
+	if (global.selectedApp) selectedApp = global.selectedApp;
+	else selectedApp = await selectApp(apps);
 
 	printInfo(`Backup file being used - ${global.backupFileName}`);
 

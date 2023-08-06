@@ -72,11 +72,13 @@ function padCount(_d) {
 }
 function parseCliParams(options, timestamp) {
     // ENV VAR > CLI PARAM > RUNTIME
+    console.log(options);
     global.backupFileName = `backup-${timestamp}.json`;
     if (options.backupfile)
         global.backupFileName = options.backupfile;
     global.backupFileName = process.env.DS_BR_BACKUPFILE ? process.env.DS_BR_BACKUPFILE : global.backupFileName;
     global.restoreFileName = `restore-${timestamp}.json`;
+    global.selectedApp = process.env.DS_BR_APP ? process.env.DS_BR_APP : options.app;
     if (process.env.DS_BR_SINGLELOGFILE) {
         global.backupFileName = "backup.json";
         global.restoreFileName = "restore.json";

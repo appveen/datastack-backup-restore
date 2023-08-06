@@ -49,6 +49,7 @@ program
 	.option("-h, --host <URL>", "data.stack server to connect.")
 	.option("-u, --username <username>", "data.stack username.")
 	.option("-p, --password <password>", "data.stack password.")
+	.option("-a, --app <app name>", "data.stack app name to backup or restore.")
 	.option("-b, --backupfile <backup JSON file>", "Custom backup file to use during backup or restore")
 	.action(async () => {
 		try {
@@ -56,7 +57,8 @@ program
 			header(` data.stack Backup and Restore Utility ${version} `);
 			let dsConfig = await validateCLIParams();
 			await login(dsConfig);
-			let apps = await getApps();
+			let apps = [];
+			if (!global.selectedApp) apps = await getApps();
 			const selection = await startMenu();
 			global.logger.info(`Selected mode :: ${selection.mode}`);
 			if (selection.mode == "Backup") await backupManager(apps);
@@ -78,7 +80,8 @@ program.command("backup")
 			header(`data.stack Backup and Restore Utility ${version}`);
 			let dsConfig = await validateCLIParams();
 			await login(dsConfig);
-			let apps = await getApps();
+			let apps = [];
+			if (!global.selectedApp) apps = await getApps();
 			await backupManager(apps);
 			// Logout cleanly
 			logout();
@@ -96,7 +99,8 @@ program.command("restore")
 			header(`data.stack Backup and Restore Utility ${version}`);
 			let dsConfig = await validateCLIParams();
 			await login(dsConfig);
-			let apps = await getApps();
+			let apps = [];
+			if (!global.selectedApp) apps = await getApps();
 			await restoreManager(apps);
 			// Logout cleanly
 			logout();
