@@ -14,23 +14,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.del = exports.put = exports.post = exports.get = exports.getApps = exports.login = void 0;
 const got_1 = __importDefault(require("got"));
-const ds_sdk_1 = require("@appveen/ds-sdk");
-const types_1 = require("@appveen/ds-sdk/dist/types");
 const lib_misc_1 = require("./lib.misc");
 var logger = global.logger;
-var dataStack;
 function login(config) {
     return __awaiter(this, void 0, void 0, function* () {
         logger.trace(JSON.stringify(config));
         try {
-            dataStack = yield (0, ds_sdk_1.authenticateByCredentials)(config);
+            // dataStack = await authenticateByCredentials(config);
+            const loginResponse = yield post("/api/a/rbac/auth/login", config);
             (0, lib_misc_1.printInfo)("Logged into data.stack.");
-            let message = `User ${dataStack.authData._id} is not a super admin. You will not be able to backup Mapper Functions, Plugins and NPM Libraries.`;
-            if (dataStack.authData.isSuperAdmin)
-                message = `User ${dataStack.authData._id} is a super admin.`;
-            global.isSuperAdmin = dataStack.authData.isSuperAdmin;
+            let message = `User ${loginResponse._id} is not a super admin. You will not be able to backup Mapper Functions, Plugins and NPM Libraries.`;
+            if (loginResponse.isSuperAdmin)
+                message = `User ${loginResponse._id} is a super admin.`;
+            global.token = loginResponse.token;
+            global.isSuperAdmin = loginResponse.isSuperAdmin;
             (0, lib_misc_1.printInfo)(message);
-            global.dataStack = dataStack;
         }
         catch (e) {
             (0, lib_misc_1.printError)("Unable to login to data.stack server");
@@ -42,10 +40,14 @@ exports.login = login;
 function getApps() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let listOptions = new types_1.ListOptions();
-            listOptions.count = -1;
-            let apps = yield dataStack.ListApps(listOptions);
-            return apps.map(a => a.app._id).sort();
+            let searchParams = new URLSearchParams();
+            searchParams.append("count", "-1");
+            searchParams.append("select", "_id");
+            let apps = yield get("/api/a/rbac/admin/app", searchParams);
+            logger.trace(JSON.stringify(apps));
+            const sortedApps = apps.map((a) => a._id).sort();
+            logger.debug(JSON.stringify(sortedApps));
+            return sortedApps;
         }
         catch (e) {
             logger.error(e.message);
@@ -59,7 +61,7 @@ function get(endpoint, searchParams) {
         try {
             return yield got_1.default.get(`${global.host}${endpoint}`, {
                 "headers": {
-                    "Authorization": `JWT ${dataStack.authData.token}`
+                    "Authorization": `JWT ${global.token}`
                 },
                 "searchParams": searchParams
             }).json()
@@ -82,7 +84,7 @@ function post(endpoint, payload) {
         try {
             return yield got_1.default.post(`${global.host}${endpoint}`, {
                 "headers": {
-                    "Authorization": `JWT ${dataStack.authData.token}`
+                    "Authorization": `JWT ${global.token}`
                 },
                 json: payload
             }).json()
@@ -105,7 +107,7 @@ function put(endpoint, payload) {
         try {
             return yield got_1.default.put(`${global.host}${endpoint}`, {
                 "headers": {
-                    "Authorization": `JWT ${dataStack.authData.token}`
+                    "Authorization": `JWT ${global.token}`
                 },
                 json: payload
             }).json()
@@ -127,7 +129,7 @@ function del(endpoint) {
         try {
             return yield got_1.default.delete(`${global.host}${endpoint}`, {
                 "headers": {
-                    "Authorization": `JWT ${dataStack.authData.token}`
+                    "Authorization": `JWT ${global.token}`
                 }
             }).json()
                 .catch((e) => __awaiter(this, void 0, void 0, function* () {

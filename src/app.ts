@@ -57,7 +57,7 @@ program
 			let dsConfig = await validateCLIParams();
 			await login(dsConfig);
 			let apps = await getApps();
-			var selection = await startMenu();
+			const selection = await startMenu();
 			global.logger.info(`Selected mode :: ${selection.mode}`);
 			if (selection.mode == "Backup") await backupManager(apps);
 			if (selection.mode == "Restore") await restoreManager(apps);
@@ -66,6 +66,7 @@ program
 			global.dataStack.Logout();
 		} catch (e: any) {
 			logger.error(e.message);
+			process.exit(1);
 		}
 	});
 
@@ -83,6 +84,7 @@ program.command("backup")
 			global.dataStack.Logout();
 		} catch (e: any) {
 			logger.error(e.message);
+			process.exit(1);
 		}
 	});
 
@@ -100,6 +102,7 @@ program.command("restore")
 			global.dataStack.Logout();
 		} catch (e: any) {
 			logger.error(e.message);
+			process.exit(1);
 		}
 	});
 
@@ -117,6 +120,7 @@ program.command("clear")
 			global.dataStack.Logout();
 		} catch (e: any) {
 			logger.error(e.message);
+			process.exit(1);
 		}
 	});
 

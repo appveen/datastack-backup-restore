@@ -1,22 +1,19 @@
 import got, { HTTPError } from "got";
-import { authenticateByCredentials, DataStack } from "@appveen/ds-sdk";
-import { Credentials, ListOptions } from "@appveen/ds-sdk/dist/types";
 import { printError, printInfo } from "./lib.misc";
 
 var logger = global.logger;
-var dataStack: DataStack;
 
-
-export async function login(config: Credentials) {
+export async function login(config: any) {
 	logger.trace(JSON.stringify(config));
 	try {
-		dataStack = await authenticateByCredentials(config);
+		// dataStack = await authenticateByCredentials(config);
+		const loginResponse = await post("/api/a/rbac/auth/login", config);
 		printInfo("Logged into data.stack.");
-		let message = `User ${dataStack.authData._id} is not a super admin. You will not be able to backup Mapper Functions, Plugins and NPM Libraries.`;
-		if (dataStack.authData.isSuperAdmin) message = `User ${dataStack.authData._id} is a super admin.`;
-		global.isSuperAdmin = dataStack.authData.isSuperAdmin;
+		let message = `User ${loginResponse._id} is not a super admin. You will not be able to backup Mapper Functions, Plugins and NPM Libraries.`;
+		if (loginResponse.isSuperAdmin) message = `User ${loginResponse._id} is a super admin.`;
+		global.token = loginResponse.token;
+		global.isSuperAdmin = loginResponse.isSuperAdmin;
 		printInfo(message);
-		global.dataStack = dataStack;
 	} catch (e: any) {
 		printError("Unable to login to data.stack server");
 		logger.error(e.message);
@@ -25,10 +22,14 @@ export async function login(config: Credentials) {
 
 export async function getApps() {
 	try {
-		let listOptions = new ListOptions();
-		listOptions.count = -1;
-		let apps = await dataStack.ListApps(listOptions);
-		return apps.map(a => a.app._id).sort();
+		let searchParams = new URLSearchParams();
+		searchParams.append("count", "-1");
+		searchParams.append("select", "_id");
+		let apps = await get("/api/a/rbac/admin/app", searchParams);
+		logger.trace(JSON.stringify(apps));
+		const sortedApps = apps.map((a: any) => a._id).sort();
+		logger.debug(JSON.stringify(sortedApps));
+		return sortedApps;
 	} catch (e: any) {
 		logger.error(e.message);
 	}
@@ -39,7 +40,7 @@ export async function get(endpoint: string, searchParams: URLSearchParams): Prom
 	try {
 		return await got.get(`${global.host}${endpoint}`, {
 			"headers": {
-				"Authorization": `JWT ${dataStack.authData.token}`
+				"Authorization": `JWT ${global.token}`
 			},
 			"searchParams": searchParams
 		}).json()
@@ -59,7 +60,7 @@ export async function post(endpoint: string, payload: any): Promise<any> {
 	try {
 		return await got.post(`${global.host}${endpoint}`, {
 			"headers": {
-				"Authorization": `JWT ${dataStack.authData.token}`
+				"Authorization": `JWT ${global.token}`
 			},
 			json: payload
 		}).json()
@@ -79,7 +80,7 @@ export async function put(endpoint: string, payload: any): Promise<any> {
 	try {
 		return await got.put(`${global.host}${endpoint}`, {
 			"headers": {
-				"Authorization": `JWT ${dataStack.authData.token}`
+				"Authorization": `JWT ${global.token}`
 			},
 			json: payload
 		}).json()
@@ -98,7 +99,7 @@ export async function del(endpoint: string): Promise<any> {
 	try {
 		return await got.delete(`${global.host}${endpoint}`, {
 			"headers": {
-				"Authorization": `JWT ${dataStack.authData.token}`
+				"Authorization": `JWT ${global.token}`
 			}
 		}).json()
 			.catch(async (e) => {

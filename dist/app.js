@@ -62,7 +62,7 @@ program
         let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
         yield (0, manager_api_1.login)(dsConfig);
         let apps = yield (0, manager_api_1.getApps)();
-        var selection = yield (0, lib_cli_1.startMenu)();
+        const selection = yield (0, lib_cli_1.startMenu)();
         global.logger.info(`Selected mode :: ${selection.mode}`);
         if (selection.mode == "Backup")
             yield (0, manager_backup_1.backupManager)(apps);
@@ -75,6 +75,7 @@ program
     }
     catch (e) {
         logger.error(e.message);
+        process.exit(1);
     }
 }));
 program.command("backup")
@@ -92,6 +93,7 @@ program.command("backup")
     }
     catch (e) {
         logger.error(e.message);
+        process.exit(1);
     }
 }));
 program.command("restore")
@@ -109,6 +111,7 @@ program.command("restore")
     }
     catch (e) {
         logger.error(e.message);
+        process.exit(1);
     }
 }));
 program.command("clear")
@@ -126,6 +129,7 @@ program.command("clear")
     }
     catch (e) {
         logger.error(e.message);
+        process.exit(1);
     }
 }));
 program.parse();

@@ -7,5 +7,6 @@ declare global {
     var host: string;
     var backupFileName: string;
     var restoreFileName: string;
+    var token: string;
     var isSuperAdmin: boolean;
 }
