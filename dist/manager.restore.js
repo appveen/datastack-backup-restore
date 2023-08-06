@@ -25,7 +25,7 @@ function restoreManager(apps) {
         (0, lib_misc_1.printInfo)(`Backup file being used - ${global.backupFileName}`);
         (0, lib_db_1.restoreInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations...");
-        if (!global.isSuperAdmin) {
+        if (global.isSuperAdmin) {
             yield restoreMapperFormulas();
             yield restorePlugins();
         }

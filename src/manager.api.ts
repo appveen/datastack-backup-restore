@@ -1,7 +1,7 @@
 import got, { HTTPError } from "got";
 import { authenticateByCredentials, DataStack } from "@appveen/ds-sdk";
 import { Credentials, ListOptions } from "@appveen/ds-sdk/dist/types";
-import { killThySelf, printError, printInfo } from "./lib.misc";
+import { printError, printInfo } from "./lib.misc";
 
 var logger = global.logger;
 var dataStack: DataStack;

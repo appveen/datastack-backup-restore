@@ -1,4 +1,3 @@
-export declare function killThySelf(killCode: number): Promise<void>;
 export declare function header(_s: string): void;
 export declare function stringComparison(a: string, b: string): 0 | 1 | -1;
 export declare function isNotAnAcceptableValue(i: any): boolean;

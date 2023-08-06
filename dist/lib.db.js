@@ -7,7 +7,7 @@ const lib_misc_1 = require("./lib.misc");
 let logger = global.logger;
 let sampleBackupData = {
     "version": `${global.version}`,
-    "host": `${global.host}`,
+    "host": "",
     "map": {
         "mapperformulas": {},
         "mapperformulas_lookup": {},
@@ -51,6 +51,7 @@ let sampleBackupData = {
 };
 function backupInit() {
     (0, lib_misc_1.printInfo)(`Backup file - ${global.backupFileName}`);
+    sampleBackupData.host = global.host;
     writeJSON(global.backupFileName, JSON.stringify(sampleBackupData));
 }
 exports.backupInit = backupInit;

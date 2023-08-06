@@ -1,25 +1,7 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseCliParams = exports.printDone = exports.printError = exports.printInfo = exports.isNotAnAcceptableValue = exports.stringComparison = exports.header = exports.killThySelf = void 0;
-const log4js_1 = require("log4js");
+exports.parseCliParams = exports.printDone = exports.printError = exports.printInfo = exports.isNotAnAcceptableValue = exports.stringComparison = exports.header = void 0;
 let logger = global.logger;
-function killThySelf(killCode) {
-    return __awaiter(this, void 0, void 0, function* () {
-        printError(`Terminating with exit code(${killCode})`);
-        // process.exit(killCode);
-        yield (0, log4js_1.shutdown)(function () { process.exit(killCode); });
-    });
-}
-exports.killThySelf = killThySelf;
 function header(_s) {
     let totalWidth = 32;
     let fitLength = _s.length;
@@ -75,7 +57,7 @@ function printInfo(message) {
 exports.printInfo = printInfo;
 function printError(message) {
     logger.error(message);
-    console.error(`!!! ${message} !!!`);
+    console.error(`\n!!! ${message} !!!\n`);
 }
 exports.printError = printError;
 function printDone(_msg, _count) {

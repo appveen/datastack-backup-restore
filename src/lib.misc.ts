@@ -1,12 +1,4 @@
-import { shutdown } from "log4js";
-
 let logger = global.logger;
-
-export async function killThySelf(killCode: number) {
-	printError(`Terminating with exit code(${killCode})`);
-	// process.exit(killCode);
-	await shutdown(function () { process.exit(killCode); });
-}
 
 export function header(_s: string) {
 	let totalWidth = 32;

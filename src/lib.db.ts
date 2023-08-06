@@ -1,12 +1,12 @@
 import { join } from "path";
 import { readFileSync, writeFileSync, existsSync } from "fs";
-import { killThySelf, printError, printInfo } from "./lib.misc";
+import { printError, printInfo } from "./lib.misc";
 
 let logger = global.logger;
 
 let sampleBackupData = {
 	"version": `${global.version}`,
-	"host": `${global.host}`,
+	"host": "",
 	"map": {
 		"mapperformulas": {},
 		"mapperformulas_lookup": {},
@@ -51,6 +51,7 @@ let sampleBackupData = {
 
 export function backupInit() {
 	printInfo(`Backup file - ${global.backupFileName}`);
+	sampleBackupData.host = global.host;
 	writeJSON(global.backupFileName, JSON.stringify(sampleBackupData));
 }
 
