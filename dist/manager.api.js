@@ -49,7 +49,7 @@ function logout() {
             (0, lib_misc_1.printInfo)("Logged out of data.stack.");
         }
         catch (e) {
-            (0, lib_misc_1.printError)("Unable to logout of data.stack server");
+            // printError("Unable to logout of data.stack server");
             logger.error(e.message);
         }
     });

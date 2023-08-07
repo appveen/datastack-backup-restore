@@ -72,7 +72,6 @@ function padCount(_d) {
 }
 function parseCliParams(options, timestamp) {
     // ENV VAR > CLI PARAM > RUNTIME
-    console.log(options);
     global.backupFileName = `backup-${timestamp}.json`;
     if (options.backupfile)
         global.backupFileName = options.backupfile;

@@ -19,7 +19,7 @@ function findLibraries(def: any) {
 	let librariesUsed: string[] = [];
 	def.forEach((attr: any) => {
 		if (attr.properties.schema) return librariesUsed.push(attr.properties.schema);
-		if (attr.type == "Object" || attr.type == "Array") {
+		if ((attr.type == "Object" || attr.type == "Array") && !attr.properties.schemaFree) {
 			let returnValues = findLibraries(attr.definition);
 			librariesUsed = librariesUsed.concat(returnValues);
 		}
@@ -190,6 +190,7 @@ export function parseAndFixDataServices(dataservices: any[]): any[] {
 export function buildDependencyMatrixForDataServices(dataservices: any[]) {
 	let dependencyMatrix: any = {};
 	dataservices.forEach((dataservice: any) => {
+		console.log(`Processing ${dataservice.name}`);
 		dependencyMatrix[dataservice._id] = { dataservices: [], libraries: [], functions: [] };
 		if (dataservice.relatedSchemas) {
 			dataservice.relatedSchemas.outgoing.forEach((outgoing: any) => {

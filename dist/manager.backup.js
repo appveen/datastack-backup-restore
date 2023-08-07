@@ -41,22 +41,22 @@ function backupManager(apps) {
         (0, lib_db_1.backupInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations within the app...");
         if (global.isSuperAdmin) {
-            yield fetchMapperFormulas();
-            yield fetchPlugins();
-            yield fetchNPMLibraries();
+            // await fetchMapperFormulas();
+            // await fetchPlugins();
+            // await fetchNPMLibraries();
         }
         else {
             (0, lib_misc_1.printInfo)("Skipping Mapper Formulas, Plugins and NPM Libraries as you are not a super admin.");
         }
         yield fetchDataServices();
-        yield fetchLibraries();
-        yield fetchFunctions();
-        yield fetchConnectors();
-        yield fetchDataFormats();
-        yield fetchAgents();
-        yield fetchDataPipes();
-        yield fetchGroups();
-        yield customiseBackup();
+        // await fetchLibraries();
+        // await fetchFunctions();
+        // await fetchConnectors();
+        // await fetchDataFormats();
+        // await fetchAgents();
+        // await fetchDataPipes();
+        // await fetchGroups();
+        // await customiseBackup();
         (0, lib_misc_1.header)("Backup complete!");
     });
 }

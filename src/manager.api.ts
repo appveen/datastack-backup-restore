@@ -30,7 +30,7 @@ export async function logout() {
 		});
 		printInfo("Logged out of data.stack.");
 	} catch (e: any) {
-		printError("Unable to logout of data.stack server");
+		// printError("Unable to logout of data.stack server");
 		logger.error(e.message);
 	}
 }

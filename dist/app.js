@@ -89,7 +89,9 @@ program.command("backup")
         (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
         let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
         yield (0, manager_api_1.login)(dsConfig);
-        let apps = yield (0, manager_api_1.getApps)();
+        let apps = [];
+        if (!global.selectedApp)
+            apps = yield (0, manager_api_1.getApps)();
         yield (0, manager_backup_1.backupManager)(apps);
         // Logout cleanly
         (0, manager_api_1.logout)();
@@ -107,7 +109,9 @@ program.command("restore")
         (0, lib_misc_1.header)(`data.stack Backup and Restore Utility ${version}`);
         let dsConfig = yield (0, lib_cli_1.validateCLIParams)();
         yield (0, manager_api_1.login)(dsConfig);
-        let apps = yield (0, manager_api_1.getApps)();
+        let apps = [];
+        if (!global.selectedApp)
+            apps = yield (0, manager_api_1.getApps)();
         yield (0, manager_restore_1.restoreManager)(apps);
         // Logout cleanly
         (0, manager_api_1.logout)();
