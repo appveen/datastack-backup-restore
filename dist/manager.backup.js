@@ -39,24 +39,25 @@ function backupManager(apps) {
         else
             selectedApp = yield (0, lib_cli_1.selectApp)(apps);
         (0, lib_db_1.backupInit)();
+        (0, lib_misc_1.printInfo)(`Selected app: ${selectedApp}`);
         (0, lib_misc_1.printInfo)("Scanning the configurations within the app...");
         if (global.isSuperAdmin) {
-            // await fetchMapperFormulas();
-            // await fetchPlugins();
-            // await fetchNPMLibraries();
+            yield fetchMapperFormulas();
+            yield fetchPlugins();
+            yield fetchNPMLibraries();
         }
         else {
             (0, lib_misc_1.printInfo)("Skipping Mapper Formulas, Plugins and NPM Libraries as you are not a super admin.");
         }
         yield fetchDataServices();
-        // await fetchLibraries();
-        // await fetchFunctions();
-        // await fetchConnectors();
-        // await fetchDataFormats();
-        // await fetchAgents();
-        // await fetchDataPipes();
-        // await fetchGroups();
-        // await customiseBackup();
+        yield fetchLibraries();
+        yield fetchFunctions();
+        yield fetchConnectors();
+        yield fetchDataFormats();
+        yield fetchAgents();
+        yield fetchDataPipes();
+        yield fetchGroups();
+        yield customiseBackup();
         (0, lib_misc_1.header)("Backup complete!");
     });
 }
@@ -76,7 +77,7 @@ function fetchMapperFormulas() {
                 (0, lib_db_1.backupMapper)("mapperformulas", mf._id, mf.name);
                 (0, lib_db_1.backupMapper)("mapperformulas_lookup", mf.name, mf._id);
             });
-            (0, lib_misc_1.printDone)("Mapper Formulas(!)", mapperFormulaCount);
+            (0, lib_misc_1.printDone)("Mapper Formulas *", mapperFormulaCount);
         }
         catch (e) {
             logger.error(e.message);
@@ -98,7 +99,7 @@ function fetchPlugins() {
                 (0, lib_db_1.backupMapper)("plugins", plugin._id, plugin.name);
                 (0, lib_db_1.backupMapper)("plugins_lookup", plugin.name, plugin._id);
             });
-            (0, lib_misc_1.printDone)("Plugins(!)", pluginCount);
+            (0, lib_misc_1.printDone)("Plugins *", pluginCount);
         }
         catch (e) {
             logger.error(e.message);
@@ -115,7 +116,7 @@ function fetchNPMLibraries() {
                 (0, lib_db_1.backupMapper)("npmlibraries", lib._id, lib.name);
                 (0, lib_db_1.backupMapper)("npmlibraries_lookup", lib.name, lib._id);
             });
-            (0, lib_misc_1.printDone)("NPM Library(!)", npmLibraries.length);
+            (0, lib_misc_1.printDone)("NPM Library *", npmLibraries.length);
         }
         catch (e) {
             logger.error(e.message);

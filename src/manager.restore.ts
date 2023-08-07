@@ -14,6 +14,7 @@ export async function restoreManager(apps: any) {
 	if (global.selectedApp) selectedApp = global.selectedApp;
 	else selectedApp = await selectApp(apps);
 
+	printInfo(`Selected app: ${selectedApp}`);
 	printInfo(`Backup file being used - ${global.backupFileName}`);
 
 	restoreInit();
@@ -353,6 +354,7 @@ async function restoreDataPipes() {
 			delete datapipe._metadata;
 			delete datapipe.__v;
 			delete datapipe.version;
+			delete datapipe.lastInvoked;
 			let existingID = await configExists(BASE_URL, datapipe.name, selectedApp);
 			let newData = null;
 			if (existingID) newData = await update("Data pipe", BASE_URL, selectedApp, datapipe, existingID);

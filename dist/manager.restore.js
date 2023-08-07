@@ -25,12 +25,13 @@ function restoreManager(apps) {
             selectedApp = global.selectedApp;
         else
             selectedApp = yield (0, lib_cli_1.selectApp)(apps);
+        (0, lib_misc_1.printInfo)(`Selected app: ${selectedApp}`);
         (0, lib_misc_1.printInfo)(`Backup file being used - ${global.backupFileName}`);
         (0, lib_db_1.restoreInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations...");
         if (global.isSuperAdmin) {
-            yield restoreMapperFormulas();
-            yield restorePlugins();
+            // await restoreMapperFormulas();
+            // await restorePlugins();
         }
         yield restoreLibrary();
         yield restoreFunctions();
@@ -413,6 +414,7 @@ function restoreDataPipes() {
                 delete datapipe._metadata;
                 delete datapipe.__v;
                 delete datapipe.version;
+                delete datapipe.lastInvoked;
                 let existingID = yield configExists(BASE_URL, datapipe.name, selectedApp);
                 let newData = null;
                 if (existingID)

@@ -31,6 +31,7 @@ export async function backupManager(apps: any) {
 	else selectedApp = await selectApp(apps);
 
 	backupInit();
+	printInfo(`Selected app: ${selectedApp}`);
 	printInfo("Scanning the configurations within the app...");
 
 	if (global.isSuperAdmin) {
@@ -66,7 +67,7 @@ async function fetchMapperFormulas() {
 			backupMapper("mapperformulas", mf._id, mf.name);
 			backupMapper("mapperformulas_lookup", mf.name, mf._id);
 		});
-		printDone("Mapper Formulas(!)", mapperFormulaCount);
+		printDone("Mapper Formulas *", mapperFormulaCount);
 	} catch (e: any) {
 		logger.error(e.message);
 	}
@@ -86,7 +87,7 @@ async function fetchPlugins() {
 			backupMapper("plugins", plugin._id, plugin.name);
 			backupMapper("plugins_lookup", plugin.name, plugin._id);
 		});
-		printDone("Plugins(!)", pluginCount);
+		printDone("Plugins *", pluginCount);
 	} catch (e: any) {
 		logger.error(e.message);
 	}
@@ -101,7 +102,7 @@ async function fetchNPMLibraries() {
 			backupMapper("npmlibraries", lib._id, lib.name);
 			backupMapper("npmlibraries_lookup", lib.name, lib._id);
 		});
-		printDone("NPM Library(!)", npmLibraries.length);
+		printDone("NPM Library *", npmLibraries.length);
 	} catch (e: any) {
 		logger.error(e.message);
 	}

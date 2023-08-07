@@ -51,7 +51,7 @@ export function printInfo(message: string) {
 
 export function printError(message: string) {
 	logger.error(message);
-	console.error(`\n!!! ${message} !!!\n`);
+	console.error(`ERR: ${message}`);
 }
 
 export function printDone(_msg: string, _count: number) {
@@ -60,8 +60,9 @@ export function printDone(_msg: string, _count: number) {
 }
 
 function padCount(_d: number) {
-	if (_d > 9) return ` ${_d} `;
-	return `  ${_d} `;
+	if (_d > 99) return ` ${_d} `;
+	if (_d > 9) return `  ${_d} `;
+	return `   ${_d} `;
 }
 
 export function parseCliParams(options: any, timestamp: string) {

@@ -57,7 +57,7 @@ function printInfo(message) {
 exports.printInfo = printInfo;
 function printError(message) {
     logger.error(message);
-    console.error(`\n!!! ${message} !!!\n`);
+    console.error(`ERR: ${message}`);
 }
 exports.printError = printError;
 function printDone(_msg, _count) {
@@ -66,9 +66,11 @@ function printDone(_msg, _count) {
 }
 exports.printDone = printDone;
 function padCount(_d) {
-    if (_d > 9)
+    if (_d > 99)
         return ` ${_d} `;
-    return `  ${_d} `;
+    if (_d > 9)
+        return `  ${_d} `;
+    return `   ${_d} `;
 }
 function parseCliParams(options, timestamp) {
     // ENV VAR > CLI PARAM > RUNTIME

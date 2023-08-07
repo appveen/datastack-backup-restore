@@ -190,7 +190,6 @@ export function parseAndFixDataServices(dataservices: any[]): any[] {
 export function buildDependencyMatrixForDataServices(dataservices: any[]) {
 	let dependencyMatrix: any = {};
 	dataservices.forEach((dataservice: any) => {
-		console.log(`Processing ${dataservice.name}`);
 		dependencyMatrix[dataservice._id] = { dataservices: [], libraries: [], functions: [] };
 		if (dataservice.relatedSchemas) {
 			dataservice.relatedSchemas.outgoing.forEach((outgoing: any) => {
