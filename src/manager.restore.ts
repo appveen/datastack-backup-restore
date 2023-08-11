@@ -214,10 +214,14 @@ async function restoreFunctions() {
 			delete fn._metadata;
 			delete fn.__v;
 			delete fn.version;
+			delete fn.lastInvoked;
 			let existingID = await configExists(BASE_URL, fn.name, selectedApp);
 			let newData = null;
 			if (existingID) newData = await update("Function", BASE_URL, selectedApp, fn, existingID);
-			else newData = await insert("Function", BASE_URL, selectedApp, fn);
+			else {
+				newData = await insert("Function", BASE_URL, selectedApp, fn);
+				newData = await update("Function", BASE_URL, selectedApp, fn, newData._id);
+			}
 			restoreMapper("functions", fn._id, newData._id);
 			restoreMapper("functionURL", newData._id, newData.url);
 		}, Promise.resolve());

@@ -30,8 +30,8 @@ function restoreManager(apps) {
         (0, lib_db_1.restoreInit)();
         (0, lib_misc_1.printInfo)("Scanning the configurations...");
         if (global.isSuperAdmin) {
-            // await restoreMapperFormulas();
-            // await restorePlugins();
+            yield restoreMapperFormulas();
+            yield restorePlugins();
         }
         yield restoreLibrary();
         yield restoreFunctions();
@@ -253,12 +253,15 @@ function restoreFunctions() {
                 delete fn._metadata;
                 delete fn.__v;
                 delete fn.version;
+                delete fn.lastInvoked;
                 let existingID = yield configExists(BASE_URL, fn.name, selectedApp);
                 let newData = null;
                 if (existingID)
                     newData = yield update("Function", BASE_URL, selectedApp, fn, existingID);
-                else
+                else {
                     newData = yield insert("Function", BASE_URL, selectedApp, fn);
+                    newData = yield update("Function", BASE_URL, selectedApp, fn, newData._id);
+                }
                 (0, lib_db_1.restoreMapper)("functions", fn._id, newData._id);
                 (0, lib_db_1.restoreMapper)("functionURL", newData._id, newData.url);
             }), Promise.resolve());
