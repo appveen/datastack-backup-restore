@@ -1,3 +1,9 @@
+# Deprecated!
+
+This repo only supports till data.stack version `2.7.4``.
+
+Data.stack has been rebranded as datanimbus.io. Support for versions > 2.7.4 will be done using the [dnio-backup-and-restore](https://github.com/datanimbus/dnio-backup-and-restore) utility.
+
 # datastack-backup-restore
 Utility to backup and restore data.stack
 
@@ -21,6 +27,7 @@ Commands:
 ```
 
 # Table of contents
+- [Deprecated!](#deprecated)
 - [datastack-backup-restore](#datastack-backup-restore)
 - [Table of contents](#table-of-contents)
 - [Installation](#installation)
